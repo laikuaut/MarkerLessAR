@@ -27,3 +27,6 @@ ASIFT : ASIFT関連
 MarkerLessAR : マーカレスARのメイン
 third_party : サードパーティ
 MyLibs : マイライブラリ
+
+
+This software is released under the MIT License, see LICENSE.

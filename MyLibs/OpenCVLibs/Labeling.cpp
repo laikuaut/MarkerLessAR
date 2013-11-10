@@ -1,3 +1,10 @@
+/*
+	This file is part of UCHIYAMARKERS, a software for random dot markers.
+	Copyright (c) 2011 Hideaki Uchiyama
+
+	You can use, copy, modify and re-distribute this software
+	for non-profit purposes.
+*/
 
 #include "Labeling.h"
 
