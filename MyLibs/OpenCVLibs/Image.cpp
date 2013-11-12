@@ -9,13 +9,14 @@
 namespace pro{
 
 Image::Image(void) : path(Dir()){
-	
+	init(100,100);
 }
 
 void Image::init(int width,int height){
 	w = width;
 	h = height;
 	img = cv::Mat::zeros(cv::Size(w,h),CV_8UC3);
+	winName = string();
 }
 
 void Image::w_h_reset(){
@@ -190,9 +191,52 @@ void Image::triangle(cv::Point2f pt1,cv::Point2f pt2,cv::Point2f pt3,cv::Scalar 
 	cv::line(img,pt3,pt1,scal,thickness,8);
 }
 
-void Image::imshow(string windowName){
-	cv::namedWindow(windowName,0);
-	cv::imshow(windowName,img);
+void Image::imshow(string windowName,int flag){
+	if(windowName.empty() && winName.empty()){
+		throw Exception("ウィンドウを作成していません。","Image.cpp","Image::imshow(string,int)",__LINE__);
+		return;
+	}else if(windowName != winName){
+		winName = windowName;
+		cv::namedWindow(winName,flag);
+	}
+	cv::imshow(winName,img);
+}
+
+void Image::moveWindow(int x,int y){
+	cv::moveWindow(winName,x,y);
+}
+
+void Image::resizeWindow(int w,int h){
+	cv::resizeWindow(winName,w,h);
+}
+
+void Image::getWindowPos(int &x,int &y){
+	LPRECT lpRect = NULL;
+	HWND hWnd = (HWND)cvGetWindowHandle(winName.c_str());
+	if(hWnd == NULL) return;
+	if(GetWindowRect(hWnd,lpRect)==0) return;
+	x = lpRect->left;
+	y = lpRect->top;
+}
+
+void Image::getWindowSize(int &w,int &h){
+	LPRECT lpRect = NULL;
+	HWND hWnd = (HWND)cvGetWindowHandle(winName.c_str());
+	if(hWnd == NULL) return;
+	if(GetWindowRect(hWnd,lpRect)==0) return;
+	w = lpRect->right-lpRect->left;
+	h = lpRect->bottom-lpRect->top;
+}
+
+void Image::getWindowRect(int &x,int &y,int &w,int &h){
+	LPRECT lpRect = NULL;
+	HWND hWnd = (HWND)cvGetWindowHandle(winName.c_str());
+	if(hWnd == NULL) return;
+	if(GetWindowRect(hWnd,lpRect)==0) return;
+	x = lpRect->left;
+	y = lpRect->top;
+	w = lpRect->right-lpRect->left;
+	h = lpRect->bottom-lpRect->top;
 }
 
 cv::Size Image::size(){

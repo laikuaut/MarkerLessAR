@@ -11,6 +11,7 @@
 #include"opencv2\highgui\highgui.hpp"
 #include <opencv2/imgproc/imgproc.hpp>
 #include<string>
+#include <Windows.h>
 
 class PRO_EXPORTS cv::Mat;
 
@@ -23,6 +24,7 @@ private:
 
 	cv::Mat img;
 	int w,h;
+	std::string winName;
 
 public:
 
@@ -72,7 +74,12 @@ public:
 	void line(cv::Point2f pt1,cv::Point2f pt2,cv::Scalar scal = cv::Scalar(0,0,0),int thickness=1);
 	void triangle(cv::Point2f pt1,cv::Point2f pt2,cv::Point2f pt3,cv::Scalar scal = cv::Scalar(0,0,0),int thickness=1);
 
-	void imshow(string windowName);
+	void imshow(string windowName=string(),int flag=0);
+	void moveWindow(int x,int y);
+	void resizeWindow(int w,int h);
+	void getWindowPos(int &x,int &y);
+	void getWindowSize(int &w,int &h);
+	void getWindowRect(int &x,int &y,int &w,int &h);
 
 	cv::Size size();
 

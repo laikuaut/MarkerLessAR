@@ -6,19 +6,19 @@
 
 #pragma once
 
-#ifdef NSTATIC
+#if defined(NSTATIC)
 #	define PRO_EXPORTS __declspec(dllexport)
 #else
 #	define PRO_EXPORTS
 #endif
 
-#ifdef NSTATIC
+#if defined(NSTATIC)
 #	define PRO_C_EXTERN extern "C" __declspec(dllexport)
 #else
 #	define PRO_C_EXTERN extern "C"
 #endif
 
-#if defined(NSTATIC)
+#if defined(NSTATIC) && defined(_DLL)
 #define BOOST_ALL_DYN_LINK
 #endif
 

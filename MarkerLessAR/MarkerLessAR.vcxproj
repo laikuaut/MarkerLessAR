@@ -35,7 +35,18 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="main.cpp" />
+    <ProjectReference Include="..\MyLibs\Core\Core.vcxproj">
+      <Project>{556a4f2e-7490-46b0-bbe3-d1aaceaa6c9b}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\MyLibs\Exceptions\Exceptions.vcxproj">
+      <Project>{1eeb7be6-6f86-495e-b753-4ebcb93f8312}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\MyLibs\OpenCVLibs\OpenCVLibs.vcxproj">
+      <Project>{05014a64-3374-4c86-ada0-d50135d4b27c}</Project>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Source.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{F068438C-73BA-4A86-B449-6295BFD0F5E9}</ProjectGuid>
@@ -102,34 +113,42 @@
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
     <Import Project="..\props\vc11\OpenCV.x86.vc11.Debug.props" />
+    <Import Project="..\props\boost.x86.vc11.props" />
   </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Static_Debug|Win32'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
     <Import Project="..\props\vc11\OpenCV.x86.vc11.Static_Debug.props" />
+    <Import Project="..\props\boost.x86.vc11.props" />
   </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
     <Import Project="..\props\vc11\OpenCV.x64.vc11.Debug.props" />
+    <Import Project="..\props\boost.x64.vc11.props" />
   </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Static_Debug|x64'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
     <Import Project="..\props\vc11\OpenCV.x64.vc11.Static_Debug.props" />
+    <Import Project="..\props\boost.x64.vc11.props" />
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
     <Import Project="..\props\vc11\OpenCV.x86.vc11.Release.props" />
+    <Import Project="..\props\boost.x86.vc11.props" />
   </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='static_Release|Win32'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
     <Import Project="..\props\vc11\OpenCV.x86.vc11.Static_Release.props" />
+    <Import Project="..\props\boost.x86.vc11.props" />
   </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
     <Import Project="..\props\vc11\OpenCV.x64.vc11.Release.props" />
+    <Import Project="..\props\boost.x64.vc11.props" />
   </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='static_Release|x64'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
     <Import Project="..\props\vc11\OpenCV.x64.vc11.Static_Release.props" />
+    <Import Project="..\props\boost.x64.vc11.props" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">

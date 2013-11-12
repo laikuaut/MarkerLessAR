@@ -1,8 +1,6 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2012
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MarkerLessAR", "MarkerLessAR\MarkerLessAR.vcxproj", "{F068438C-73BA-4A86-B449-6295BFD0F5E9}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "MyLibs", "MyLibs", "{86E08AD7-7E27-41C1-BE01-F4DDC7DE5DF7}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Third_Party", "Third_Party", "{1FB023A2-4E1D-49FD-818C-C84972117B0D}"
@@ -25,6 +23,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "OpenCVLibs", "MyLibs\OpenCV
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ASIFT", "ASIFT\ASIFT\ASIFT.vcxproj", "{D21BE8F9-F6D9-432B-9BF5-AC2D9D896DD3}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MarkerLessAR", "MarkerLessAR\MarkerLessAR.vcxproj", "{F068438C-73BA-4A86-B449-6295BFD0F5E9}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -37,22 +37,6 @@ Global
 		static_Release|x64 = static_Release|x64
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{F068438C-73BA-4A86-B449-6295BFD0F5E9}.Debug|Win32.ActiveCfg = Debug|Win32
-		{F068438C-73BA-4A86-B449-6295BFD0F5E9}.Debug|Win32.Build.0 = Debug|Win32
-		{F068438C-73BA-4A86-B449-6295BFD0F5E9}.Debug|x64.ActiveCfg = Debug|x64
-		{F068438C-73BA-4A86-B449-6295BFD0F5E9}.Debug|x64.Build.0 = Debug|x64
-		{F068438C-73BA-4A86-B449-6295BFD0F5E9}.Release|Win32.ActiveCfg = Release|Win32
-		{F068438C-73BA-4A86-B449-6295BFD0F5E9}.Release|Win32.Build.0 = Release|Win32
-		{F068438C-73BA-4A86-B449-6295BFD0F5E9}.Release|x64.ActiveCfg = Release|x64
-		{F068438C-73BA-4A86-B449-6295BFD0F5E9}.Release|x64.Build.0 = Release|x64
-		{F068438C-73BA-4A86-B449-6295BFD0F5E9}.Static_Debug|Win32.ActiveCfg = Static_Debug|Win32
-		{F068438C-73BA-4A86-B449-6295BFD0F5E9}.Static_Debug|Win32.Build.0 = Static_Debug|Win32
-		{F068438C-73BA-4A86-B449-6295BFD0F5E9}.Static_Debug|x64.ActiveCfg = Static_Debug|x64
-		{F068438C-73BA-4A86-B449-6295BFD0F5E9}.Static_Debug|x64.Build.0 = Static_Debug|x64
-		{F068438C-73BA-4A86-B449-6295BFD0F5E9}.static_Release|Win32.ActiveCfg = static_Release|Win32
-		{F068438C-73BA-4A86-B449-6295BFD0F5E9}.static_Release|Win32.Build.0 = static_Release|Win32
-		{F068438C-73BA-4A86-B449-6295BFD0F5E9}.static_Release|x64.ActiveCfg = static_Release|x64
-		{F068438C-73BA-4A86-B449-6295BFD0F5E9}.static_Release|x64.Build.0 = static_Release|x64
 		{F0BA3049-3F11-4983-A511-320E72C3215A}.Debug|Win32.ActiveCfg = Debug|Win32
 		{F0BA3049-3F11-4983-A511-320E72C3215A}.Debug|Win32.Build.0 = Debug|Win32
 		{F0BA3049-3F11-4983-A511-320E72C3215A}.Debug|x64.ActiveCfg = Debug|Win32
@@ -161,6 +145,22 @@ Global
 		{D21BE8F9-F6D9-432B-9BF5-AC2D9D896DD3}.static_Release|Win32.ActiveCfg = Release|Win32
 		{D21BE8F9-F6D9-432B-9BF5-AC2D9D896DD3}.static_Release|Win32.Build.0 = Release|Win32
 		{D21BE8F9-F6D9-432B-9BF5-AC2D9D896DD3}.static_Release|x64.ActiveCfg = Release|Win32
+		{F068438C-73BA-4A86-B449-6295BFD0F5E9}.Debug|Win32.ActiveCfg = Debug|Win32
+		{F068438C-73BA-4A86-B449-6295BFD0F5E9}.Debug|Win32.Build.0 = Debug|Win32
+		{F068438C-73BA-4A86-B449-6295BFD0F5E9}.Debug|x64.ActiveCfg = Debug|x64
+		{F068438C-73BA-4A86-B449-6295BFD0F5E9}.Debug|x64.Build.0 = Debug|x64
+		{F068438C-73BA-4A86-B449-6295BFD0F5E9}.Release|Win32.ActiveCfg = Release|Win32
+		{F068438C-73BA-4A86-B449-6295BFD0F5E9}.Release|Win32.Build.0 = Release|Win32
+		{F068438C-73BA-4A86-B449-6295BFD0F5E9}.Release|x64.ActiveCfg = Release|x64
+		{F068438C-73BA-4A86-B449-6295BFD0F5E9}.Release|x64.Build.0 = Release|x64
+		{F068438C-73BA-4A86-B449-6295BFD0F5E9}.Static_Debug|Win32.ActiveCfg = Static_Debug|Win32
+		{F068438C-73BA-4A86-B449-6295BFD0F5E9}.Static_Debug|Win32.Build.0 = Static_Debug|Win32
+		{F068438C-73BA-4A86-B449-6295BFD0F5E9}.Static_Debug|x64.ActiveCfg = Static_Debug|x64
+		{F068438C-73BA-4A86-B449-6295BFD0F5E9}.Static_Debug|x64.Build.0 = Static_Debug|x64
+		{F068438C-73BA-4A86-B449-6295BFD0F5E9}.static_Release|Win32.ActiveCfg = static_Release|Win32
+		{F068438C-73BA-4A86-B449-6295BFD0F5E9}.static_Release|Win32.Build.0 = static_Release|Win32
+		{F068438C-73BA-4A86-B449-6295BFD0F5E9}.static_Release|x64.ActiveCfg = static_Release|x64
+		{F068438C-73BA-4A86-B449-6295BFD0F5E9}.static_Release|x64.Build.0 = static_Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

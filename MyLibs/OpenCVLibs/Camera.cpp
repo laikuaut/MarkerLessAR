@@ -4,12 +4,17 @@
 // 
 // http://opensource.org/licenses/mit-license.php
 
-#include<iostream>
+#include "Camera.h"
 
-using namespace std;
+namespace pro{
 
-int main(void){
-	cout << "aa" << endl;
-	return 0;
+Camera::Camera(void)
+{
 }
 
+
+Camera::~Camera(void)
+{
+}
+
+}
