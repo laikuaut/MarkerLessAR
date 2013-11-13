@@ -34,9 +34,13 @@
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="..\..\props\vc11\OpenCV.x86.vc11.Debug.props" />
+    <Import Project="..\..\props\boost.x86.vc11.props" />
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="..\..\props\vc11\OpenCV.x86.vc11.Release.props" />
+    <Import Project="..\..\props\boost.x86.vc11.props" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -67,6 +71,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <OpenMPSupport>true</OpenMPSupport>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -107,6 +112,15 @@
     <ClInclude Include="splines.h" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\MyLibs\Core\Core.vcxproj">
+      <Project>{556a4f2e-7490-46b0-bbe3-d1aaceaa6c9b}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\..\MyLibs\Exceptions\Exceptions.vcxproj">
+      <Project>{1eeb7be6-6f86-495e-b753-4ebcb93f8312}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\..\MyLibs\OpenCVLibs\OpenCVLibs.vcxproj">
+      <Project>{05014a64-3374-4c86-ada0-d50135d4b27c}</Project>
+    </ProjectReference>
     <ProjectReference Include="..\..\third_party\png\png.vcxproj">
       <Project>{f0ba3049-3f11-4983-a511-320e72c3215a}</Project>
     </ProjectReference>

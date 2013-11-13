@@ -19,12 +19,17 @@ namespace pro{
 
 class PRO_EXPORTS Image
 {
+public:
+
+	static const int _8UC3 = CV_8UC3;
+	static const int _32FC3 = CV_32FC3;
 
 private:
 
 	cv::Mat img;
 	int w,h;
 	std::string winName;
+	int type;
 
 public:
 
@@ -37,8 +42,10 @@ private:
 public:
 	
 	Image(void);
+	Image(int w,int h,int type=_8UC3);
+	Image(int type);
 	
-	void init(int w,int h);
+	void init(int w,int h,int type=_8UC3);
 
 	void release();
 	void clone(const Image& src);
@@ -83,9 +90,14 @@ public:
 
 	cv::Size size();
 
+	unsigned char* getU8Data();
+	float* getF32Data();
+
 	operator cv::Mat &(); 
 	operator const unsigned char* ();
 	operator unsigned char* ();
+	operator const float* ();
+	operator float* ();
 	operator cv::Size ();
 
 

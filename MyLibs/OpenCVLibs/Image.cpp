@@ -12,10 +12,19 @@ Image::Image(void) : path(Dir()){
 	init(100,100);
 }
 
-void Image::init(int width,int height){
+Image::Image(int width,int height,int type) : path(Dir()){
+	init(width,height,type);
+}
+
+Image::Image(int type) : path(Dir()){
+	init(100,100,type);
+}
+
+void Image::init(int width,int height,int type){
 	w = width;
 	h = height;
-	img = cv::Mat::zeros(cv::Size(w,h),CV_8UC3);
+	this->type = type;
+	img = cv::Mat::zeros(cv::Size(w,h),type);
 	winName = string();
 }
 
@@ -83,7 +92,7 @@ void Image::adaptiveBinarization(const Image& src){
 }
 
 void Image::oneColor(cv::Scalar scal){
-	img = cv::Mat(cv::Size(w, h), CV_8UC3, scal);
+	img = cv::Mat(cv::Size(w, h), type, scal);
 }
 
 void Image::hsvColorExtraction(const Image& src,int low_hue,int up_hue,int low_saturation,int low_value){
@@ -211,36 +220,47 @@ void Image::resizeWindow(int w,int h){
 }
 
 void Image::getWindowPos(int &x,int &y){
-	LPRECT lpRect = NULL;
+	RECT lpRect;
 	HWND hWnd = (HWND)cvGetWindowHandle(winName.c_str());
 	if(hWnd == NULL) return;
-	if(GetWindowRect(hWnd,lpRect)==0) return;
-	x = lpRect->left;
-	y = lpRect->top;
+	if(GetWindowRect(hWnd,(LPRECT)&lpRect)==0) return;
+	x = lpRect.left;
+	y = lpRect.top;
 }
 
 void Image::getWindowSize(int &w,int &h){
-	LPRECT lpRect = NULL;
+	RECT lpRect;
 	HWND hWnd = (HWND)cvGetWindowHandle(winName.c_str());
 	if(hWnd == NULL) return;
-	if(GetWindowRect(hWnd,lpRect)==0) return;
-	w = lpRect->right-lpRect->left;
-	h = lpRect->bottom-lpRect->top;
+	if(GetWindowRect(hWnd,(LPRECT)&lpRect)==0) return;
+	w = lpRect.right-lpRect.left;
+	h = lpRect.bottom-lpRect.top;
 }
 
 void Image::getWindowRect(int &x,int &y,int &w,int &h){
-	LPRECT lpRect = NULL;
+	RECT lpRect;
 	HWND hWnd = (HWND)cvGetWindowHandle(winName.c_str());
 	if(hWnd == NULL) return;
-	if(GetWindowRect(hWnd,lpRect)==0) return;
-	x = lpRect->left;
-	y = lpRect->top;
-	w = lpRect->right-lpRect->left;
-	h = lpRect->bottom-lpRect->top;
+	if(GetWindowRect(hWnd,(LPRECT)&lpRect)==0) return;
+	x = lpRect.left;
+	y = lpRect.top;
+	w = lpRect.right-lpRect.left;
+	h = lpRect.bottom-lpRect.top;
 }
 
 cv::Size Image::size(){
+	w_h_reset();
 	return cv::Size(w,h);
+}
+
+unsigned char* Image::getU8Data(){
+	return img.data;
+}
+
+float* Image::getF32Data(){
+	for(int i=0;i<100;i++)
+		std::cout << img.data[i] << " " << std::flush;
+	return (float*)img.data;
 }
 
 Image::operator cv::Mat &(){
@@ -252,6 +272,14 @@ Image::operator unsigned char *(){
 }
 Image::operator const unsigned char *(){
 	return img.data;
+}
+
+Image::operator const float* (){
+	return (float*)img.data;
+}
+
+Image::operator float* (){
+	return (float*)img.data;
 }
 
 Image::operator cv::Size (){
