@@ -16,6 +16,11 @@ Image::Image(int width,int height,int type) : path(Dir()){
 	init(width,height,type);
 }
 
+Image::Image(string name,int type) : path(Dir()){
+	init(100,100,type);
+	load(name);
+}
+
 Image::Image(int type) : path(Dir()){
 	init(100,100,type);
 }
@@ -74,6 +79,14 @@ void Image::rotation(const Image& src,cv::Point2f center,double angle){
 	float scale = 1.0;
 	const cv::Mat affine_matrix = cv::getRotationMatrix2D( center, angle, scale );
 	cv::warpAffine(src.img, img, affine_matrix, src.img.size());
+}
+
+void Image::horiconcat(const Image& src1,const Image& src2){
+	cv::hconcat(src1.img,src2.img,img);
+}
+
+void Image::vertconcat(const Image& src1,const Image& src2){
+	cv::vconcat(src1.img,src2.img,img);
 }
 
 void Image::grayeScale(const Image& src){
@@ -257,11 +270,9 @@ unsigned char* Image::getU8Data(){
 	return img.data;
 }
 
-float* Image::getF32Data(){
-	for(int i=0;i<100;i++)
-		std::cout << img.data[i] << " " << std::flush;
-	return (float*)img.data;
-}
+//float* Image::getF32Data(){
+//	return (float*)img.data;
+//}
 
 Image::operator cv::Mat &(){
 	return img;

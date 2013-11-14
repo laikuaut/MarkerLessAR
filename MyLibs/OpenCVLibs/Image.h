@@ -43,6 +43,7 @@ public:
 	
 	Image(void);
 	Image(int w,int h,int type=_8UC3);
+	Image(string name,int type=_8UC3);
 	Image(int type);
 	
 	void init(int w,int h,int type=_8UC3);
@@ -54,6 +55,9 @@ public:
 	void resize(const Image& src,double fx,double fy);
 	void resize(const Image& src,cv::Size size);
 	void rotation(const Image& src,cv::Point2f center,double angle);
+
+	void horiconcat(const Image &src1,const Image &src2);
+	void vertconcat(const Image &src1,const Image &src2);
 	
 	void grayeScale(const Image& src);
 	void binarization(const Image& src);
@@ -91,7 +95,7 @@ public:
 	cv::Size size();
 
 	unsigned char* getU8Data();
-	float* getF32Data();
+	//float* getF32Data();
 
 	operator cv::Mat &(); 
 	operator const unsigned char* ();

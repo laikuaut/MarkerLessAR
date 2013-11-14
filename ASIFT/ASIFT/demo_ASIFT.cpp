@@ -90,20 +90,18 @@ int main(int argc, char **argv)
 	// Read image1
 	unsigned char * iarr1;
 	size_t w1, h1;
-	pro::Image img1(pro::Image::_32FC3);
 	try{
-		img1.load(argv[1]);
+		pro::Image img1(argv[1],pro::Image::_32FC3);
+		img1.grayeScale(img1);
+		w1 = img1.size().width;
+		h1 = img1.size().height;
+		iarr1 = img1.getU8Data();
+		//img1.imshow(argv[1],1);
 	}catch(pro::Exception &e){
 		e.showError();
 		std::cerr << "Unable to load image file " << argv[1] << std::endl;
 		return 1;
 	}
-	img1.grayeScale(img1);
-	w1 = img1.size().width;
-	h1 = img1.size().height;
-	iarr1 = img1.getU8Data();
-	img1.imshow("test");
-	cv::waitKey(0);
 
     //if (NULL == (iarr1 = read_png_f32_gray(argv[1], &w1, &h1))) {
     //    std::cerr << "Unable to load image file " << argv[1] << std::endl;
@@ -114,14 +112,26 @@ int main(int argc, char **argv)
 	//free(iarr1); /*memcheck*/
 	
 	// Read image2
-    float * iarr2;
-    size_t w2, h2;
-    if (NULL == (iarr2 = read_png_f32_gray(argv[2], &w2, &h2))) {
-        std::cerr << "Unable to load image file " << argv[2] << std::endl;
-        return 1;
-    }
+	unsigned char * iarr2;
+	size_t w2, h2;
+	try{
+		pro::Image img2(argv[2],pro::Image::_32FC3);
+		img2.grayeScale(img2);
+		w2 = img2.size().width;
+		h2 = img2.size().height;
+		iarr2 = img2.getU8Data();
+		//img2.imshow(argv[2],1);
+	}catch(pro::Exception &e){
+		e.showError();
+		std::cerr << "Unable to load image file " << argv[2] << std::endl;
+		return 1;
+	}
+    //if (NULL == (iarr2 = read_png_f32_gray(argv[2], &w2, &h2))) {
+    //    std::cerr << "Unable to load image file " << argv[2] << std::endl;
+    //    return 1;
+    //}
     std::vector<float> ipixels2(iarr2, iarr2 + w2 * h2);
-	free(iarr2); /*memcheck*/	
+	//free(iarr2); /*memcheck*/	
 	
 	///// Resize the images to area wS*hW in remaining the apsect-ratio	
 	///// Resize if the resize flag is not set or if the flag is set unequal to 0
@@ -234,8 +244,8 @@ int main(int argc, char **argv)
 	
 	///// Compute ASIFT keypoints
 	// number N of tilts to simulate t = 1, \sqrt{2}, (\sqrt{2})^2, ..., {\sqrt{2}}^(N-1)
-	int num_of_tilts1 = 7;
-	int num_of_tilts2 = 7;
+	int num_of_tilts1 = 3;
+	int num_of_tilts2 = 3;
 //	int num_of_tilts1 = 1;
 //	int num_of_tilts2 = 1;
 	int verb = 0;
