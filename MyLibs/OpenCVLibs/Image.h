@@ -20,14 +20,16 @@ namespace pro{
 class PRO_EXPORTS Image
 {
 public:
-
+	
+	static const int _8UC1 = CV_8UC1;
+	static const int _32FC1 = CV_32FC1;
 	static const int _8UC3 = CV_8UC3;
 	static const int _32FC3 = CV_32FC3;
 
 private:
 
 	cv::Mat img;
-	int w,h;
+	int w,h,ch;
 	std::string winName;
 	int type;
 
@@ -56,8 +58,8 @@ public:
 	void resize(const Image& src,cv::Size size);
 	void rotation(const Image& src,cv::Point2f center,double angle);
 
-	void horiconcat(const Image &src1,const Image &src2);
-	void vertconcat(const Image &src1,const Image &src2);
+	void horiconcat(const Image &src1,const Image &src2,int band_w=0);
+	void vertconcat(const Image &src1,const Image &src2,int band_w=0);
 	
 	void grayeScale(const Image& src);
 	void binarization(const Image& src);
@@ -95,6 +97,8 @@ public:
 	cv::Size size();
 
 	unsigned char* getU8Data();
+	void setU8Data(unsigned char* cudata,int w,int h,int ch);
+	void setU8Data(vector<unsigned char> cudata,int w,int h,int ch);
 	//float* getF32Data();
 
 	operator cv::Mat &(); 

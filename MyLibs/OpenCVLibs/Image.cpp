@@ -29,13 +29,15 @@ void Image::init(int width,int height,int type){
 	w = width;
 	h = height;
 	this->type = type;
-	img = cv::Mat::zeros(cv::Size(w,h),type);
+	img = cv::Mat(cv::Size(w,h),type);
+	ch = img.channels();
 	winName = string();
 }
 
 void Image::w_h_reset(){
 	w = img.size().width;
 	h = img.size().height;
+	ch = img.channels();
 }
 
 void Image::release(){
@@ -81,12 +83,28 @@ void Image::rotation(const Image& src,cv::Point2f center,double angle){
 	cv::warpAffine(src.img, img, affine_matrix, src.img.size());
 }
 
-void Image::horiconcat(const Image& src1,const Image& src2){
-	cv::hconcat(src1.img,src2.img,img);
+void Image::horiconcat(const Image& src1,const Image& src2,int band_w){
+	if(band_w<=0){
+		cv::hconcat(src1.img,src2.img,img);
+	}else{
+		Image band(band_w,h,img.type());
+		band.oneColor(cv::Scalar::all(255));
+		cv::hconcat(src1.img,band.img,band.img);
+		cv::hconcat(band.img,src2.img,img);
+	}
+	w_h_reset();
 }
 
-void Image::vertconcat(const Image& src1,const Image& src2){
-	cv::vconcat(src1.img,src2.img,img);
+void Image::vertconcat(const Image& src1,const Image& src2,int band_w){
+	if(band_w<=0){
+		cv::vconcat(src1.img,src2.img,img);
+	}else{
+		Image band(w,band_w,img.type());
+		band.oneColor(cv::Scalar::all(255));
+		cv::vconcat(src1.img,band.img,band.img);
+		cv::vconcat(band.img,src2.img,img);
+	}
+	w_h_reset();
 }
 
 void Image::grayeScale(const Image& src){
@@ -267,7 +285,39 @@ cv::Size Image::size(){
 }
 
 unsigned char* Image::getU8Data(){
-	return img.data;
+	unsigned char* udata = new unsigned char[img.cols*img.rows*img.channels()];
+	std::cout << img.channels() << std::endl;
+	for(int i=0;i<img.rows;i++){
+		for(int j=0;j<img.cols;j++){
+			for(int k=0;k<img.channels();k++){
+				udata[i*img.cols+j*img.channels()+k] = img.data[i*img.cols+j*img.channels()+k];
+			}
+		}
+	}
+	return udata;
+}
+
+void Image::setU8Data(unsigned char* cudata,int w,int h,int ch){
+	init(w,h,img.type());
+	std::cout << ch << "," << img.channels() << std::endl;
+	for(int i=0;i<h;i++){
+		for(int j=0;j<w;j++){
+			for(int k=0;k<ch;k++){
+				img.data[w*i+j*ch+k] = cudata[w*i+j*ch+k];
+			}
+		}
+	}
+}
+
+void Image::setU8Data(vector<unsigned char> cudata,int w,int h,int ch){
+	init(w,h,img.type());
+	for(int i=0;i<h;i++){
+		for(int j=0;j<w;j++){
+			for(int k=0;k<ch;k++){
+				img.data[w*i+j*ch+k] = cudata[w*i+j*ch+k];
+			}
+		}
+	}
 }
 
 //float* Image::getF32Data(){

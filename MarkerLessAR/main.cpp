@@ -19,9 +19,9 @@ Image img;
 cv::Size size;
 int m_w,m_h;
 double m_wr,m_hr;
-cv::VideoCapture cap(0);
+cv::VideoCapture cap(1);
 
-#define MAXSIZE 1024
+#define MAXSIZE 4096
 
 GLuint texture[2];
 
@@ -50,8 +50,8 @@ void setTex(const int texturenum){
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
 
-	//glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, MAXSIZE, MAXSIZE, 0, GL_BGR_EXT, GL_UNSIGNED_BYTE, 0);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, MAXSIZE, MAXSIZE, 0, GL_DEPTH_COMPONENT, GL_UNSIGNED_BYTE, 0);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, MAXSIZE, MAXSIZE, 0, GL_BGR_EXT, GL_UNSIGNED_BYTE, 0);
+	//glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, MAXSIZE, MAXSIZE, 0, GL_DEPTH_COMPONENT, GL_UNSIGNED_BYTE, 0);
 
 }
 
@@ -61,8 +61,9 @@ void draw(const unsigned char* data){
 	glBindTexture(GL_TEXTURE_2D, texture[0]);
 
 	glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
-	//glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, m_w, m_h, GL_BGR_EXT, GL_UNSIGNED_BYTE, data);
-	glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, m_w, m_h, GL_DEPTH_COMPONENT, GL_UNSIGNED_BYTE, data);
+
+	glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, m_w, m_h, GL_BGR_EXT, GL_UNSIGNED_BYTE, data);
+	//glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, m_w, m_h, GL_DEPTH_COMPONENT, GL_UNSIGNED_BYTE, data);
 
 	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
@@ -76,16 +77,16 @@ void draw(const unsigned char* data){
 
 	glTexCoord2d(m_wr, 0.0);		glVertex2d(1, 1);
 	glTexCoord2d(m_wr, m_hr);		glVertex2d(1, -1);
-	glTexCoord2d(0.0, m_hr);		glVertex2d(-1, -1);
-	glTexCoord2d(0.0, 0.0);			glVertex2d(-1, 1);
+	glTexCoord2d(0.0 , m_hr);		glVertex2d(-1, -1);
+	glTexCoord2d(0.0 , 0.0);		glVertex2d(-1, 1);
 
 	glEnd();
 	glDisable(GL_TEXTURE_2D);
 }
 
 void display(){
-	cap.read(img);
-	img.grayeScale(img);
+	//cap.read(img);
+	//img.grayeScale(img);
 	draw(img);
 	glutSwapBuffers();
 }
@@ -109,10 +110,11 @@ void reshape(const int w, const int h)
 }
 
 void glInit(){
-	cap.read(img);
-	//img.load("adam1.png");
+	//cap.read(img);
+	img.load("adam1.png");
+	img.horiconcat(img,img,20);
 
-	img.grayeScale(img);
+	//img.grayeScale(img);
 	//img.imshow("test",1);
 	size = img.size();
 	wininit(size.width,size.height,"MarkerLessAR");
@@ -143,10 +145,11 @@ int main(int argc, char **argv)
 	 *  GLUTのウィンドウの大きさが変ったときや、移動したときに
 	 *  呼び出されるコールバック関数を登録する。
 	 */
-	glutReshapeFunc(reshape);	// 
+	glutReshapeFunc(reshape);
 
 	// 処理するべきイベントが何もない状態の時に発行され続けます。
 	glutIdleFunc(idle);
+
 	glutDisplayFunc(display);	// メインループ
 
 	glutMainLoop();
