@@ -73,7 +73,7 @@ using namespace std;
 int main(int argc, char **argv)
 {			
 	
-    if ((argc != 8) && (argc != 9)) {
+    if ((argc != 8) && (argc != 9) && (argc != 11)) {
         std::cerr << " ******************************************************************************* " << std::endl
 				  << " ***************************  ASIFT image matching  **************************** " << std::endl
 				  << " ******************************************************************************* " << std::endl
@@ -101,7 +101,7 @@ int main(int argc, char **argv)
 		w1 = img1.size().width;
 		h1 = img1.size().height;
 		iarr1 = img1.getU8Data();
-		img1.imshow(argv[1],1);
+		//img1.imshow(argv[1],1);
 	}catch(pro::Exception &e){
 		e.showError();
 		std::cerr << "Unable to load image file " << argv[1] << std::endl;
@@ -125,7 +125,7 @@ int main(int argc, char **argv)
 		w2 = img2.size().width;
 		h2 = img2.size().height;
 		iarr2 = img2.getU8Data();
-		img2.imshow(argv[2],1);
+		//img2.imshow(argv[2],1);
 	}catch(pro::Exception &e){
 		e.showError();
 		std::cerr << "Unable to load image file " << argv[2] << std::endl;
@@ -283,16 +283,20 @@ int main(int argc, char **argv)
 
 
 	///// Compute ASIFT keypoints
-	AsiftKeypoints asiftKeys1(3);
-	AsiftKeypoints asiftKeys2(3);
+	AsiftKeypoints asiftKeys1(atoi(argv[9]));
+	AsiftKeypoints asiftKeys2(atoi(argv[10]));
 	int verb = 0;
 
 	cout << "Computing keypoints on the two images..." << endl;
 	time_t tstart, tend;
 	tstart = time(0);
 
-	asiftKeys1.computeAsiftKeyPoints(ipixels1_zoom,wS1,hS1,verb);
-	asiftKeys2.computeAsiftKeyPoints(ipixels2_zoom,wS2,hS2,verb);
+	//asiftKeys1.computeAsiftKeyPoints(ipixels1_zoom,wS1,hS1,verb,zoom1);
+	asiftKeys1.input(argv[6]);
+	cout << asiftKeys1.getNum() << endl;
+	asiftKeys2.computeAsiftKeyPoints(ipixels2_zoom,wS2,hS2,verb,zoom2);
+	//asiftKeys2.input(argv[7]);
+	//cout << asiftKeys2.getNum() << endl;
 	
 	tend = time(0);
 	cout << "Keypoints computation accomplished in " << difftime(tend, tstart) << " seconds." << endl;
@@ -347,7 +351,7 @@ int main(int argc, char **argv)
 	pro::Image img_V(woV,hoV,pro::Image::_8UC1);
 	img_V.setU8Data(vector<uchar>(opixelsASIFT,opixelsASIFT+woV*hoV),woV,hoV,1);
 	img_V.save(argv[3]);
-	img_V.imshow(argv[3],1);
+	//img_V.imshow(argv[3],1);
 	//write_png_f32(argv[3], opixelsASIFT, wo, ho, 1);
 	
 	delete[] opixelsASIFT; /*memcheck*/
@@ -381,101 +385,106 @@ int main(int argc, char **argv)
 	pro::Image img_H(woH,hoH,pro::Image::_8UC1);
 	img_H.setU8Data(vector<uchar>(opixelsASIFT_H,opixelsASIFT_H+woH*hoH),woH,hoH,1);
 	img_H.save(argv[4]);
-	img_H.imshow(argv[4],1);
+	//img_H.imshow(argv[4],1);
 	//write_png_f32(argv[4], opixelsASIFT_H, woH, hoH, 1);
 	
 	delete[] opixelsASIFT_H; /*memcheck*/
 	
 	////// Write the coordinates of the matched points (row1, col1, row2, col2) to the file argv[5]
-	std::ofstream file(argv[5]);
-	if (file.is_open())
-	{		
-		// Write the number of matchings in the first line
-		file << asiftMatchings.getNum() << std::endl;
-		
-		matchingslist::iterator ptr = asiftMatchings.matchings.begin();
-		for(int i=0; i < (int) asiftMatchings.matchings.size(); i++, ptr++)		
-		{
-			file << zoom1*ptr->first.x << "  " << zoom1*ptr->first.y << "  " <<  zoom2*ptr->second.x << 
-			"  " <<  zoom2*ptr->second.y << std::endl;
-		}		
-	}
-	else 
-	{
-		std::cerr << "Unable to open the file matchings."; 
-	}
+	//std::ofstream file(argv[5]);
+	//if (file.is_open())
+	//{		
+	//	// Write the number of matchings in the first line
+	//	file << asiftMatchings.getNum() << std::endl;
+	//	
+	//	matchingslist::iterator ptr = asiftMatchings.matchings.begin();
+	//	for(int i=0; i < (int) asiftMatchings.matchings.size(); i++, ptr++)		
+	//	{
+	//		file << zoom1*ptr->first.x << "  " << zoom1*ptr->first.y << "  " <<  zoom2*ptr->second.x << 
+	//		"  " <<  zoom2*ptr->second.y << std::endl;
+	//	}		
+	//}
+	//else 
+	//{
+	//	std::cerr << "Unable to open the file matchings."; 
+	//}
 
-	file.close();
+	//file.close();
 
+	asiftMatchings.output(argv[5]);
 
-	
 	// Write all the keypoints (row, col, scale, orientation, desciptor (128 integers)) to 
 	// the file argv[6] (so that the users can match the keypoints with their own matching algorithm if they wish to)
 	// keypoints in the 1st image
-	std::ofstream file_key1(argv[6]);
-	if (file_key1.is_open())
-	{
-		// Follow the same convention of David Lowe: 
-		// the first line contains the number of keypoints and the length of the desciptors (128)
-		file_key1 << asiftKeys1.getNum() << "  " << VecLength << "  " << std::endl;
-		for (int tt = 0; tt < (int) asiftKeys1.keys.size(); tt++)
-		{
-			for (int rr = 0; rr < (int) asiftKeys1.keys[tt].size(); rr++)
-			{
-				keypointslist::iterator ptr = asiftKeys1.keys[tt][rr].begin();
-				for(int i=0; i < (int) asiftKeys1.keys[tt][rr].size(); i++, ptr++)	
-				{
-					file_key1 << zoom1*ptr->x << "  " << zoom1*ptr->y << "  " << zoom1*ptr->scale << "  " << ptr->angle;
-					
-					for (int ii = 0; ii < (int) VecLength; ii++)
-					{
-						file_key1 << "  " << ptr->vec[ii];
-					}
-					
-					file_key1 << std::endl;
-				}
-			}	
-		}
-	}
-	else 
-	{
-		std::cerr << "Unable to open the file keys1."; 
-	}
+	//std::ofstream file_key1(argv[6]);
+	//if (file_key1.is_open())
+	//{
+	//	// Follow the same convention of David Lowe: 
+	//	// the first line contains the number of keypoints and the length of the desciptors (128)
+	//	file_key1 << asiftKeys1.getNum() << "  " << VecLength << "  " << std::endl;
+	//	for (int tt = 0; tt < (int) asiftKeys1.keys.size(); tt++)
+	//	{
+	//		for (int rr = 0; rr < (int) asiftKeys1.keys[tt].size(); rr++)
+	//		{
+	//			keypointslist::iterator ptr = asiftKeys1.keys[tt][rr].begin();
+	//			for(int i=0; i < (int) asiftKeys1.keys[tt][rr].size(); i++, ptr++)	
+	//			{
+	//				file_key1 << zoom1*ptr->x << "  " << zoom1*ptr->y << "  " << zoom1*ptr->scale << "  " << ptr->angle;
+	//				
+	//				for (int ii = 0; ii < (int) VecLength; ii++)
+	//				{
+	//					file_key1 << "  " << ptr->vec[ii];
+	//				}
+	//				
+	//				file_key1 << std::endl;
+	//			}
+	//		}	
+	//	}
+	//}
+	//else 
+	//{
+	//	std::cerr << "Unable to open the file keys1."; 
+	//}
 
-	file_key1.close();
+	//file_key1.close();
+
+	//asiftKeys1.output(argv[6]);
+
 	
 	////// keypoints in the 2nd image
-	std::ofstream file_key2(argv[7]);
-	if (file_key2.is_open())
-	{
-		// Follow the same convention of David Lowe: 
-		// the first line contains the number of keypoints and the length of the desciptors (128)
-		file_key2 << asiftKeys2.getNum() << "  " << VecLength << "  " << std::endl;
-		for (int tt = 0; tt < (int) asiftKeys2.keys.size(); tt++)
-		{
-			for (int rr = 0; rr < (int) asiftKeys2.keys[tt].size(); rr++)
-			{
-				keypointslist::iterator ptr = asiftKeys2.keys[tt][rr].begin();
-				for(int i=0; i < (int) asiftKeys2.keys[tt][rr].size(); i++, ptr++)	
-				{
-					file_key2 << zoom2*ptr->x << "  " << zoom2*ptr->y << "  " << zoom2*ptr->scale << "  " << ptr->angle;
-					
-					for (int ii = 0; ii < (int) VecLength; ii++)
-					{
-						file_key2 << "  " << ptr->vec[ii];
-					}					
-					file_key2 << std::endl;
-				}
-			}	
-		}
-	}
-	else 
-	{
-		std::cerr << "Unable to open the file keys2."; 
-	}
-	file_key2.close();
+	//std::ofstream file_key2(argv[7]);
+	//if (file_key2.is_open())
+	//{
+	//	// Follow the same convention of David Lowe: 
+	//	// the first line contains the number of keypoints and the length of the desciptors (128)
+	//	file_key2 << asiftKeys2.getNum() << "  " << VecLength << "  " << std::endl;
+	//	for (int tt = 0; tt < (int) asiftKeys2.keys.size(); tt++)
+	//	{
+	//		for (int rr = 0; rr < (int) asiftKeys2.keys[tt].size(); rr++)
+	//		{
+	//			keypointslist::iterator ptr = asiftKeys2.keys[tt][rr].begin();
+	//			for(int i=0; i < (int) asiftKeys2.keys[tt][rr].size(); i++, ptr++)	
+	//			{
+	//				file_key2 << zoom2*ptr->x << "  " << zoom2*ptr->y << "  " << zoom2*ptr->scale << "  " << ptr->angle;
+	//				
+	//				for (int ii = 0; ii < (int) VecLength; ii++)
+	//				{
+	//					file_key2 << "  " << ptr->vec[ii];
+	//				}					
+	//				file_key2 << std::endl;
+	//			}
+	//		}	
+	//	}
+	//}
+	//else 
+	//{
+	//	std::cerr << "Unable to open the file keys2."; 
+	//}
+	//file_key2.close();
 
-	cv::waitKey(0);
+	asiftKeys2.output(argv[7]);
+
+	//cv::waitKey(0);
 	
     return 0;
 }

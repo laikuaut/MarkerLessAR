@@ -4,6 +4,8 @@
 #include "demo_lib_sift.h"
 #include "compute_asift_matches.h"
 
+#include "../../MyLibs/Core/Dir.h"
+
 class AsiftKeypoints;
 
 class AsiftMatchings
@@ -19,6 +21,8 @@ public:
 
 	matchingslist matchings;
 
+	pro::Dir path;
+
 public:
 
 	AsiftMatchings(void);
@@ -27,6 +31,9 @@ public:
 
 	int computeAsiftMatches(int verb);
 	int getNum() const;
+
+	void output(string name);
+	void input(string name);
 
 };
 

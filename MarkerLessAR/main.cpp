@@ -21,9 +21,9 @@ int m_w,m_h;
 double m_wr,m_hr;
 cv::VideoCapture cap(1);
 
-#define MAXSIZE 4096
+#define MAXSIZE 1024
 
-GLuint texture[2];
+GLuint texture[1];
 
 //————— 画像を読み込み//
 
@@ -38,11 +38,12 @@ void wininit(const int iw, const int ih, const char* name){
 	m_ID = glutCreateWindow(name);
 }
 
-void setTex(const int texturenum){
-	texture[0] = texturenum;
+void setTex(){
+	glGenTextures(1, texture);
+	//texture[0] = texture[];
 
 	glBindTexture(GL_TEXTURE_2D, texture[0]);
-	glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
+	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
@@ -60,7 +61,7 @@ void draw(const unsigned char* data){
 
 	glBindTexture(GL_TEXTURE_2D, texture[0]);
 
-	glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
+	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
 	glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, m_w, m_h, GL_BGR_EXT, GL_UNSIGNED_BYTE, data);
 	//glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, m_w, m_h, GL_DEPTH_COMPONENT, GL_UNSIGNED_BYTE, data);
@@ -80,14 +81,24 @@ void draw(const unsigned char* data){
 	glTexCoord2d(0.0 , m_hr);		glVertex2d(-1, -1);
 	glTexCoord2d(0.0 , 0.0);		glVertex2d(-1, 1);
 
+	//glTexCoord2d(1.0, 0.0);		glVertex2d(1, 1);
+	//glTexCoord2d(1.0, 1.0);		glVertex2d(1, -1);
+	//glTexCoord2d(0.0 , 1.0);		glVertex2d(-1, -1);
+	//glTexCoord2d(0.0 , 0.0);		glVertex2d(-1, 1);
+
 	glEnd();
 	glDisable(GL_TEXTURE_2D);
 }
 
 void display(){
-	//cap.read(img);
+	cap.read(img);
+	img.grayeScale(img);
+	pro::Image image("adam1.png");
+	image.grayeScale(image);
+	img.horiconcat(img,image,20);
+	img.imshow("test");
 	//img.grayeScale(img);
-	draw(img);
+	//draw(img);
 	glutSwapBuffers();
 }
 
@@ -110,9 +121,9 @@ void reshape(const int w, const int h)
 }
 
 void glInit(){
-	//cap.read(img);
-	img.load("adam1.png");
-	img.horiconcat(img,img,20);
+	cap.read(img);
+	//img.load("adam2.png");
+	//img.horiconcat(img,img,20);
 
 	//img.grayeScale(img);
 	//img.imshow("test",1);
@@ -120,8 +131,8 @@ void glInit(){
 	wininit(size.width,size.height,"MarkerLessAR");
 	//wininit(640, 480,"MarkerLessAR");
 	
-	glGenTextures(2, texture);
-	setTex(texture[0]);
+	
+	setTex();
 
 }
 

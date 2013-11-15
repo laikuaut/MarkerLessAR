@@ -3,12 +3,14 @@
 
 AsiftMatchings::AsiftMatchings(void)
 {
+	path = pro::Dir();
 	default_sift_parameters(siftparams);
 }
 
 
 AsiftMatchings::AsiftMatchings(AsiftKeypoints keys1,AsiftKeypoints keys2)
 {
+	path = pro::Dir();
 	this->asiftKeys1 = new AsiftKeypoints(keys1);
 	this->asiftKeys2 = new AsiftKeypoints(keys2);
 	default_sift_parameters(siftparams);
@@ -27,4 +29,30 @@ int AsiftMatchings::computeAsiftMatches(int verb){
 
 int AsiftMatchings::getNum() const{
 	return num;
+}
+
+void AsiftMatchings::output(string name){
+	
+	std::ofstream of;
+
+	of.open(path.pwd(name));
+
+	if (of.is_open())
+	{		
+		// Write the number of matchings in the first line
+		of << getNum() << std::endl;
+		
+		matchingslist::iterator ptr = matchings.begin();
+		for(int i=0; i < (int) matchings.size(); i++, ptr++)		
+		{
+			of << asiftKeys1->zoom*ptr->first.x << "  " << asiftKeys1->zoom*ptr->first.y << "  " <<  asiftKeys2->zoom*ptr->second.x << 
+			"  " <<  asiftKeys2->zoom*ptr->second.y << std::endl;
+		}		
+	}
+	else 
+	{
+		std::cerr << "Unable to open the file matchings."; 
+	}
+
+	of.close();
 }

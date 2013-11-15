@@ -286,7 +286,7 @@ cv::Size Image::size(){
 
 unsigned char* Image::getU8Data(){
 	unsigned char* udata = new unsigned char[img.cols*img.rows*img.channels()];
-	std::cout << img.channels() << std::endl;
+	//std::cout << img.channels() << std::endl;
 	for(int i=0;i<img.rows;i++){
 		for(int j=0;j<img.cols;j++){
 			for(int k=0;k<img.channels();k++){
@@ -299,7 +299,7 @@ unsigned char* Image::getU8Data(){
 
 void Image::setU8Data(unsigned char* cudata,int w,int h,int ch){
 	init(w,h,img.type());
-	std::cout << ch << "," << img.channels() << std::endl;
+	//std::cout << ch << "," << img.channels() << std::endl;
 	for(int i=0;i<h;i++){
 		for(int j=0;j<w;j++){
 			for(int k=0;k<ch;k++){
