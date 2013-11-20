@@ -32,6 +32,11 @@
 
 #include "demo_lib_sift.h"
 
+#include "../../MyLibs/OpenCVLibs/Image.h"
+#include <opencv2/imgproc/imgproc.hpp>
+#include <opencv2/nonfree/features2d.hpp>
+
+
 #define DEBUG 0
 
 #define ABS(x)    (((x) > 0) ? (x) : (-(x)))
@@ -134,7 +139,36 @@ void PlaceInIndex(
 	float mag, float ori, float rx, float cx,siftPar &par);
 
 
+void compute_cv_surf_keypoints(float *input, keypointslist& keypoints, int width, int height, siftPar &par){
+	pro::Image img(width,height,pro::Image::_8UC1);
+	img.setU8Data(vector<uchar>(input,input+width*height),width,height,1);
+	cv::normalize((cv::Mat&)img, (cv::Mat&)img, 0, 255, cv::NORM_MINMAX);
+	
+	std::vector<cv::KeyPoint> keys;
+	std::vector<cv::KeyPoint>::iterator itk;
+	cv::Mat descriptors;
 
+	cv::SurfFeatureDetector detector(1000,4,2,true,false);
+	detector.detect((const cv::Mat&)img, keys);
+
+	cv::SurfDescriptorExtractor extractor(1000,4,2,true,false);
+	cv::Scalar color(100,255,50);
+	extractor.compute((const cv::Mat&)img, keys, descriptors);
+
+	for(int i=0; i<descriptors.rows; ++i) {
+		keypoint key;
+		key.angle = keys[i].angle;
+		key.scale = keys[i].octave;
+		key.x = keys[i].pt.x;
+		key.y = keys[i].pt.y;
+		cv::Mat d(descriptors, cv::Rect(0,i,descriptors.cols,1));
+		for(int j=0;j<d.cols;j++){
+			key.vec[j] = d.data[j];
+		}
+		keypoints.push_back(key);
+	}
+
+}
 
 void compute_sift_keypoints(float *input, keypointslist& keypoints, int width, int height, siftPar &par)
 {

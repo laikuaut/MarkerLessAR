@@ -318,13 +318,18 @@ void Image::setU8Data(vector<unsigned char> cudata,int w,int h,int ch){
 			}
 		}
 	}
+	cudata.clear();
 }
 
 //float* Image::getF32Data(){
 //	return (float*)img.data;
 //}
 
-Image::operator cv::Mat &(){
+//Image::operator cv::Mat &(){
+//	return img;
+//}
+
+Image::operator const cv::Mat &(){
 	return img;
 }
 

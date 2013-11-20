@@ -291,6 +291,7 @@ void compute_sift_keypoints(float *input,  keypointslist& keypoints,int width, i
 
 // MATCHING DETECTION FUNCTION:
 void compute_sift_matches( keypointslist& keys1, keypointslist& keys2, matchingslist& matchings, siftPar &par);
+void compute_cv_surf_keypoints(float *input, keypointslist& keypoints, int width, int height, siftPar &par);
 
 #endif // _LIBSIFT_H_
 

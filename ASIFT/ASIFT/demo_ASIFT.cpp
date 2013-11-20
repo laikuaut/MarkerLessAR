@@ -65,6 +65,9 @@ using namespace std;
 #include "AsiftKeypoints.h"
 #include "AsiftMatchings.h"
 
+#include <opencv2/imgproc/imgproc.hpp>
+#include <opencv2/features2d/features2d.hpp>
+
 # define IM_X 800
 # define IM_Y 600
 
@@ -72,7 +75,6 @@ using namespace std;
 
 int main(int argc, char **argv)
 {			
-	
     if ((argc != 8) && (argc != 9) && (argc != 11)) {
         std::cerr << " ******************************************************************************* " << std::endl
 				  << " ***************************  ASIFT image matching  **************************** " << std::endl
@@ -108,12 +110,7 @@ int main(int argc, char **argv)
 		return 1;
 	}
 
-    //if (NULL == (iarr1 = read_png_f32_gray(argv[1], &w1, &h1))) {
-    //    std::cerr << "Unable to load image file " << argv[1] << std::endl;
-    //    return 1;
-    //}
     std::vector<float> ipixels1(iarr1, iarr1 + w1 * h1);
-	//free(iarr1); /*memcheck*/
 	delete[] iarr1;
 	
 	// Read image2
@@ -131,18 +128,7 @@ int main(int argc, char **argv)
 		std::cerr << "Unable to load image file " << argv[2] << std::endl;
 		return 1;
 	}
-    //if (NULL == (iarr2 = read_png_f32_gray(argv[2], &w2, &h2))) {
-    //    std::cerr << "Unable to load image file " << argv[2] << std::endl;
-    //    return 1;
-    //}
     std::vector<float> ipixels2(iarr2, iarr2 + w2 * h2);
-	//pro::Image img(w2,h2,pro::Image::_8UC3);
-	//img.grayeScale(img);
-	////img.setU8Data(iarr2,w2,h2,1);
-	//img.setU8Data(vector<uchar>(ipixels2.begin(),ipixels2.end()),w2,h2,1);
-	//img.imshow("tset",1);
-	//cv::waitKey(0);
-	//free(iarr2); /*memcheck*/	
 	delete[] iarr2;
 
 	///// Resize the images to area wS*hW in remaining the apsect-ratio	
@@ -255,34 +241,6 @@ int main(int argc, char **argv)
 
 	
 	///// Compute ASIFT keypoints
-//	// number N of tilts to simulate t = 1, \sqrt{2}, (\sqrt{2})^2, ..., {\sqrt{2}}^(N-1)
-//	int num_of_tilts1 = 3;
-//	int num_of_tilts2 = 3;
-////	int num_of_tilts1 = 1;
-////	int num_of_tilts2 = 1;
-//	int verb = 0;
-//	// Define the SIFT parameters
-//	siftPar siftparameters;	
-//	default_sift_parameters(siftparameters);
-//
-//	vector< vector< keypointslist > > keys1;
-//	vector< vector< keypointslist > > keys2;
-//	
-//	int num_keys1=0, num_keys2=0;
-//	
-//	
-//	cout << "Computing keypoints on the two images..." << endl;
-//	time_t tstart, tend;	
-//	tstart = time(0);
-//
-//	num_keys1 = compute_asift_keypoints(ipixels1_zoom, wS1, hS1, num_of_tilts1, verb, keys1, siftparameters);
-//	num_keys2 = compute_asift_keypoints(ipixels2_zoom, wS2, hS2, num_of_tilts2, verb, keys2, siftparameters);
-//	
-//	tend = time(0);
-//	cout << "Keypoints computation accomplished in " << difftime(tend, tstart) << " seconds." << endl;
-
-
-	///// Compute ASIFT keypoints
 	AsiftKeypoints asiftKeys1(atoi(argv[9]));
 	AsiftKeypoints asiftKeys2(atoi(argv[10]));
 	int verb = 0;
@@ -291,26 +249,15 @@ int main(int argc, char **argv)
 	time_t tstart, tend;
 	tstart = time(0);
 
-	//asiftKeys1.computeAsiftKeyPoints(ipixels1_zoom,wS1,hS1,verb,zoom1);
-	asiftKeys1.input(argv[6]);
-	cout << asiftKeys1.getNum() << endl;
+	asiftKeys1.computeAsiftKeyPoints(ipixels1_zoom,wS1,hS1,verb,zoom1);
+	//asiftKeys1.input(argv[6]);
+	//cout << asiftKeys1.getNum() << endl;
 	asiftKeys2.computeAsiftKeyPoints(ipixels2_zoom,wS2,hS2,verb,zoom2);
-	//asiftKeys2.input(argv[7]);
-	//cout << asiftKeys2.getNum() << endl;
 	
 	tend = time(0);
 	cout << "Keypoints computation accomplished in " << difftime(tend, tstart) << " seconds." << endl;
 	
 	//// Match ASIFT keypoints
-	//int num_matchings;
-	//matchingslist matchings;	
-	//cout << "Matching the keypoints..." << endl;
-	//tstart = time(0);
-	//num_matchings = compute_asift_matches(num_of_tilts1, num_of_tilts2, wS1, hS1, wS2, 
-	//									  hS2, verb, keys1, keys2, matchings, siftparameters);
-	//tend = time(0);
-	//cout << "Keypoints matching accomplished in " << difftime(tend, tstart) << " seconds." << endl;
-
 	AsiftMatchings asiftMatchings(asiftKeys1,asiftKeys2);
 
 	cout << "Matching the keypoints..." << endl;
@@ -351,8 +298,6 @@ int main(int argc, char **argv)
 	pro::Image img_V(woV,hoV,pro::Image::_8UC1);
 	img_V.setU8Data(vector<uchar>(opixelsASIFT,opixelsASIFT+woV*hoV),woV,hoV,1);
 	img_V.save(argv[3]);
-	//img_V.imshow(argv[3],1);
-	//write_png_f32(argv[3], opixelsASIFT, wo, ho, 1);
 	
 	delete[] opixelsASIFT; /*memcheck*/
 	
@@ -385,103 +330,20 @@ int main(int argc, char **argv)
 	pro::Image img_H(woH,hoH,pro::Image::_8UC1);
 	img_H.setU8Data(vector<uchar>(opixelsASIFT_H,opixelsASIFT_H+woH*hoH),woH,hoH,1);
 	img_H.save(argv[4]);
-	//img_H.imshow(argv[4],1);
-	//write_png_f32(argv[4], opixelsASIFT_H, woH, hoH, 1);
-	
+
 	delete[] opixelsASIFT_H; /*memcheck*/
 	
 	////// Write the coordinates of the matched points (row1, col1, row2, col2) to the file argv[5]
 	//std::ofstream file(argv[5]);
-	//if (file.is_open())
-	//{		
-	//	// Write the number of matchings in the first line
-	//	file << asiftMatchings.getNum() << std::endl;
-	//	
-	//	matchingslist::iterator ptr = asiftMatchings.matchings.begin();
-	//	for(int i=0; i < (int) asiftMatchings.matchings.size(); i++, ptr++)		
-	//	{
-	//		file << zoom1*ptr->first.x << "  " << zoom1*ptr->first.y << "  " <<  zoom2*ptr->second.x << 
-	//		"  " <<  zoom2*ptr->second.y << std::endl;
-	//	}		
-	//}
-	//else 
-	//{
-	//	std::cerr << "Unable to open the file matchings."; 
-	//}
-
-	//file.close();
-
 	asiftMatchings.output(argv[5]);
 
 	// Write all the keypoints (row, col, scale, orientation, desciptor (128 integers)) to 
 	// the file argv[6] (so that the users can match the keypoints with their own matching algorithm if they wish to)
 	// keypoints in the 1st image
-	//std::ofstream file_key1(argv[6]);
-	//if (file_key1.is_open())
-	//{
-	//	// Follow the same convention of David Lowe: 
-	//	// the first line contains the number of keypoints and the length of the desciptors (128)
-	//	file_key1 << asiftKeys1.getNum() << "  " << VecLength << "  " << std::endl;
-	//	for (int tt = 0; tt < (int) asiftKeys1.keys.size(); tt++)
-	//	{
-	//		for (int rr = 0; rr < (int) asiftKeys1.keys[tt].size(); rr++)
-	//		{
-	//			keypointslist::iterator ptr = asiftKeys1.keys[tt][rr].begin();
-	//			for(int i=0; i < (int) asiftKeys1.keys[tt][rr].size(); i++, ptr++)	
-	//			{
-	//				file_key1 << zoom1*ptr->x << "  " << zoom1*ptr->y << "  " << zoom1*ptr->scale << "  " << ptr->angle;
-	//				
-	//				for (int ii = 0; ii < (int) VecLength; ii++)
-	//				{
-	//					file_key1 << "  " << ptr->vec[ii];
-	//				}
-	//				
-	//				file_key1 << std::endl;
-	//			}
-	//		}	
-	//	}
-	//}
-	//else 
-	//{
-	//	std::cerr << "Unable to open the file keys1."; 
-	//}
-
-	//file_key1.close();
-
-	//asiftKeys1.output(argv[6]);
+	asiftKeys1.output(argv[6]);
 
 	
 	////// keypoints in the 2nd image
-	//std::ofstream file_key2(argv[7]);
-	//if (file_key2.is_open())
-	//{
-	//	// Follow the same convention of David Lowe: 
-	//	// the first line contains the number of keypoints and the length of the desciptors (128)
-	//	file_key2 << asiftKeys2.getNum() << "  " << VecLength << "  " << std::endl;
-	//	for (int tt = 0; tt < (int) asiftKeys2.keys.size(); tt++)
-	//	{
-	//		for (int rr = 0; rr < (int) asiftKeys2.keys[tt].size(); rr++)
-	//		{
-	//			keypointslist::iterator ptr = asiftKeys2.keys[tt][rr].begin();
-	//			for(int i=0; i < (int) asiftKeys2.keys[tt][rr].size(); i++, ptr++)	
-	//			{
-	//				file_key2 << zoom2*ptr->x << "  " << zoom2*ptr->y << "  " << zoom2*ptr->scale << "  " << ptr->angle;
-	//				
-	//				for (int ii = 0; ii < (int) VecLength; ii++)
-	//				{
-	//					file_key2 << "  " << ptr->vec[ii];
-	//				}					
-	//				file_key2 << std::endl;
-	//			}
-	//		}	
-	//	}
-	//}
-	//else 
-	//{
-	//	std::cerr << "Unable to open the file keys2."; 
-	//}
-	//file_key2.close();
-
 	asiftKeys2.output(argv[7]);
 
 	//cv::waitKey(0);

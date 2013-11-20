@@ -101,7 +101,8 @@ public:
 	void setU8Data(vector<unsigned char> cudata,int w,int h,int ch);
 	//float* getF32Data();
 
-	operator cv::Mat &(); 
+	//operator cv::Mat &();
+	operator const cv::Mat &(); 
 	operator const unsigned char* ();
 	operator unsigned char* ();
 	operator const float* ();
