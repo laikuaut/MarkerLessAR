@@ -7,6 +7,11 @@
 
 #include "../../MyLibs/Core/Dir.h"
 
+#include <boost/property_tree/ptree.hpp>
+#include <boost/property_tree/ini_parser.hpp>
+#include <boost/optional.hpp>
+using namespace boost::property_tree;
+
 class AsiftMatchings;
 
 class AsiftKeypoints
@@ -34,6 +39,10 @@ public:
 
 	int computeAsiftKeyPoints(vector<float>& image, int width, int height, int verb,float zoom);
 	int getNum() const;
+	
+	void inireadSiftParameters();
+	void iniwriteSiftParameters();
+	void iniwriteSiftParameters(siftPar par);
 
 	void output(string name);
 	void input(string name);

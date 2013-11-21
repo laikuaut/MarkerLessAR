@@ -46,25 +46,29 @@ void default_sift_parameters(siftPar &par)
 {
 	par.OctaveMax=100000;
 	par.DoubleImSize = 0;
-	par.order = 3;
-	par.InitSigma = 1.6;
-	par.BorderDist = 5; 
-	par.Scales = 3;
-	par.PeakThresh = 255.0 * 0.04 / 3.0;
-	par.EdgeThresh = 0.06; 
-	par.EdgeThresh1 = 0.08; 
-	par.OriBins  = 36;
-	par.OriSigma = 1.5;
-	par.OriHistThresh = 0.8;
-	par.MaxIndexVal = 0.2;
-	par.MagFactor  = 3;
-	par.IndexSigma  = 1.0;
-	par.IgnoreGradSign = 0;
+	par.order		= 3;
+	par.InitSigma	= 1.6;
+	par.BorderDist	= 5; 
+	par.Scales		= 3;
+	par.PeakThresh	= 255.0 * 0.04 / 3.0;
+	par.EdgeThresh	= 0.06; 
+	par.EdgeThresh1		= 0.08;
+	//par.PeakThresh = 255.0 * 0.04 / 3.0;
+	//par.EdgeThresh = 0.1; 
+	//par.EdgeThresh1 = 0.2; 
+	par.OriBins			= 36;
+	par.OriSigma		= 1.5;
+	par.OriHistThresh	= 0.8;
+	par.MaxIndexVal		= 0.2;
+	par.MagFactor		= 3;
+	par.IndexSigma		= 1.0;
+	par.IgnoreGradSign	= 0;
 //	par.MatchRatio = 0.6;
 //	par.MatchRatio = 0.75; // Guoshen Yu. Since l1 distance is used for matching instead of l2, a larger threshold is needed. 
-	par.MatchRatio = 0.73; // Guoshen Yu. Since l1 distance is used for matching instead of l2, a larger threshold is needed. 
-	par.MatchXradius = 1000000.0f;
-	par.MatchYradius = 1000000.0f;
+//	par.MatchRatio = 0.73; // Guoshen Yu. Since l1 distance is used for matching instead of l2, a larger threshold is needed. 
+	par.MatchRatio		= 0.8; // Guoshen Yu. Since l1 distance is used for matching instead of l2, a larger threshold is needed. 
+	par.MatchXradius	= 1000000.0f;
+	par.MatchYradius	= 1000000.0f;
 
 	par.noncorrectlylocalized = 0;
 
@@ -148,10 +152,10 @@ void compute_cv_surf_keypoints(float *input, keypointslist& keypoints, int width
 	std::vector<cv::KeyPoint>::iterator itk;
 	cv::Mat descriptors;
 
-	cv::SurfFeatureDetector detector(1000,4,2,true,false);
+	cv::SurfFeatureDetector detector(400,3,4,true,false);
 	detector.detect((const cv::Mat&)img, keys);
 
-	cv::SurfDescriptorExtractor extractor(1000,4,2,true,false);
+	cv::SurfDescriptorExtractor extractor(400,3,4,true,false);
 	cv::Scalar color(100,255,50);
 	extractor.compute((const cv::Mat&)img, keys, descriptors);
 

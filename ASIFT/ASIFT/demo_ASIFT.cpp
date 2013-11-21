@@ -334,7 +334,6 @@ int main(int argc, char **argv)
 	delete[] opixelsASIFT_H; /*memcheck*/
 	
 	////// Write the coordinates of the matched points (row1, col1, row2, col2) to the file argv[5]
-	//std::ofstream file(argv[5]);
 	asiftMatchings.output(argv[5]);
 
 	// Write all the keypoints (row, col, scale, orientation, desciptor (128 integers)) to 

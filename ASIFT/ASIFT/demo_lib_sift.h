@@ -71,7 +71,7 @@
 // BASIC STRUCTURES:
 
 // Keypoints:
-#define OriSize  8
+#define OriSize  4
 #define IndexSize  4
 #define VecLength  IndexSize * IndexSize * OriSize
 
