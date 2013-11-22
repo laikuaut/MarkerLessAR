@@ -19,6 +19,7 @@ int AsiftKeypoints::computeAsiftKeyPoints(vector<float>& image, int width, int h
 {
 	w = width,h = height;
 	this->zoom = zoom;
+	keys.clear();
 	num = compute_asift_keypoints(image,width,height,tilts,verb,keys,siftparams);
 	return num;
 }

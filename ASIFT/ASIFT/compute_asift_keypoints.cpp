@@ -395,8 +395,8 @@ int compute_asift_keypoints(vector<float>& image, int width, int height, int num
       for (int cc = 0; cc < width*height; cc++)
         image_tmp1_float[cc] = image_tmp1[cc];
 
-      compute_sift_keypoints(image_tmp1_float,keys_all[tt-1][0],width,height,siftparameters);
-      //compute_cv_surf_keypoints(image_tmp1_float,keys_all[tt-1][0],width,height,siftparameters);
+      //compute_sift_keypoints(image_tmp1_float,keys_all[tt-1][0],width,height,siftparameters);
+      compute_cv_surf_keypoints(image_tmp1_float,keys_all[tt-1][0],width,height,siftparameters);
 
       delete[] image_tmp1_float;
 
@@ -465,8 +465,8 @@ int compute_asift_keypoints(vector<float>& image, int width, int height, int num
         // compute SIFT keypoints on simulated image. 	 
         keypointslist keypoints;
         keypointslist keypoints_filtered;
-        compute_sift_keypoints(image_tmp1_float,keypoints,width_t,height_t,siftparameters);
-		//compute_cv_surf_keypoints(image_tmp1_float,keypoints,width_t,height_t,siftparameters);
+        //compute_sift_keypoints(image_tmp1_float,keypoints,width_t,height_t,siftparameters);
+		compute_cv_surf_keypoints(image_tmp1_float,keypoints,width_t,height_t,siftparameters);
 
         delete[] image_tmp1_float;		
 

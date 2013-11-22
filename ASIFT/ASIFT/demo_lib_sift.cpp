@@ -152,10 +152,10 @@ void compute_cv_surf_keypoints(float *input, keypointslist& keypoints, int width
 	std::vector<cv::KeyPoint>::iterator itk;
 	cv::Mat descriptors;
 
-	cv::SurfFeatureDetector detector(400,3,4,true,false);
+	cv::SurfFeatureDetector detector(4000,3,4,false,false);
 	detector.detect((const cv::Mat&)img, keys);
 
-	cv::SurfDescriptorExtractor extractor(400,3,4,true,false);
+	cv::SurfDescriptorExtractor extractor(4000,3,4,false,false);
 	cv::Scalar color(100,255,50);
 	extractor.compute((const cv::Mat&)img, keys, descriptors);
 
@@ -1252,9 +1252,12 @@ void compute_sift_matches(
 		
 		sqratio = CheckForMatch_short(keys1_short[i], keys2_short, imatch,par);
 
-
-		if (sqratio< sqminratio)
+		if (sqratio< sqminratio){
+			std::cout << "ok:" << sqratio << " , " << std::endl;
 			matchings.push_back( matching(keys1[i],keys2[imatch] ));
-	//		 matchings.push_back( matching_char(keys1_char[i],keys2_char[imatch] ));
+		}else{
+			//std::cout << "ng:" << sqratio << " , " << std::endl;
+		}
+			//		 matchings.push_back( matching_char(keys1_char[i],keys2_char[imatch] ));
 	}
 }

@@ -152,6 +152,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Asift.cpp" />
     <ClCompile Include="AsiftKeypoints.cpp" />
     <ClCompile Include="AsiftMatchings.cpp" />
     <ClCompile Include="compute_asift_keypoints.cpp" />
@@ -170,6 +171,7 @@
     <ClCompile Include="splines.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Asift.h" />
     <ClInclude Include="AsiftKeypoints.h" />
     <ClInclude Include="AsiftMatchings.h" />
     <ClInclude Include="compute_asift_keypoints.h" />

@@ -64,6 +64,7 @@ using namespace std;
 
 #include "AsiftKeypoints.h"
 #include "AsiftMatchings.h"
+#include "Asift.h"
 
 #include <opencv2/imgproc/imgproc.hpp>
 #include <opencv2/features2d/features2d.hpp>
@@ -71,6 +72,12 @@ using namespace std;
 # define IM_X 800
 # define IM_Y 600
 
+
+//int main(){
+//	Asift asift;
+//	asift.init("adam1.png","adam2.png","V.png","H.png","keys1.txt","keys2.txt","match.txt",3,2,1);
+//	asift.run();
+//}
 
 
 int main(int argc, char **argv)
@@ -136,15 +143,15 @@ int main(int argc, char **argv)
 	float wS = IM_X;
 	float hS = IM_Y;
 	
-	float zoom1=0, zoom2=0;	
+	float zoom1=0, zoom2=0;
 	int wS1=0, hS1=0, wS2=0, hS2=0;
 	vector<float> ipixels1_zoom, ipixels2_zoom;	
 		
 	int flag_resize = 1;
-	if (argc == 9)
-	{	
+	//if (argc == 9)
+	//{	
 		flag_resize = atoi(argv[8]);
-	}
+	//}
 	
 	if ((argc == 8) || (flag_resize != 0))
 	{
@@ -187,6 +194,7 @@ int main(int argc, char **argv)
 		/* Anti-aliasing filtering along vertical direction */
 		if ( zoom1 > 1 )
 		{
+			
 			float sigma_aa = InitSigma_aa * zoom1 / 2;
 			GaussianBlur1D(ipixels1,w1,h1,sigma_aa,1);
 			GaussianBlur1D(ipixels1,w1,h1,sigma_aa,0);
@@ -232,7 +240,7 @@ int main(int argc, char **argv)
 		hS1 = h1;
 		zoom1 = 1;
 		
-		ipixels2_zoom.resize(w2*h2);	
+		ipixels2_zoom.resize(w2*h2);
 		ipixels2_zoom = ipixels2;
 		wS2 = w2;
 		hS2 = h2;

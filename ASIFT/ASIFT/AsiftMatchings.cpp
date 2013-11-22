@@ -13,7 +13,8 @@ AsiftMatchings::AsiftMatchings(AsiftKeypoints keys1,AsiftKeypoints keys2)
 	path = pro::Dir();
 	this->asiftKeys1 = new AsiftKeypoints(keys1);
 	this->asiftKeys2 = new AsiftKeypoints(keys2);
-	default_sift_parameters(siftparams);
+	//default_sift_parameters(siftparams);
+	siftparams = keys2.siftparams;
 }
 
 
