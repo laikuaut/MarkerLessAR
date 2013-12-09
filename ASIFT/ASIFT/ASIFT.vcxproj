@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project DefaultTargets="Build" ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
       <Configuration>Debug</Configuration>
@@ -27,26 +27,26 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v110</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
+    <PlatformToolset>v110</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Static_Debug|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v110</PlatformToolset>
+    <PlatformToolset>v120</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v110</PlatformToolset>
+    <PlatformToolset>v120</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='static_Release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v110</PlatformToolset>
+    <PlatformToolset>v120</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
@@ -190,13 +190,13 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\MyLibs\Core\Core.vcxproj">
-      <Project>{556a4f2e-7490-46b0-bbe3-d1aaceaa6c9b}</Project>
+      <Project>{8f17dd21-5dbb-4b8a-acf8-bf434f29562d}</Project>
     </ProjectReference>
     <ProjectReference Include="..\..\MyLibs\Exceptions\Exceptions.vcxproj">
-      <Project>{1eeb7be6-6f86-495e-b753-4ebcb93f8312}</Project>
+      <Project>{df026274-d8ce-485b-8dd3-d8cef1099e7d}</Project>
     </ProjectReference>
     <ProjectReference Include="..\..\MyLibs\OpenCVLibs\OpenCVLibs.vcxproj">
-      <Project>{05014a64-3374-4c86-ada0-d50135d4b27c}</Project>
+      <Project>{1794ad3e-0599-476b-ab16-211df9620e27}</Project>
     </ProjectReference>
     <ProjectReference Include="..\..\third_party\png\png.vcxproj">
       <Project>{f0ba3049-3f11-4983-a511-320e72c3215a}</Project>
