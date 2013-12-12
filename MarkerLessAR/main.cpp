@@ -5,13 +5,22 @@
 // http://opensource.org/licenses/mit-license.php
 
 #include<iostream>
-#include"../MyLibs/OpenCVLibs/Image.h"
 #include<gl\glut.h>
 #include<gl\GL.h>
 #include<gl\GLU.h>
 
+#include "../ASIFT/ASIFT/Asift.h"
+
+#include"../MyLibs/OpenCVLibs/Image.h"
+
 using namespace std;
 using namespace pro;
+
+void main(){
+	Asift asift;
+	asift.init(1);
+	asift.run();
+}
 
 //int m_ID;
 //Image img;
@@ -136,38 +145,38 @@ using namespace pro;
 //
 //}
 
-#include <opencv2/imgproc/imgproc.hpp>
-#include <opencv2/nonfree/features2d.hpp>
-
-int
-main(int argc, char *argv[])
-{
-  cv::Mat img = cv::imread("./adam1.png", 1);
-  if(img.empty()) return -1; 
-
-  cv::Mat gray_img;
-  cv::cvtColor(img, gray_img, CV_BGR2GRAY);
-  cv::normalize(gray_img, gray_img, 0, 255, cv::NORM_MINMAX);
-
-  std::vector<cv::KeyPoint> keypoints;
-  std::vector<cv::KeyPoint>::iterator itk;
-  cv::Mat descriptors;
-
-  //
-  // threshold=4500
-  cv::SurfFeatureDetector detector(4500);
-  detector.detect(gray_img, keypoints);
-  // SURF に基づくディスクリプタ抽出器
-  cv::SurfDescriptorExtractor extractor;
-  cv::Scalar color(100,255,50);
-  extractor.compute(gray_img, keypoints, descriptors);
-
-  // 64次元の特徴量 x keypoint数
-  for(int i=0; i<descriptors.rows; ++i) {
-    cv::Mat d(descriptors, cv::Rect(0,i,descriptors.cols,1));
-    std::cout << i << ": " << d << std::endl;
-  }
-}
+//#include <opencv2/imgproc/imgproc.hpp>
+//#include <opencv2/nonfree/features2d.hpp>
+//
+//int
+//main(int argc, char *argv[])
+//{
+//  cv::Mat img = cv::imread("./adam1.png", 1);
+//  if(img.empty()) return -1; 
+//
+//  cv::Mat gray_img;
+//  cv::cvtColor(img, gray_img, CV_BGR2GRAY);
+//  cv::normalize(gray_img, gray_img, 0, 255, cv::NORM_MINMAX);
+//
+//  std::vector<cv::KeyPoint> keypoints;
+//  std::vector<cv::KeyPoint>::iterator itk;
+//  cv::Mat descriptors;
+//
+//  //
+//  // threshold=4500
+//  cv::SurfFeatureDetector detector(4500);
+//  detector.detect(gray_img, keypoints);
+//  // SURF に基づくディスクリプタ抽出器
+//  cv::SurfDescriptorExtractor extractor;
+//  cv::Scalar color(100,255,50);
+//  extractor.compute(gray_img, keypoints, descriptors);
+//
+//  // 64次元の特徴量 x keypoint数
+//  for(int i=0; i<descriptors.rows; ++i) {
+//    cv::Mat d(descriptors, cv::Rect(0,i,descriptors.cols,1));
+//    std::cout << i << ": " << d << std::endl;
+//  }
+//}
 
 //int main(int argc, char **argv)
 //

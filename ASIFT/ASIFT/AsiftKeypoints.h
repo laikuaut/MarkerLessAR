@@ -14,38 +14,51 @@ using namespace boost::property_tree;
 
 class AsiftMatchings;
 
-class AsiftKeypoints
+class PRO_EXPORTS AsiftKeypoints
 {
 
 	friend class AsiftMatchings;
 
 private:
 
+	// 傾き(Asfitパラメータ)
 	int tilts;
+	// Sift Parameter
 	siftPar siftparams;
+	// キーポイント数
 	int num;
+	// 縦横幅
 	int w,h;
+	// 拡大率
 	float zoom;
 
 public:
 
+	// キーポイント
 	vector< vector< keypointslist > > keys;
 
+	// キーポイントパス
 	pro::Dir path;
 
 public:
 	AsiftKeypoints(int tilts = 1);
 	~AsiftKeypoints(void);
 
+	// Asiftキーポイント計算
 	int computeAsiftKeyPoints(vector<float>& image, int width, int height, int verb,float zoom);
+
+	// アクセサリ関連
 	int getNum() const;
-	
-	void inireadSiftParameters();
-	void iniwriteSiftParameters();
-	void iniwriteSiftParameters(siftPar par);
+	int getTilts() const;
+
+	//　.iniファイル関連
+	void inireadSiftParameters(ptree &pt);
+	void iniwriteSiftParameters(ptree &pt);
+	void iniwriteSiftParameters(ptree &pt,siftPar par);
 
 	void output(string name);
 	void input(string name);
+
 
 };
 

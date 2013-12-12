@@ -35,6 +35,9 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\ASIFT\ASIFT\ASIFT.vcxproj">
+      <Project>{d21be8f9-f6d9-432b-9bf5-ac2d9d896dd3}</Project>
+    </ProjectReference>
     <ProjectReference Include="..\MyLibs\Core\Core.vcxproj">
       <Project>{556a4f2e-7490-46b0-bbe3-d1aaceaa6c9b}</Project>
     </ProjectReference>

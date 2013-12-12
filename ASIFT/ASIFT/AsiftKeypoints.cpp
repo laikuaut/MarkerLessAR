@@ -5,8 +5,8 @@ AsiftKeypoints::AsiftKeypoints(int tilts)
 {
 	path = pro::Dir();
 	this->tilts = tilts;
-	inireadSiftParameters();
-	//default_sift_parameters(siftparams);
+	//inireadSiftParameters();
+	default_sift_parameters(siftparams);
 	num = 0;
 	w = h = 0;
 }
@@ -28,46 +28,39 @@ int AsiftKeypoints::getNum() const{
 	return num;
 }
 
-void AsiftKeypoints::inireadSiftParameters(){
-
-	if(path.isExist("Asift.ini")){
-
-		ptree pt;
-		read_ini("Asift.ini", pt);
-
-		siftparams.OctaveMax	  = pt.get_optional<int>("SIFTParams.OctaveMax").get();
-		siftparams.DoubleImSize	  = pt.get_optional<int>("SIFTParams.DoubleImSize"  ).get();
-		siftparams.order		  = pt.get_optional<int>("SIFTParams.order"		  ).get();
-		siftparams.InitSigma	  = pt.get_optional<float>("SIFTParams.InitSigma"	  ).get();
-		siftparams.BorderDist	  = pt.get_optional<int>("SIFTParams.BorderDist"	  ).get();
-		siftparams.Scales		  = pt.get_optional<int>("SIFTParams.Scales"		  ).get();
-		siftparams.PeakThresh	  = pt.get_optional<float>("SIFTParams.PeakThresh"	  ).get();
-		siftparams.EdgeThresh	  = pt.get_optional<float>("SIFTParams.EdgeThresh"	  ).get();
-		siftparams.EdgeThresh1	  = pt.get_optional<float>("SIFTParams.EdgeThresh1"	  ).get();
-		siftparams.OriBins		  = pt.get_optional<int>("SIFTParams.OriBins"		  ).get();
-		siftparams.OriSigma		  = pt.get_optional<float>("SIFTParams.OriSigma"	  ).get();
-		siftparams.OriHistThresh  = pt.get_optional<float>("SIFTParams.OriHistThresh" ).get();
-		siftparams.MaxIndexVal	  = pt.get_optional<float>("SIFTParams.MaxIndexVal"	  ).get();
-		siftparams.MagFactor	  = pt.get_optional<int>("SIFTParams.MagFactor"	  ).get();
-		siftparams.IndexSigma	  = pt.get_optional<float>("SIFTParams.IndexSigma"	  ).get();
-		siftparams.IgnoreGradSign = pt.get_optional<int>("SIFTParams.IgnoreGradSign").get();
-		siftparams.MatchRatio	  = pt.get_optional<float>("SIFTParams.MatchRatio"	  ).get();
-		siftparams.MatchXradius	  = pt.get_optional<float>("SIFTParams.MatchXradius"  ).get();
-		siftparams.MatchYradius	  = pt.get_optional<float>("SIFTParams.MatchYradius"  ).get();
-
-	}else{
-		default_sift_parameters(siftparams);
-		iniwriteSiftParameters();
-	}
-
+int AsiftKeypoints::getTilts() const{
+	return tilts;
 }
 
-void AsiftKeypoints::iniwriteSiftParameters(){
-	iniwriteSiftParameters(siftparams);	
+void AsiftKeypoints::inireadSiftParameters(ptree &pt){
+	
+	siftparams.OctaveMax	  = pt.get_optional<int>("SIFTParams.OctaveMax").get();
+	siftparams.DoubleImSize	  = pt.get_optional<int>("SIFTParams.DoubleImSize"  ).get();
+	siftparams.order		  = pt.get_optional<int>("SIFTParams.order"		  ).get();
+	siftparams.InitSigma	  = pt.get_optional<float>("SIFTParams.InitSigma"	  ).get();
+	siftparams.BorderDist	  = pt.get_optional<int>("SIFTParams.BorderDist"	  ).get();
+	siftparams.Scales		  = pt.get_optional<int>("SIFTParams.Scales"		  ).get();
+	siftparams.PeakThresh	  = pt.get_optional<float>("SIFTParams.PeakThresh"	  ).get();
+	siftparams.EdgeThresh	  = pt.get_optional<float>("SIFTParams.EdgeThresh"	  ).get();
+	siftparams.EdgeThresh1	  = pt.get_optional<float>("SIFTParams.EdgeThresh1"	  ).get();
+	siftparams.OriBins		  = pt.get_optional<int>("SIFTParams.OriBins"		  ).get();
+	siftparams.OriSigma		  = pt.get_optional<float>("SIFTParams.OriSigma"	  ).get();
+	siftparams.OriHistThresh  = pt.get_optional<float>("SIFTParams.OriHistThresh" ).get();
+	siftparams.MaxIndexVal	  = pt.get_optional<float>("SIFTParams.MaxIndexVal"	  ).get();
+	siftparams.MagFactor	  = pt.get_optional<int>("SIFTParams.MagFactor"	  ).get();
+	siftparams.IndexSigma	  = pt.get_optional<float>("SIFTParams.IndexSigma"	  ).get();
+	siftparams.IgnoreGradSign = pt.get_optional<int>("SIFTParams.IgnoreGradSign").get();
+	siftparams.MatchRatio	  = pt.get_optional<float>("SIFTParams.MatchRatio"	  ).get();
+	siftparams.MatchXradius	  = pt.get_optional<float>("SIFTParams.MatchXradius"  ).get();
+	siftparams.MatchYradius	  = pt.get_optional<float>("SIFTParams.MatchYradius"  ).get();
+	
 }
 
-void AsiftKeypoints::iniwriteSiftParameters(siftPar par){
-	ptree pt;
+void AsiftKeypoints::iniwriteSiftParameters(ptree &pt){
+	iniwriteSiftParameters(pt,siftparams);	
+}
+
+void AsiftKeypoints::iniwriteSiftParameters(ptree &pt,siftPar par){
 	pt.put("SIFTParams.OctaveMax"	  ,par.OctaveMax	 );
 	pt.put("SIFTParams.DoubleImSize"  ,par.DoubleImSize	 );
 	pt.put("SIFTParams.order"		  ,par.order		 );
@@ -87,7 +80,6 @@ void AsiftKeypoints::iniwriteSiftParameters(siftPar par){
 	pt.put("SIFTParams.MatchRatio"	  ,par.MatchRatio	 );
 	pt.put("SIFTParams.MatchXradius"  ,par.MatchXradius	 );
 	pt.put("SIFTParams.MatchYradius"  ,par.MatchYradius	 );
-	write_ini("Asift.ini" , pt);
 }
 
 void AsiftKeypoints::output(string name){

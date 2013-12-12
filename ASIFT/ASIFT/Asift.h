@@ -28,7 +28,7 @@
 #include <opencv2/features2d/features2d.hpp>
 
 
-class Asift
+class PRO_EXPORTS Asift
 {
 public:
 
@@ -59,30 +59,45 @@ private:
 	std::vector<float> ipixels1,ipixels2;
 	// リサイズ後のピクセルデータ
 	std::vector<float> ipixels1Zoom,ipixels2Zoom;
+
 	// リサイズ比
 	float zoom1,zoom2;
 	// リサイズするかのフラグ
 	int resizeFlag;
+
 	// キーポイントデータ
 	AsiftKeypoints keys1,keys2;
 	// マッチングデータ
 	AsiftMatchings matchings;
+
 	// メッセージ表示？
 	int verb;
 	// 画像結合の空白幅
 	int bandWidth;
 
+	// keys1 をファイルから読み込むかどうか
+	int keys1InputFlag;
+
 public:
 
+
+	// コンストラクタ
 	Asift(void);
+	// デストラクタ
 	~Asift(void);
 
-	void init(string img1_name="imgIn1.png",string img2_name="imgIn2.png",
+	// 初期化関数
+	void init(int readini,string img1_name="imgIn1.png",string img2_name="imgIn2.png",
 				string imgV_name="imgOutVert.png",string imgH_name="imgOutHori.png",
 				string keys1_name="keys1.txt",string keys2_name="keys2.txt",
 				string matchings_name="matchings.txt",
 				int tilt1=7,int tilt2=7,int resize_flag=1);
 
+	// Asift.iniの作成関数
+	void writeIni();
+	void readIni();
+
+	// 実行関数
 	void run();
 
 private:

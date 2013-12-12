@@ -8,7 +8,7 @@
 
 class AsiftKeypoints;
 
-class AsiftMatchings
+class PRO_EXPORTS AsiftMatchings
 {
 private:
 

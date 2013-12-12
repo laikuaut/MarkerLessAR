@@ -87,7 +87,7 @@ void Image::horiconcat(const Image& src1,const Image& src2,int band_w){
 	if(band_w<=0){
 		cv::hconcat(src1.img,src2.img,img);
 	}else{
-		Image band(band_w,h,img.type());
+		Image band(band_w,src1.h,img.type());
 		band.oneColor(cv::Scalar::all(255));
 		cv::hconcat(src1.img,band.img,band.img);
 		cv::hconcat(band.img,src2.img,img);
@@ -99,7 +99,7 @@ void Image::vertconcat(const Image& src1,const Image& src2,int band_w){
 	if(band_w<=0){
 		cv::vconcat(src1.img,src2.img,img);
 	}else{
-		Image band(w,band_w,img.type());
+		Image band(src1.w,band_w,img.type());
 		band.oneColor(cv::Scalar::all(255));
 		cv::vconcat(src1.img,band.img,band.img);
 		cv::vconcat(band.img,src2.img,img);

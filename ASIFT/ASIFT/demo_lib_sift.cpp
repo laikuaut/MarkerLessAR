@@ -1253,7 +1253,7 @@ void compute_sift_matches(
 		sqratio = CheckForMatch_short(keys1_short[i], keys2_short, imatch,par);
 
 		if (sqratio< sqminratio){
-			std::cout << "ok:" << sqratio << " , " << std::endl;
+			//std::cout << "ok:" << sqratio << " , " << std::endl;
 			matchings.push_back( matching(keys1[i],keys2[imatch] ));
 		}else{
 			//std::cout << "ng:" << sqratio << " , " << std::endl;
