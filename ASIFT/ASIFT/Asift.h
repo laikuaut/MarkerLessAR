@@ -33,8 +33,8 @@ class PRO_EXPORTS Asift
 public:
 
 	pro::Dir path;
-	static const int IMAGE_X = 640;
-	static const int IMAGE_Y = 480;
+	static const int IMAGE_X = 800;
+	static const int IMAGE_Y = 600;
 
 private:
 
@@ -77,6 +77,8 @@ private:
 
 	// keys1 をファイルから読み込むかどうか
 	int keys1InputFlag;
+	// 動画読み込み処理のフラグ
+	int videoInputFlag;
 
 public:
 
@@ -104,8 +106,21 @@ private:
 
 	void resize(pro::Image &src,pro::Image &dst,float &zoom,int resizeFlag);
 
-	void createVertImage();
-	void createHoriImage();
+	void createVertImage(pro::Image img);
+	pro::Image createHoriImage(pro::Image img);
 
 };
+	//pro::Image frame;
 
+	//while(1){
+	//	cap.read((cv::Mat&)frame);
+
+	//	img2Gray.grayeScale(frame);
+	//	resize(img2Gray,img2GrayZoom,zoom2,0);
+	//	unsigned char * iarr2 = img2Gray.getU8Data();
+	//	ipixels2Zoom = std::vector<float>(iarr2,iarr2 + img2GrayZoom.size().width * img2GrayZoom.size().height);
+	
+	//	frame.imshow("Capture",1);
+	//	if(cv::waitKey(30) >= 0) break;
+	//	delete[] iarr2;
+	//}
