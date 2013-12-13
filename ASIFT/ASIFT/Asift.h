@@ -42,6 +42,8 @@ private:
 	std::string img1Name,img2Name;
 	// 出力画像ファイル名(V:垂直結合画像,水平結合画像)
 	std::string imgVName,imgHName;
+	// 入力動画名,出力動画名
+	std::string capInName,capOutName;
 	// キーポイント保存ファイル名
 	std::string keys1Name,keys2Name;
 	// マッチング保存ファイル名
@@ -93,6 +95,7 @@ public:
 				string imgV_name="imgOutVert.png",string imgH_name="imgOutHori.png",
 				string keys1_name="keys1.txt",string keys2_name="keys2.txt",
 				string matchings_name="matchings.txt",
+				string capIn_name="capin.avi",string capOut_name="capout.avi",
 				int tilt1=7,int tilt2=7,int resize_flag=1);
 
 	// Asift.iniの作成関数
@@ -106,7 +109,7 @@ private:
 
 	void resize(pro::Image &src,pro::Image &dst,float &zoom,int resizeFlag);
 
-	void createVertImage(pro::Image img);
+	pro::Image createVertImage(pro::Image img);
 	pro::Image createHoriImage(pro::Image img);
 
 };

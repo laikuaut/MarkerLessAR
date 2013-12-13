@@ -89,8 +89,14 @@ void Image::horiconcat(const Image& src1,const Image& src2,int band_w){
 	}else{
 		Image band(band_w,src1.img.size().height,img.type());
 		band.oneColor(cv::Scalar::all(255));
-		cv::hconcat(src1.img,band.img,band.img);
-		cv::hconcat(band.img,src2.img,img);
+		try{
+			cv::hconcat(src1.img,band.img,band.img);
+			cv::hconcat(band.img,src2.img,img);
+		}catch(cv::Exception ex){
+			std::cout << ex.what() << std::endl;
+			std::cout << "size not fit" << std::endl;
+			exit(1);
+		}
 	}
 	w_h_reset();
 }
@@ -101,8 +107,14 @@ void Image::vertconcat(const Image& src1,const Image& src2,int band_w){
 	}else{
 		Image band(src1.img.size().width,band_w,img.type());
 		band.oneColor(cv::Scalar::all(255));
-		cv::vconcat(src1.img,band.img,band.img);
-		cv::vconcat(band.img,src2.img,img);
+		try{
+			cv::vconcat(src1.img,band.img,band.img);
+			cv::vconcat(band.img,src2.img,img);
+		}catch(cv::Exception ex){
+			std::cout << ex.what() << std::endl;
+			std::cout << "size not fit" << std::endl;
+			exit(1);
+		}
 	}
 	w_h_reset();
 }

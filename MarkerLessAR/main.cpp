@@ -58,6 +58,8 @@ int main_videoWriter(int argc, char *argv[])
 	int start = 0;
 	pro::Timer timer;
 
+	int time = atoi(argv[5]);
+
 	while(1) {
 		cap >> frame;  // キャプチャ
 		// 様々な処理
@@ -70,14 +72,15 @@ int main_videoWriter(int argc, char *argv[])
 		int key = cv::waitKey(30) ;
 
 		// タイマー最大１０秒
-		if(timer.getNow()>atoi(argv[5])/2*pro::Timer::PER_SEC){
+		if(time!=0 && timer.getNow()>time/2*pro::Timer::PER_SEC){
 			break;
 		}
 
 		// sキーで開始
 		if(key == 's'){
 			timer.start();
-			start = 1;
+			cout << ((start==0)?"start":"stop") << endl;
+			start = (start==1)?0:1;
 		}
 		// qキーで終了
 		else if(key == 'q')

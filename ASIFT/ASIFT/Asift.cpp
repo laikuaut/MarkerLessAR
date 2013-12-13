@@ -13,7 +13,7 @@ Asift::~Asift(void)
 void Asift::init(int readini,string img1_name,string img2_name,
 			string imgV_name,string imgH_name,
 			string keys1_name,string keys2_name,
-			string matchings_name,
+			string matchings_name,string capIn_name,string capOut_name,
 			int tilt1,int tilt2,int resize_flag){
 
 	// 設定初期化
@@ -25,6 +25,8 @@ void Asift::init(int readini,string img1_name,string img2_name,
 	keys1Name = keys1_name;
 	keys2Name = keys2_name;
 	matchingsName = matchings_name;
+	capInName = capIn_name;
+	capOutName = capOut_name;
 	resizeFlag = resize_flag;
 
 	keys1 = AsiftKeypoints(tilt1);
@@ -34,6 +36,7 @@ void Asift::init(int readini,string img1_name,string img2_name,
 	bandWidth = 20;
 
 	keys1InputFlag = 0;
+	videoInputFlag = 0;
 
 	// iniファイルから読み込み
 	if(readini){
@@ -43,22 +46,21 @@ void Asift::init(int readini,string img1_name,string img2_name,
 	}
 
 	// 画像読み込み
-	img1.load(img1Name);
-	img1Gray.grayeScale(img1);
-	img2.load(img2Name);
-	img2Gray.grayeScale(img2);
+	//if(!keys1InputFlag){
+		img1.load(img1Name);
+		img1Gray.grayeScale(img1);
+		resize(img1Gray,img1GrayZoom,zoom1,resizeFlag);
+		unsigned char * iarr1 = img1GrayZoom.getU8Data();
+		ipixels1Zoom = std::vector<float>(iarr1,iarr1 + img1GrayZoom.size().width * img1GrayZoom.size().height);
+	//}
+	if(!videoInputFlag){
+		img2.load(img2Name);
+		img2Gray.grayeScale(img2);
+		resize(img2Gray,img2GrayZoom,zoom2,resizeFlag);
+		unsigned char * iarr2 = img2GrayZoom.getU8Data();
+		ipixels2Zoom = std::vector<float>(iarr2,iarr2 + img2GrayZoom.size().width * img2GrayZoom.size().height);
+	}
 
-	// リサイズ処理
-	resize(img1Gray,img1GrayZoom,zoom1,resizeFlag);
-	resize(img2Gray,img2GrayZoom,zoom2,resizeFlag);
-
-	 // ピクセル取得
-	unsigned char * iarr1 = img1GrayZoom.getU8Data();
-	unsigned char * iarr2 = img2GrayZoom.getU8Data();
-
-	// ベクターへ変換
-	ipixels1Zoom = std::vector<float>(iarr1,iarr1 + img1GrayZoom.size().width * img1GrayZoom.size().height);
-	ipixels2Zoom = std::vector<float>(iarr2,iarr2 + img2GrayZoom.size().width * img2GrayZoom.size().height);
 
 }
 
@@ -73,6 +75,11 @@ void Asift::writeIni(){
 	pt.put("File.OutputKeyPoints1",keys1Name);
 	pt.put("File.OutputKeyPoints2",keys2Name);
 	pt.put("File.OutputMatching",matchingsName);
+	pt.put("File.CapInput",capInName);
+	pt.put("File.CapOutput",capOutName);
+
+		capInName = pt.get_optional<std::string>("File.CapInput").get();
+		capOutName = pt.get_optional<std::string>("File.CapOutput").get();
 	
 	// write Asift parameter
 	pt.put("Asift.Tilt1",keys1.getTilts());
@@ -108,6 +115,8 @@ void Asift::readIni(){
 		keys1Name = pt.get_optional<std::string>("File.OutputKeyPoints1").get();
 		keys2Name = pt.get_optional<std::string>("File.OutputKeyPoints2").get();
 		matchingsName = pt.get_optional<std::string>("File.OutputMatching").get();
+		capInName = pt.get_optional<std::string>("File.CapInput").get();
+		capOutName = pt.get_optional<std::string>("File.CapOutput").get();
 
 		// read Asift Parameter
 		int tilts1 = pt.get_optional<int>("Asift.Tilt1").get();
@@ -131,7 +140,7 @@ void Asift::readIni(){
 
 	}else{
 
-		cout << "not exist Asift.ini" << endl;
+		std::cout << "not exist Asift.ini" << endl;
 		writeIni();
 
 	}
@@ -146,17 +155,18 @@ void Asift::run(){
 	/***********************************************************
 	 *  Keypoints1 
 	 */
-	cout << "Computing keypoints1 on the two images..." << endl;
+	std::cout << "Computing keypoints1 on the two images..." << endl;
 	timer.start();
 
 		if(!keys1InputFlag){
 			keys1.computeAsiftKeyPoints(ipixels1Zoom,img1GrayZoom.size().width,img1GrayZoom.size().height,verb,zoom1);
 		}else{
 			keys1.input(keys1Name);
-			cout << keys1.getNum() <<  " ASIFT keypoints are detected." << endl;
 		}
-
-	cout << "Keypoints1 computation accomplished in " << (double)timer.getDiff()/pro::Timer::PER_SEC << " seconds." << endl << endl;
+		
+			
+	std::cout << keys1.getNum() <<  " ASIFT keypoints are detected." << endl;
+	std::cout << "Keypoints1 computation accomplished in " << (double)timer.getDiff()/pro::Timer::PER_SEC << " seconds." << endl << endl;
 	timer.lap();
 
 	/**
@@ -165,21 +175,29 @@ void Asift::run(){
 	if(videoInputFlag){
 
 		// 読み込み動画
-		cv::VideoCapture cap("cap5.avi");
+		cv::VideoCapture cap(capInName);
 		// ファイルがオープンできたかの確認
 		if(!cap.isOpened()) return;
 
 		// ビデオライタ
 		int fps = 15;
-		cv::VideoWriter writer("capture1.avi", CV_FOURCC('X','V','I','D'), fps, cv::Size(800*2+20,600));
+		cv::VideoWriter writer(capOutName, CV_FOURCC('X','V','I','D'), fps, cv::Size(800*2+20,600));
 	
 		pro::Image frame;
+
+		// 進行状況
+		int count = 0;
+		int framenum = cap.get(CV_CAP_PROP_FRAME_COUNT);
+
+		// 表示
+		std::cout << "video Input is " << capInName << "." << endl;
+		std::cout << "video Output is " << capOutName << "." << endl;
+		cout << "start" << endl;
 
 		while(1) {
 			cap.read((cv::Mat&)frame);  // キャプチャ
 
 			if(frame.empty()){
-				cout << "empty" << endl;
 				break;
 			}
 
@@ -188,6 +206,7 @@ void Asift::run(){
 			unsigned char * iarr2 = img2Gray.getU8Data();
 			ipixels2Zoom = std::vector<float>(iarr2,iarr2 + img2GrayZoom.size().width * img2GrayZoom.size().height);
 	
+			std::cout << ++count << "/" << framenum << "\r" << flush;
 			keys2.computeAsiftKeyPoints(ipixels2Zoom,img2GrayZoom.size().width,img2GrayZoom.size().height,verb,zoom2);
 			matchings = AsiftMatchings(keys1,keys2);
 			matchings.computeAsiftMatches(verb);
@@ -210,25 +229,27 @@ void Asift::run(){
 		/***********************************************************
 		 *  Keypoints2
 		 */
-		cout << "Computing keypoints2 on the two images..." << endl;
+		std::cout << "Computing keypoints2 on the two images..." << endl;
 
 			keys2.computeAsiftKeyPoints(ipixels2Zoom,img2GrayZoom.size().width,img2GrayZoom.size().height,verb,zoom2);
-	
-		cout << "Keypoints2 computation accomplished in " << (double)timer.getDiff()/pro::Timer::PER_SEC << " seconds." << endl << endl;
+			std::cout << keys2.getNum() <<  " ASIFT keypoints are detected." << endl;
+
+		std::cout << "Keypoints2 computation accomplished in " << (double)timer.getDiff()/pro::Timer::PER_SEC << " seconds." << endl << endl;
 		timer.lap();
 	
 		/***********************************************************
 		 *  Keypoints matching
 		 */
-		cout << "Matching the keypoints..." << endl;
+		std::cout << "Matching the keypoints..." << endl;
 
 			matchings = AsiftMatchings(keys1,keys2);
 			matchings.computeAsiftMatches(verb);
-
-		cout << "Keypoints matching accomplished in " << (double)timer.getDiff()/pro::Timer::PER_SEC << " seconds." << endl << endl;
+		
+		std::cout << "The two images match! " << matchings.getNum() << " matchings are identified." << endl;
+		std::cout << "Keypoints matching accomplished in " << (double)timer.getDiff()/pro::Timer::PER_SEC << " seconds." << endl << endl;
 		timer.lap();
 
-		cout << "All computation accomplished in " << (double)timer.getNow()/pro::Timer::PER_SEC << "seconds." << endl << endl;
+		std::cout << "All computation accomplished in " << (double)timer.getNow()/pro::Timer::PER_SEC << "seconds." << endl << endl;
 		
 		// 水平画像作成
 		createHoriImage(img2);
@@ -252,7 +273,7 @@ void Asift::resize(pro::Image &src,pro::Image &dst,float &zoom,int resizeFlag){
 		dst.clone(src);
 		zoom = 1;
 	}else{
-		//cout << "WARNING: The input images are resized to " << IMAGE_X << "x" << IMAGE_Y << " for ASIFT. " << endl 
+		//std::cout << "WARNING: The input images are resized to " << IMAGE_X << "x" << IMAGE_Y << " for ASIFT. " << endl 
 		//<< "         But the results will be normalized to the original image size." << endl << endl;
 		
 		float InitSigma_aa = 1.6;
@@ -289,7 +310,7 @@ void Asift::resize(pro::Image &src,pro::Image &dst,float &zoom,int resizeFlag){
 	}
 }
 
-void Asift::createVertImage(pro::Image img){
+pro::Image Asift::createVertImage(pro::Image img){
 	pro::Image vertImg;
 	vertImg.vertconcat(img1,img,bandWidth);
 	matchingslist::iterator ptr = matchings.matchings.begin();
@@ -298,7 +319,9 @@ void Asift::createVertImage(pro::Image img){
 		vertImg.line(cv::Point2f((zoom1*ptr->first.x),(zoom1*ptr->first.y)), 
 			cv::Point2f((zoom2*ptr->second.x),(zoom2*ptr->second.y) + img1.size().height + bandWidth),cv::Scalar::all(255));
 	}
-	vertImg.save(imgVName);
+	if(!videoInputFlag)
+		vertImg.save(imgVName);
+	return vertImg;
 }
 
 pro::Image Asift::createHoriImage(pro::Image img){
@@ -310,6 +333,7 @@ pro::Image Asift::createHoriImage(pro::Image img){
 		horiImg.line(cv::Point2f((zoom1*ptr->first.x),(zoom1*ptr->first.y)), 
 			cv::Point2f((zoom2*ptr->second.x) + img1.size().width + bandWidth,(zoom2*ptr->second.y)),cv::Scalar::all(255));
 	}
+	if(!videoInputFlag)
+		horiImg.save(imgHName);
 	return horiImg;
-	//horiImg.save(imgHName);
 }
