@@ -19,49 +19,59 @@ using namespace pro;
 /**
  * メイン関数
  */
-void main(){
-	Asift asift;
-	asift.init(1);
-	asift.run();
-}
+//void main(){
+//	Asift asift;
+//	asift.init(1);
+//	asift.run();
+//}
 
 /**
  * 動画書き込み
  */
-//int main(int argc, char *argv[])
-//{
-//	cv::VideoCapture cap(0);
-//	// 様々な設定...
-//	cv::Size cap_size(800, 600);
-//	cap.set(CV_CAP_PROP_FRAME_WIDTH, cap_size.width);
-//	cap.set(CV_CAP_PROP_FRAME_HEIGHT, cap_size.height);
-//	// カメラがオープンできたかの確認
-//	if(!cap.isOpened()) return -1;
-//
-//	// ビデオライタ
-//	int fps = 15;
-//	cv::VideoWriter writer("capture.avi", CV_FOURCC('X','V','I','D'), fps, cap_size);
-//
-//	cv::namedWindow("Capture", CV_WINDOW_AUTOSIZE|CV_WINDOW_FREERATIO);
-//	cv::Mat frame;   
-//
-//	int start = 0;
-//	while(1) {
-//		cap >> frame;  // キャプチャ
-//		// 様々な処理
-//		// ...
-//		if(start)
-//			writer << frame;
-//		cv::imshow("Capture", frame);
-//
-//		int key = cv::waitKey(30) ;
-//		if(key == 's')
-//			start = 1;
-//		else if(key == 'q')
-//			break;
-//	}
-//	return 0;
-//}
+int main(int argc, char *argv[])
+{
+	cv::VideoCapture cap(0);
+	// 様々な設定...
+	if(argc != 4){
+		cout << "input << capture.avi,width,height" << endl; 
+	}
+
+	cout << "s:start q:quit" << endl;
+
+	cv::Size cap_size(atoi(argv[2]), atoi(argv[3]));
+	cap.set(CV_CAP_PROP_FRAME_WIDTH, cap_size.width);
+	cap.set(CV_CAP_PROP_FRAME_HEIGHT, cap_size.height);
+	// カメラがオープンできたかの確認
+	if(!cap.isOpened()) return -1;
+
+	// ビデオライタ
+	int fps = 15;
+	cv::VideoWriter writer(argv[1], CV_FOURCC('X','V','I','D'), fps, cap_size);
+
+	cv::namedWindow("Capture", CV_WINDOW_AUTOSIZE|CV_WINDOW_FREERATIO);
+	cv::Mat frame;   
+
+	int start = 0;
+	while(1) {
+		cap >> frame;  // キャプチャ
+		// 様々な処理
+		// ...
+		if(start)
+			writer << frame;
+		cv::imshow(argv[1], frame);
+
+		int key = cv::waitKey(30) ;
+		if(key == 's')
+			start = 1;
+		else if(key == 'q')
+			break;
+	}
+	writer.release();
+
+	cout << argv[1] << " end" << endl;
+
+	return 0;
+}
 
 /**
  * 動画読み込み
