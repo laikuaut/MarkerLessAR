@@ -5,6 +5,8 @@
 *.idb
 *.lastbuildstate
 *.jpg
+*.avi
+*.png
 [Ss]tatic_Debug/
 [Ss]tatic_Release/
 [Rr]esource/
