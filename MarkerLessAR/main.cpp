@@ -32,8 +32,8 @@ int main(int argc, char *argv[])
 {
 	cv::VideoCapture cap(0);
 	// 様々な設定...
-	if(argc != 4){
-		cout << "input << capture.avi,width,height" << endl; 
+	if(argc != 5){
+		cout << "input << capture.avi,width,height,time" << endl; 
 	}
 
 	cout << "s:start q:quit" << endl;
@@ -52,17 +52,30 @@ int main(int argc, char *argv[])
 	cv::Mat frame;   
 
 	int start = 0;
+	pro::Timer timer;
+
 	while(1) {
 		cap >> frame;  // キャプチャ
 		// 様々な処理
 		// ...
 		if(start)
 			writer << frame;
+
 		cv::imshow(argv[1], frame);
 
 		int key = cv::waitKey(30) ;
-		if(key == 's')
+
+		// タイマー最大１０秒
+		if(timer.getNow()>atoi(argv[4])/2*pro::Timer::PER_SEC){
+			break;
+		}
+
+		// sキーで開始
+		if(key == 's'){
+			timer.start();
 			start = 1;
+		}
+		// qキーで終了
 		else if(key == 'q')
 			break;
 	}
