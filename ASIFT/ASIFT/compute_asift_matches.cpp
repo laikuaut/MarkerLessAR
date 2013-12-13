@@ -362,6 +362,7 @@ int compute_asift_matches(int num_of_tilts1, int num_of_tilts2, int w1, int h1, 
 	float t_im2;
 
 	/* It stores the coordinates of ALL matches points of ALL affine simulations  */
+	// すべてのアフィンシミュレータ上のすべてのマッチング座標を保管(フィルタリングの座標処理に使用している)
 	vector< vector <float> > Minfoall;
 
 	int Tmin = 8;					
@@ -369,21 +370,29 @@ int compute_asift_matches(int num_of_tilts1, int num_of_tilts2, int w1, int h1, 
 
 	num_rot_t2 = 10;
 
+	// 最少tilt 1
 	t_min = 1;
+	// 
 	t_k = sqrt(2.);
 
 	num_tilt1 = num_of_tilts1;
 	num_tilt2 = num_of_tilts2;
 
+	// tiltは１以上でなければならない
 	if ( ( num_tilt1 < 1 ) || ( num_tilt2 < 1 ) )
 	{
 		printf("Number of tilts num_tilt should be equal or larger than 1. \n");
 		exit(-1);	
 	}
 
-	
+	/**
+	 * マッチングに必要なベクターの初期化処理
+	 * 後に、一次元ベクターへ保管する。
+	 */
 	/* Initialize the vector structure for the matching points */	
+	// マッチング構造体ベクターの初期化処理(tilt1 * rot1 * tilt2 * rot2 : ４次元)
 	std::vector< vector< vector < vector < matchingslist > > > > matchings_vec(num_tilt1);	
+	// マッチング座標Minfoall(x,y)*(tilt1 * rot1 * tilt2 * rot2 : ４次元)
 	std::vector< vector< vector< vector< vector< vector <float> > > > > > Minfoall_vec(num_tilt1);	
 	for (tt = 1; tt <= num_tilt1; tt++)
 	{		
@@ -489,11 +498,16 @@ int compute_asift_matches(int num_of_tilts1, int num_of_tilts2, int w1, int h1, 
 	//    }
 	//}
 		
+	/**
+	 * マッチング処理の開始
+	 */
 	/* Calculate the number of simulations */
+	// シミュレーションの数を計算
 #ifdef _OPENMP
 	omp_set_nested(1);
 #endif 
 	// loop on tilts for image 1. 
+	// 画像１傾きのループ
 #pragma omp parallel for private(tt)
 	for (int tt = 1; tt <= num_tilt1; tt++)
 	{
@@ -526,22 +540,26 @@ int compute_asift_matches(int num_of_tilts1, int num_of_tilts2, int w1, int h1, 
 		float delta_theta = PI/num_rot1;
 		
 		// Loop on rotations for image 1. 
+		// 画像１の回転ループ
 #pragma omp parallel for private(rr)
 		for  ( int rr = 1; rr <= num_rot1; rr++ ) 
 		{   
 			float theta = delta_theta * (rr-1);
 			theta = theta * 180 / PI;
 			
-			/* Read the keypoints of image 1 */	       
+			/* Read the keypoints of image 1 */	  
+			// 画像１のキーポイントを読み込み
 			keypointslist keypoints1 = keys1[tt-1][rr-1];
 			
 			// loop on tilts for image 2.
+			// 画像２の傾きループ
 #pragma omp parallel for private(tt2)
 			for (int tt2 = 1; tt2 <= num_tilt2; tt2++)				
 			{
 				float t_im2 = t_min * pow(t_k, tt2-1);
 				
 				/* Attention: the t1, t2 do not follow the same convention as in asift_v1.c */
+				// t1,t2は同じ制約に従わない？
 				float t_im2_1 = t_im2; 
 				float t_im2_2 = 1;
 				
@@ -565,17 +583,23 @@ int compute_asift_matches(int num_of_tilts1, int num_of_tilts2, int w1, int h1, 
 				
 #pragma omp parallel for private(rr2)
 				// Loop on rotations for image 2. 
+				// 画像２の回転ループ
 				for  ( int rr2 = 1; rr2 <= num_rot1_2; rr2++ ) 
 				{   
 					float theta2 = delta_theta2 * (rr2-1);
 					theta2 = theta2 * 180 / PI;
 					
 					/* Read the keypoints of image2. */	       
+					// 画像２のキーポイントを読み込み
 					keypointslist keypoints2 = keys2[tt2-1][rr2-1];
 					
 					
 					// Match the keypoints of image1 and image2.
-					matchingslist matchings1;					
+					// 画像１画像２のキーポイントマッチング処理
+					matchingslist matchings1;			
+					/**
+					 * siftマッチング計算
+					 */
 					compute_sift_matches(keypoints1,keypoints2,matchings1,siftparameters);		       
 					
 					if ( verb ) 
@@ -584,6 +608,7 @@ int compute_asift_matches(int num_of_tilts1, int num_of_tilts2, int w1, int h1, 
 					}
 					
 					/* Store the matches */
+					// マッチングを保管する
 					if ( matchings1.size() > 0 )
 					{
 						matchings_vec[tt-1][rr-1][tt2-1][rr2-1] = matchingslist(matchings1.size());
@@ -613,6 +638,7 @@ int compute_asift_matches(int num_of_tilts1, int num_of_tilts2, int w1, int h1, 
 	}
 			
 	// Move the matches to a 1D vector
+	// マッチデータを一次元ベクターへ移動(引数:matchings)
 	for (tt = 1; tt <= num_tilt1; tt++)
 	{				
 		t = t_min * pow(t_k, tt-1);
@@ -667,11 +693,16 @@ int compute_asift_matches(int num_of_tilts1, int num_of_tilts2, int w1, int h1, 
 	  printf("The number of matches is %d \n", (int) matchings.size());
 	}
 
+	/**
+	 *  フィルタリング処理を行う!!
+	 */
 	
 	if ( matchings.size() > 0 )
 	{
 	  /* Remove the repetitive matches that appear in different simulations and retain only one. */		
+	  // 別のシミュレーションで出現する反復したマッチング点をただ一つのものとする
 		// Since tilts are simuated on both image 1 and image 2, it is normal to have repetitive matches. 
+		// tiltは画像１，２両方でシミュレートした時から、通常反復点を持つ
 		matchingslist matchings_unique;	
 		vector< vector<float> > Minfoall_unique;			
 		unique_match1(matchings, matchings_unique, Minfoall, Minfoall_unique);      		
@@ -692,6 +723,7 @@ int compute_asift_matches(int num_of_tilts1, int num_of_tilts2, int w1, int h1, 
 		 This allows to avoid removing some good matches: multiple-to-one matches is much more frequent than one-to-multiple. Sometimes some of the feature points in image 1 that take part in "multiple-to-one" bad matches have also correct matches in image 2. The modified scheme avoid removing these good matches. */
 	 
 		// Remove to multiple-to-one matches	
+		// 複数の点が一つの点に集中している重複点を除外
 		matchings_unique.clear();
 		Minfoall_unique.clear();		
 		clean_match2(matchings, matchings_unique, Minfoall, Minfoall_unique);    		
@@ -699,6 +731,7 @@ int compute_asift_matches(int num_of_tilts1, int num_of_tilts2, int w1, int h1, 
 		Minfoall = Minfoall_unique;
 		
 		// Remove to one-to-multiple matches	
+		// 一つの点が複数の点に重複している重複点を除外
 		matchings_unique.clear();
 		Minfoall_unique.clear();		
 		clean_match1(matchings, matchings_unique, Minfoall, Minfoall_unique);    		
@@ -712,6 +745,7 @@ int compute_asift_matches(int num_of_tilts1, int num_of_tilts2, int w1, int h1, 
 		}
 		
 		// If enough matches to do epipolar filtering
+		// エピポーラを十分に満たすかどうかフィルタリング
 		if ( (int) matchings.size() >= Tmin )
 		{			
 			//////// Use ORSA to filter out the incorrect matches. 

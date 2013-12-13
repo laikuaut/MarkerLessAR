@@ -46,6 +46,7 @@ void AsiftMatchings::output(string name){
 		matchingslist::iterator ptr = matchings.begin();
 		for(int i=0; i < (int) matchings.size(); i++, ptr++)		
 		{
+			// std::pair‚Åˆ—
 			of << asiftKeys1->zoom*ptr->first.x << "  " << asiftKeys1->zoom*ptr->first.y << "  " <<  asiftKeys2->zoom*ptr->second.x << 
 			"  " <<  asiftKeys2->zoom*ptr->second.y << std::endl;
 		}		
