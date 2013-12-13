@@ -165,13 +165,13 @@ void Asift::run(){
 	if(videoInputFlag){
 
 		// 読み込み動画
-		cv::VideoCapture cap("capture.avi");
+		cv::VideoCapture cap("cap5.avi");
 		// ファイルがオープンできたかの確認
 		if(!cap.isOpened()) return;
 
 		// ビデオライタ
 		int fps = 15;
-		cv::VideoWriter writer("capture1.avi", CV_FOURCC('X','V','I','D'), fps, cv::Size(800,600));
+		cv::VideoWriter writer("capture1.avi", CV_FOURCC('X','V','I','D'), fps, cv::Size(800*2+20,600));
 	
 		pro::Image frame;
 
@@ -188,12 +188,12 @@ void Asift::run(){
 			unsigned char * iarr2 = img2Gray.getU8Data();
 			ipixels2Zoom = std::vector<float>(iarr2,iarr2 + img2GrayZoom.size().width * img2GrayZoom.size().height);
 	
-			//keys2.computeAsiftKeyPoints(ipixels2Zoom,img2GrayZoom.size().width,img2GrayZoom.size().height,verb,zoom2);
-			//matchings = AsiftMatchings(keys1,keys2);
-			//matchings.computeAsiftMatches(verb);
+			keys2.computeAsiftKeyPoints(ipixels2Zoom,img2GrayZoom.size().width,img2GrayZoom.size().height,verb,zoom2);
+			matchings = AsiftMatchings(keys1,keys2);
+			matchings.computeAsiftMatches(verb);
 
 			// 水平画像作成
-			createHoriImage(frame).imshow("view");
+			writer << createHoriImage(frame);
 
 			//writer << frame;
 

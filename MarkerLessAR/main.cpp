@@ -16,29 +16,33 @@
 using namespace std;
 using namespace pro;
 
+
+
+
 /**
- * メイン関数
+ * Asift main
  */
-//void main(){
-//	Asift asift;
-//	asift.init(1);
-//	asift.run();
-//}
+void main_Asift(int argc,char *argv[]){
+	Asift asift;
+	asift.init(1);
+	asift.run();
+}
 
 /**
  * 動画書き込み
  */
-int main(int argc, char *argv[])
+int main_videoWriter(int argc, char *argv[])
 {
 	cv::VideoCapture cap(0);
 	// 様々な設定...
-	if(argc != 5){
+	if(argc != 6){
 		cout << "input << capture.avi,width,height,time" << endl; 
+		return 0;
 	}
 
 	cout << "s:start q:quit" << endl;
 
-	cv::Size cap_size(atoi(argv[2]), atoi(argv[3]));
+	cv::Size cap_size(atoi(argv[3]), atoi(argv[4]));
 	cap.set(CV_CAP_PROP_FRAME_WIDTH, cap_size.width);
 	cap.set(CV_CAP_PROP_FRAME_HEIGHT, cap_size.height);
 	// カメラがオープンできたかの確認
@@ -46,7 +50,7 @@ int main(int argc, char *argv[])
 
 	// ビデオライタ
 	int fps = 15;
-	cv::VideoWriter writer(argv[1], CV_FOURCC('X','V','I','D'), fps, cap_size);
+	cv::VideoWriter writer(argv[2], CV_FOURCC('X','V','I','D'), fps, cap_size);
 
 	cv::namedWindow("Capture", CV_WINDOW_AUTOSIZE|CV_WINDOW_FREERATIO);
 	cv::Mat frame;   
@@ -61,12 +65,12 @@ int main(int argc, char *argv[])
 		if(start)
 			writer << frame;
 
-		cv::imshow(argv[1], frame);
+		cv::imshow(argv[2], frame);
 
 		int key = cv::waitKey(30) ;
 
 		// タイマー最大１０秒
-		if(timer.getNow()>atoi(argv[4])/2*pro::Timer::PER_SEC){
+		if(timer.getNow()>atoi(argv[5])/2*pro::Timer::PER_SEC){
 			break;
 		}
 
@@ -81,7 +85,7 @@ int main(int argc, char *argv[])
 	}
 	writer.release();
 
-	cout << argv[1] << " end" << endl;
+	cout << argv[2] << " end" << endl;
 
 	return 0;
 }
@@ -89,43 +93,97 @@ int main(int argc, char *argv[])
 /**
  * 動画読み込み
  */
-//int main(){
-//	cv::VideoCapture cap("capture.avi");
-//	// ファイルがオープンできたかの確認
-//	if(!cap.isOpened()) return -1;
-//	
-//	int width = cap.get(CV_CAP_PROP_FRAME_WIDTH);
-//	int height = cap.get(CV_CAP_PROP_FRAME_HEIGHT);
-//	
-//	// ビデオライタ
-//	int fps = 15;
-//	cv::VideoWriter writer("capture1.avi", CV_FOURCC('X','V','I','D'), fps, cv::Size(width,height));
-//
-//	cv::namedWindow("Capture", CV_WINDOW_AUTOSIZE|CV_WINDOW_FREERATIO);
-//	while(1) {
-//		pro::Image frame;
-//		cap.read((cv::Mat&)frame);  // キャプチャ
-//
-//		if(frame.empty()){
-//			cout << "empty" << endl;
-//			break;
-//		}
-//		
-//		frame.line(cv::Point2f(0,0),cv::Point2f(width,height));
-//		frame.line(cv::Point2f(width,0),cv::Point2f(0,height));
-//
-//		// 様々な処理
-//		// ...
-//		frame.imshow("Capture");
-//		//
-//
-//		writer << frame;
-//
-//		if(cv::waitKey(30) >= 0) break;
-//	}
-//	return 0;
-//}
+int main_videoReader(int argc,char *argv[]){
+	if(argc!=4){
+		cout << "input >> invideo.avi,outvideo.avi" << endl;
+		return 0;
+	}
 
+	cv::VideoCapture cap(argv[2]);
+	// ファイルがオープンできたかの確認
+	if(!cap.isOpened()) return -1;
+	
+	int width = cap.get(CV_CAP_PROP_FRAME_WIDTH);
+	int height = cap.get(CV_CAP_PROP_FRAME_HEIGHT);
+	
+	// ビデオライタ
+	int fps = 15;
+	cv::VideoWriter writer(argv[3], CV_FOURCC('X','V','I','D'), fps, cv::Size(800*2+20,600));
+	
+	cv::namedWindow(argv[2], CV_WINDOW_AUTOSIZE|CV_WINDOW_FREERATIO);
+	cv::namedWindow(argv[3], CV_WINDOW_AUTOSIZE|CV_WINDOW_FREERATIO);
+	while(1) {
+		pro::Image frame;
+		cap.read((cv::Mat&)frame);  // キャプチャ
+
+		if(frame.empty()){
+			cout << "empty" << endl;
+			break;
+		}
+		
+		frame.imshow(argv[2]);
+		
+		frame.line(cv::Point2f(0,0),cv::Point2f(width,height));
+		frame.line(cv::Point2f(width,0),cv::Point2f(0,height));
+		frame.horiconcat(frame,frame,20);
+
+		// 様々な処理
+		// ...
+		frame.imshow(argv[3]);
+		//
+
+		writer << frame;
+
+		if(cv::waitKey(30) >= 0) break;
+	}
+	return 0;
+}
+
+void main_resizeImage(int argc,char *argv[]){
+	if(argc!=6){
+		cout << "input >> input.png,output.png,width,height" << endl;
+		return;
+	}
+	int width = atoi(argv[4]);
+	int height = atoi(argv[5]);
+	pro::Image in(argv[2]),out;
+	in.imshow("in",1);
+	out.resize(in,cv::Size(width,height));
+	out.imshow("out",1);
+	out.save(argv[3]);
+	cv::waitKey(0);
+}
+
+void main_help(){
+	cout << "default : Asift" << endl;
+	cout << "-vw : video writer" << endl;
+	cout << "-vr : video reader" << endl;
+	cout << "-ir : Image resize" << endl;
+	cout << "-h : help show" << endl;
+}
+
+/**
+ * メイン関数
+ */
+void main(int argc,char *argv[]){
+	if(argc==1 || argv[1][0]!='-'){
+		main_Asift(argc,argv);
+	}else if(argc>1){
+		string option = string(argv[1]);
+		if(option=="-vw"){
+			main_videoWriter(argc,argv);
+		}else if(option=="-vr"){
+			main_videoReader(argc,argv);
+		}else if(option=="-ir"){
+			main_resizeImage(argc,argv);
+		}else if(option=="-h"){
+			main_help();
+		}
+	}else{
+		cout << "not command." << endl;
+		cout << "help is -h option." << endl;
+	}
+}
 
 //int m_ID;
 //Image img;
