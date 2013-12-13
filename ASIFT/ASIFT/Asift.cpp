@@ -206,17 +206,22 @@ void Asift::run(){
 			unsigned char * iarr2 = img2Gray.getU8Data();
 			ipixels2Zoom = std::vector<float>(iarr2,iarr2 + img2GrayZoom.size().width * img2GrayZoom.size().height);
 	
-			std::cout << ++count << "/" << framenum << "\r" << flush;
+			std::cout << ++count << "/" << framenum << endl;
+
 			keys2.computeAsiftKeyPoints(ipixels2Zoom,img2GrayZoom.size().width,img2GrayZoom.size().height,verb,zoom2);
+			std::cout << keys2.getNum() <<  " ASIFT keypoints are detected." << endl;
+
 			matchings = AsiftMatchings(keys1,keys2);
 			matchings.computeAsiftMatches(verb);
 
 			// …•½‰æ‘œì¬
+			frame.imshow("viwe",1);
+			if(cv::waitKey(30) >= 0) break;
+
 			writer << createHoriImage(frame);
 
 			//writer << frame;
 
-			if(cv::waitKey(30) >= 0) break;
 
 			delete[] iarr2;
 		}
@@ -245,7 +250,7 @@ void Asift::run(){
 			matchings = AsiftMatchings(keys1,keys2);
 			matchings.computeAsiftMatches(verb);
 		
-		std::cout << "The two images match! " << matchings.getNum() << " matchings are identified." << endl;
+		//std::cout << "The two images match! " << matchings.getNum() << " matchings are identified." << endl;
 		std::cout << "Keypoints matching accomplished in " << (double)timer.getDiff()/pro::Timer::PER_SEC << " seconds." << endl << endl;
 		timer.lap();
 
