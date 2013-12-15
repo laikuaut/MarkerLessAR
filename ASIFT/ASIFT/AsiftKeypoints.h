@@ -6,6 +6,7 @@
 #include "AsiftMatchings.h"
 
 #include "../../MyLibs/Core/Dir.h"
+#include "../../MyLibs/OpenCVLibs/Image.h"
 
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/ini_parser.hpp>
@@ -34,7 +35,7 @@ private:
 
 public:
 
-	// キーポイント
+	// キーポイント <tilt<rot<keylist<key>>>>
 	vector< vector< keypointslist > > keys;
 
 	// キーポイントパス
@@ -56,9 +57,18 @@ public:
 	void iniwriteSiftParameters(ptree &pt);
 	void iniwriteSiftParameters(ptree &pt,siftPar par);
 
+	// 入出力処理
 	void output(string name);
 	void input(string name);
 
+	// フィルター処理
+	void filterRectangle(cv::Point2f pt1,cv::Point2f pt2);
+
+	// キーポイントの描写
+	void draw(pro::Image& src);
+
+	// キーポイント数計算
+	int keypointsTotal() const;
 
 };
 

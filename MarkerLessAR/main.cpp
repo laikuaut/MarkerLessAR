@@ -16,8 +16,16 @@
 using namespace std;
 using namespace pro;
 
-
-
+/**
+ * プロトタイプ宣言
+ */
+void main_Asift(int,char*[]);
+int main_videoWriter(int argc, char *argv[]);
+int main_videoReader(int argc,char *argv[]);
+void main_resizeImage(int argc,char *argv[]);
+void main_siftDotPrint(int argc,char *argv[]);
+void main_centerLine(int argc,char *argv[]);
+void main_help();
 
 /**
  * Asift main
@@ -30,6 +38,7 @@ void main_Asift(int argc,char *argv[]){
 
 /**
  * 動画書き込み
+ * -vw
  */
 int main_videoWriter(int argc, char *argv[])
 {
@@ -95,6 +104,7 @@ int main_videoWriter(int argc, char *argv[])
 
 /**
  * 動画読み込み
+ * -vr
  */
 int main_videoReader(int argc,char *argv[]){
 	if(argc!=4){
@@ -142,6 +152,10 @@ int main_videoReader(int argc,char *argv[]){
 	return 0;
 }
 
+/**
+ * 画像サイズ変更
+ * -ir
+ */
 void main_resizeImage(int argc,char *argv[]){
 	if(argc!=6){
 		cout << "input >> input.png,output.png,width,height" << endl;
@@ -157,11 +171,173 @@ void main_resizeImage(int argc,char *argv[]){
 	cv::waitKey(0);
 }
 
+/**
+ * SIFTまたはASIFTのキーポイントを点で描写
+ * -isp
+ */
+void main_siftDotPrint(int argc,char *argv[]){
+
+	if(argc != 6 && argc!=7){
+		cout << "input >> input.png,output.png,keys.txt,flag=0(0:sift,1:asift),tilt" << endl;
+	}
+
+	string input = argv[2];
+	string output = argv[3];
+	string keys_txt = argv[4];
+	int flag = atoi(argv[5]);
+
+	//AsiftKeypoints keys;
+	Asift asift;
+	asift.init(1);
+	Image in_img,out_img;
+	// 画像読み込み
+	in_img.load(input);
+	out_img.load(input);
+
+	// Asiftに画像設置
+	asift.setImage(in_img,Asift::IMAGE_ID_BASE);
+
+	// 読み込みiniファイル設定
+	ptree pt;
+	read_ini("Asift.ini", pt);
+
+	// asiftとsiftの判定
+	if(flag == 0){
+		asift.baseKeys = AsiftKeypoints(1);
+	}else{		
+		if(argc!=7){
+			cout << "set the tilt value." << endl;
+			exit(EXIT_FAILURE);
+		}
+		int tilt = atoi(argv[6]);
+		asift.baseKeys = AsiftKeypoints(tilt);
+
+	}
+
+	// キーポイント算出
+	asift.computeKeyPoints(Asift::IMAGE_ID_BASE);
+
+	// キーポイントのドットを描写
+	for (int tt = 0; tt < (int) asift.baseKeys.keys.size(); tt++)
+	{
+		for (int rr = 0; rr < (int) asift.baseKeys.keys[tt].size(); rr++)
+		{
+			keypointslist::iterator ptr = asift.baseKeys.keys[tt][rr].begin();
+			for(int i=0; i < (int) asift.baseKeys.keys[tt][rr].size(); i++, ptr++)	
+			{
+				cv::Scalar color;
+				if(tt == 0){
+					color = cv::Scalar(0,0,255);
+				}else{
+					color = cv::Scalar(255,0,0);
+				}
+				// 中心点の描写
+				out_img.circle(cv::Point2f(ptr->x,ptr->y),1,color);
+				// スケールの描写
+				out_img.circle(cv::Point2f(ptr->x,ptr->y),ptr->scale,color,1);
+				// 特徴点のオリエンテーション方向を描写
+				if(ptr->angle>=0){
+					cv::Point pt2(ptr->x + cos(ptr->angle)*ptr->scale, ptr->y + sin(ptr->angle)*ptr->scale);
+					out_img.line(cv::Point2f(ptr->x,ptr->y),pt2,color,1);
+				}			
+			}
+		}	
+	}
+
+	// キーポイントのテキスト出力
+	asift.baseKeys.output(keys_txt);
+		
+	// 描写画像の保存
+	out_img.save(output);
+}
+
+/**
+ * センターラインの検出
+ * -cl
+ */
+void main_centerLine(int argc,char *argv[]){
+	
+	Asift asift;
+	asift.init(1);
+	asift.baseKeys = AsiftKeypoints(1);
+
+	if(argc!=5){
+		cout << "input >> in.png,out.png,distance" << endl;
+	}
+	
+	string input = argv[2];
+	string output = argv[3];
+
+	double distance = atoi(argv[4]);
+	
+	pro::Image in_img,out_img;
+	in_img.load(input);
+	out_img.load(input);
+
+	double center_x,center_y;
+	center_x = in_img.size().width/2;
+	center_y = in_img.size().height/2;
+
+	out_img.line(cv::Point2f(0,center_y),cv::Point2f(out_img.size().width,center_y),cv::Scalar(255,0,0),1);
+	out_img.line(cv::Point2f(center_x,0),cv::Point2f(center_x,out_img.size().height),cv::Scalar(255,0,0),1);
+
+	asift.computeKeyPoints(Asift::IMAGE_ID_BASE);
+	cout << asift.baseKeys.getNum() << endl;
+
+	out_img.imshow(output);
+
+	//asift.baseKeys.filterRectangle(cv::Point2f(0,0),cv::Point2f(out_img.size().width,out_img.size().height));
+	asift.setFilterRectanglePoints();
+	asift.fileterRun();
+	cout << asift.baseKeys.getNum() << endl;
+
+	//asift.baseKeys.draw(out_img);
+
+	for (int tt = 0; tt < (int) asift.baseKeys.keys.size(); tt++)
+	{
+		for (int rr = 0; rr < (int) asift.baseKeys.keys[tt].size(); rr++)
+		{
+			keypointslist::iterator ptr = asift.baseKeys.keys[tt][rr].begin();
+			for(int i=0; i < (int) asift.baseKeys.keys[tt][rr].size(); i++, ptr++)	
+			{
+				if(distance >= abs(ptr->x-center_x) || distance >= abs(ptr->y - center_y)){
+					cv::Scalar color;
+					if(tt == 0){
+						color = cv::Scalar(0,0,255);
+					}else{
+						color = cv::Scalar(255,0,0);
+					}
+					// 中心点の描写
+					out_img.circle(cv::Point2f(ptr->x,ptr->y),1,color);
+					// スケールの描写
+					out_img.circle(cv::Point2f(ptr->x,ptr->y),ptr->scale,color,1);
+					// 特徴点のオリエンテーション方向を描写
+					if(ptr->angle>=0){
+						cv::Point pt2(ptr->x + cos(ptr->angle)*ptr->scale, ptr->y + sin(ptr->angle)*ptr->scale);
+						out_img.line(cv::Point2f(ptr->x,ptr->y),pt2,color,1);
+					}
+				}
+			}
+		}	
+	}
+
+	out_img.save(output);
+
+	out_img.imshow(output);
+	cv::waitKey(0);
+}
+
+/**
+ * ヘルプ表示 
+ * -h
+ */
 void main_help(){
 	cout << "default : Asift" << endl;
 	cout << "-vw : video writer" << endl;
 	cout << "-vr : video reader" << endl;
 	cout << "-ir : Image resize" << endl;
+	cout << "-cl : center line" << endl;
+	cout << "-isp: Sift or Asift Keypoints Dot Print int Image" << endl;
 	cout << "-h : help show" << endl;
 }
 
@@ -179,6 +355,10 @@ void main(int argc,char *argv[]){
 			main_videoReader(argc,argv);
 		}else if(option=="-ir"){
 			main_resizeImage(argc,argv);
+		}else if(option=="-cl"){
+			main_centerLine(argc,argv);
+		}else if(option=="-isp"){
+			main_siftDotPrint(argc,argv);
 		}else if(option=="-h"){
 			main_help();
 		}

@@ -19,6 +19,7 @@
 #include "compute_asift_matches.h"
 
 #include "../../MyLibs/OpenCVLibs/Image.h"
+#include "../../MyLibs/OpenCVLibs/MouseEvent.h"
 #include "../../MyLibs/Core/Timer.h"
 
 #include "AsiftKeypoints.h"
@@ -28,59 +29,116 @@
 #include <opencv2/features2d/features2d.hpp>
 
 
-class PRO_EXPORTS Asift
+class PRO_EXPORTS Asift : public pro::MouseEvent
 {
 public:
-
 	pro::Dir path;
+	
+public:
+
+	// リサイズ最適化サイズ
 	static const int IMAGE_X = 800;
 	static const int IMAGE_Y = 600;
 
+	// 画像ID
+	static const int IMAGE_ID_BASE = 1;
+	static const int IMAGE_ID_INPUT = 2;
+
+	// マウスイベントID
+	static const int ON_MOUSE_ID_FILTER_RECT = 1;
+
+	// フィルターFlag
+	static const int FILTER_RECT_FLAG = 1;
+
 private:
 
+	/********************************************
+	 * ファイル名
+	 */
 	// 元画像ファイル名
-	std::string img1Name,img2Name;
+	std::string imgBaseName,imgInputName;
 	// 出力画像ファイル名(V:垂直結合画像,水平結合画像)
 	std::string imgVName,imgHName;
 	// 入力動画名,出力動画名
 	std::string capInName,capOutName;
 	// キーポイント保存ファイル名
-	std::string keys1Name,keys2Name;
+	std::string baseKeysName,inputKeysName;
 	// マッチング保存ファイル名
 	std::string matchingsName;
 
-	// 元画像
-	pro::Image img1,img2;
+	/********************************************
+	 * 画像データ
+	 */
 	// 元のグレースケール画像
-	pro::Image img1Gray,img2Gray;
+	pro::Image imgBaseGray,imgInputGray;
 	// リサイズ後の画像
-	pro::Image img1Zoom,img2Zoom;
+	pro::Image imgBaseZoom,imgInputZoom;
 	// リサイズ後のグレイスケール画像
-	pro::Image img1GrayZoom,img2GrayZoom;
+	pro::Image imgBaseGrayZoom,imgInputGrayZoom;
 	// 元画像のピクセルデータ
 	std::vector<float> ipixels1,ipixels2;
 	// リサイズ後のピクセルデータ
-	std::vector<float> ipixels1Zoom,ipixels2Zoom;
+	std::vector<float> ipixelsBase,ipixelsInput;
 
+	/********************************************
+	 * リサイズ関連
+	 */
 	// リサイズ比
-	float zoom1,zoom2;
+	float baseZoom,inputZoom;
 	// リサイズするかのフラグ
 	int resizeFlag;
 
-	// キーポイントデータ
-	AsiftKeypoints keys1,keys2;
-	// マッチングデータ
-	AsiftMatchings matchings;
-
+	/********************************************
+	 * データ表示関連
+	 */
 	// メッセージ表示？
 	int verb;
 	// 画像結合の空白幅
 	int bandWidth;
 
-	// keys1 をファイルから読み込むかどうか
-	int keys1InputFlag;
+	/********************************************
+	 * 処理判別オプション
+	 */
+	// baseKeys をファイルから読み込むかどうか
+	int baseKeysInputFlag;
 	// 動画読み込み処理のフラグ
 	int videoInputFlag;
+	// SIFTで検出したキーポイントをドットで画像に出力
+	int siftDotPrintFlag;
+
+	/********************************************
+	 * マウスイベント関連
+	 */
+	// マウスイベントを判定するID
+	int onMouseId;
+	// マウスイベントの処理カウント
+	int onMouseCount;
+	// マウスイベント用座標
+	//int mouse_x,mouse_y;
+
+	/********************************************
+	 * フィルタ関連
+	 */
+	// base画像のキーポイント矩形フィルター用
+	 cv::Rect baseFilterRect;
+	 // フィルターFlag
+	 int filterFlag;
+
+	/********************************************
+	 * 軸関連
+	 */
+	 // X軸を求めるためのキーポイント候補点
+	 AsiftKeypoints xAxis;
+
+
+public:
+	
+	// 元画像
+	pro::Image imgBase,imgInput;
+	// キーポイントデータ
+	AsiftKeypoints baseKeys,inputKeys;
+	// マッチングデータ
+	AsiftMatchings matchings;
 
 public:
 
@@ -91,9 +149,9 @@ public:
 	~Asift(void);
 
 	// 初期化関数
-	void init(int readini,string img1_name="imgIn1.png",string img2_name="imgIn2.png",
+	void init(int readini,string imgBase_name="imgIn1.png",string imgInput_name="imgIn2.png",
 				string imgV_name="imgOutVert.png",string imgH_name="imgOutHori.png",
-				string keys1_name="keys1.txt",string keys2_name="keys2.txt",
+				string baseKeys_name="baseKeys.txt",string inputKeys_name="inputKeys.txt",
 				string matchings_name="matchings.txt",
 				string capIn_name="capin.avi",string capOut_name="capout.avi",
 				int tilt1=7,int tilt2=7,int resize_flag=1);
@@ -102,14 +160,36 @@ public:
 	void writeIni();
 	void readIni();
 
-	// 実行関数
+	// 基本実行関数
 	void run();
+
+	// 画像の設置
+	void setImage(pro::Image &src,int id);
+	// キーポイントの算出
+	void computeKeyPoints(int id);
+	// マッチング処理
+	void computeMatching();
+
+	// 矩形フィルター処理
+	void setFilterRectanglePoints();
+	// フィルター実行
+	void fileterRun();
+
+	// マウスイベントIDを設定
+	void setMouseEventId(int id);
+	// マウスイベントベース
+	void onMouse_impl(int event,int x,int y,int flag);
+	// 矩形フィルターのマウスイベント
+	void onMouse_filterRect(int event,int x,int y,int flag);
 
 private:
 
+	// asiftのリサイズ処理
 	void resize(pro::Image &src,pro::Image &dst,float &zoom,int resizeFlag);
 
+	// 垂直画像結合とマッチングライン描写
 	pro::Image createVertImage(pro::Image img);
+	// 水平画像結合とマッチングライン描写
 	pro::Image createHoriImage(pro::Image img);
 
 };
@@ -118,10 +198,10 @@ private:
 	//while(1){
 	//	cap.read((cv::Mat&)frame);
 
-	//	img2Gray.grayeScale(frame);
-	//	resize(img2Gray,img2GrayZoom,zoom2,0);
-	//	unsigned char * iarr2 = img2Gray.getU8Data();
-	//	ipixels2Zoom = std::vector<float>(iarr2,iarr2 + img2GrayZoom.size().width * img2GrayZoom.size().height);
+	//	imgInputGray.grayeScale(frame);
+	//	resize(imgInputGray,imgInputGrayZoom,inputZoom,0);
+	//	unsigned char * iarr2 = imgInputGray.getU8Data();
+	//	ipixelsInput = std::vector<float>(iarr2,iarr2 + imgInputGrayZoom.size().width * imgInputGrayZoom.size().height);
 	
 	//	frame.imshow("Capture",1);
 	//	if(cv::waitKey(30) >= 0) break;

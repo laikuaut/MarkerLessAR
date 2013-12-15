@@ -57,7 +57,7 @@ void AsiftKeypoints::inireadSiftParameters(ptree &pt){
 }
 
 void AsiftKeypoints::iniwriteSiftParameters(ptree &pt){
-	iniwriteSiftParameters(pt,siftparams);	
+	iniwriteSiftParameters(pt,siftparams);
 }
 
 void AsiftKeypoints::iniwriteSiftParameters(ptree &pt,siftPar par){
@@ -162,4 +162,88 @@ void AsiftKeypoints::input(string name){
 	}
 
 	inf.close();
+}
+
+void AsiftKeypoints::filterRectangle(cv::Point2f pt1,cv::Point2f pt2){
+
+	// 最大最小の点を取得
+	int maxX,maxY,minX,minY;
+	if(pt1.x>pt2.x){
+		maxX=pt1.x;
+		minX=pt2.x;
+	}else{
+		maxX=pt2.x;
+		minX=pt1.x;
+	}
+	if(pt1.y>pt2.y){
+		maxY=pt1.y;
+		minY=pt2.y;
+	}else{
+		maxY=pt2.y;
+		minY=pt1.y;
+	}
+
+	int count=0;
+
+	for (int tt = 0; tt < (int) keys.size(); tt++)
+	{
+		for (int rr = 0; rr < (int) keys[tt].size(); rr++)
+		{
+			keypointslist::iterator ptr = keys[tt][rr].begin();
+			for(int i=0; i < (int) keys[tt][rr].size(); i++)	
+			{
+				// 矩形範囲条件
+				if(zoom*keys[tt][rr][i].x > maxX  || zoom*keys[tt][rr][i].x < minX ||
+					zoom*keys[tt][rr][i].y > maxY || zoom*keys[tt][rr][i].y < minY){
+						// 範囲外のキーポイントを削除
+					keys[tt][rr].erase(keys[tt][rr].begin()+i);
+					//ptr--; 
+					i--;
+				}
+			}
+		}	
+	}
+
+	num = keypointsTotal();
+}
+
+void AsiftKeypoints::draw(pro::Image &src){
+
+	for (int tt = 0; tt < (int) keys.size(); tt++)
+	{
+		for (int rr = 0; rr < (int) keys[tt].size(); rr++)
+		{
+			keypointslist::iterator ptr = keys[tt][rr].begin();
+			for(int i=0; i < (int) keys[tt][rr].size(); i++, ptr++)	
+			{
+				cv::Scalar color;
+				if(tt == 0){
+					color = cv::Scalar(0,0,255);
+				}else{
+					color = cv::Scalar(255,0,0);
+				}
+				// 中心点の描写
+				src.circle(cv::Point2f(zoom*ptr->x,zoom*ptr->y),1,color);
+				// スケールの描写
+				src.circle(cv::Point2f(zoom*ptr->x,zoom*ptr->y),zoom*ptr->scale,color,1);
+				// 特徴点のオリエンテーション方向を描写
+				if(ptr->angle>=0){
+					cv::Point pt2(zoom*ptr->x + zoom*cos(ptr->angle)*ptr->scale,
+						zoom*ptr->y + zoom*sin(ptr->angle)*ptr->scale);
+					src.line(cv::Point2f(zoom*ptr->x,zoom*ptr->y),pt2,color,1);
+				}
+			}
+		}	
+	}
+}
+
+int AsiftKeypoints::keypointsTotal() const{
+	int num_keys_total=0;
+	for (int tt = 0; tt < (int) keys.size(); tt++){
+		for (int rr = 0; rr < (int) keys[tt].size(); rr++)
+		{
+			num_keys_total += (int) keys[tt][rr].size();
+		}
+	}
+	return num_keys_total;
 }

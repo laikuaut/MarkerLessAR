@@ -210,8 +210,8 @@ bool Image::empty(){
 	return img.empty();
 }
 
-void Image::circle(cv::Point2f center,int radius,cv::Scalar scal){
-	cv::circle(img,center,radius,scal, -1, CV_AA);
+void Image::circle(cv::Point2f center,int radius,cv::Scalar scal,int thickness){
+	cv::circle(img,center,radius,scal, thickness, CV_AA);
 }
 
 void Image::rectangle(cv::Point2f pt1,cv::Point2f pt2,cv::Scalar scal,int thickness){
@@ -243,15 +243,16 @@ void Image::triangle(cv::Point2f pt1,cv::Point2f pt2,cv::Point2f pt3,cv::Scalar 
 	cv::line(img,pt3,pt1,scal,thickness,8);
 }
 
-void Image::imshow(string windowName,int flag){
+pro::Image Image::imshow(string windowName,int flag){
 	if(windowName.empty() && winName.empty()){
 		throw Exception("ウィンドウを作成していません。","Image.cpp","Image::imshow(string,int)",__LINE__);
-		return;
+		return NULL;
 	}else if(windowName != winName){
 		winName = windowName;
 		cv::namedWindow(winName,flag);
 	}
 	cv::imshow(winName,img);
+	return *this;
 }
 
 void Image::moveWindow(int x,int y){

@@ -25,6 +25,7 @@ public:
 
 	virtual void onMouse_impl(int event,int x,int y,int flag) = 0;
 	static void onMouse(int event, int x, int y, int flag, void* data);
+	//void onMouse(int event, int x, int y, int flag, void* data);
 
 };
 
