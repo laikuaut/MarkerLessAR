@@ -61,8 +61,11 @@ public:
 	void output(string name);
 	void input(string name);
 
-	// フィルター処理
+	// 矩形フィルター処理
 	void filterRectangle(cv::Point2f pt1,cv::Point2f pt2);
+	// センターラインフィルター処理
+	void filterCenterLine(cv::Point2f centerPt,float distance);
+
 
 	// キーポイントの描写
 	void draw(pro::Image& src);

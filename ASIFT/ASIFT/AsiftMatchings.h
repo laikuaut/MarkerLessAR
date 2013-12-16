@@ -29,7 +29,11 @@ public:
 	AsiftMatchings(AsiftKeypoints keys1,AsiftKeypoints keys2);
 	~AsiftMatchings(void);
 
+	void setKeypoints(AsiftKeypoints keys1,AsiftKeypoints keys2);
+
+	// マッチング絵算
 	int computeAsiftMatches(int verb);
+	// マッチング数取得
 	int getNum() const;
 
 	void output(string name);

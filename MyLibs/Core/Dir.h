@@ -49,8 +49,8 @@ private:
 public:
 	
 	Dir(void);
-	Dir(bool flag);
-	Dir(const boost::filesystem::path& path,bool flag);
+	Dir(bool eflag);
+	Dir(const boost::filesystem::path& path,bool eflag);
 
 	~Dir(void);
 	
@@ -71,9 +71,14 @@ public:
 	const vector<string> getDirectoryFilePaths(bool allDir=false,vector<string> &paths=vector<string>());
 	const vector<string> getDirectoryFileNames();
 	
+	// 拡張子を取得
 	static const string getExtention(const string path);
+	// ファイル名を取得
 	static const string getFileName(const string path);
+	// ファイル名を抜いたディレクトリパスを取得
 	static const string getRemoveFilename(const string path);
+	// 拡張子を抜いたファイル名を取得
+	static const string getStem(const string path);
 
 	void cd(const boost::filesystem::path& path);
 	void cd(const boost::filesystem::path& path,const DirException& e);

@@ -49,6 +49,7 @@ public:
 
 	// フィルターFlag
 	static const int FILTER_RECT_FLAG = 1;
+	static const int FILTER_CENTER_LINE_FLAG = 2;
 
 private:
 
@@ -65,6 +66,13 @@ private:
 	std::string baseKeysName,inputKeysName;
 	// マッチング保存ファイル名
 	std::string matchingsName;
+	// X軸ファイル名
+	std::string xAxisKeysName;
+
+	/********************************************
+	 * ディレクトリ名
+	 */
+	pro::Dir videoOutputDir;
 
 	/********************************************
 	 * 画像データ
@@ -103,8 +111,12 @@ private:
 	int baseKeysInputFlag;
 	// 動画読み込み処理のフラグ
 	int videoInputFlag;
+	// 動画生成時のInputKeypointsをすべてファイル出力するかどうかのフラグ
+	int videoKeypointsOutputFlag;
 	// SIFTで検出したキーポイントをドットで画像に出力
 	int siftDotPrintFlag;
+	// マウス操作の矩形フィルターをするかそうか
+	int filterRectOnMouseFlag;
 
 	/********************************************
 	 * マウスイベント関連
@@ -129,7 +141,10 @@ private:
 	 */
 	 // X軸を求めるためのキーポイント候補点
 	 AsiftKeypoints xAxis;
-
+	 // センターポイント
+	 cv::Point2f centerPt;
+	 // センターからの距離
+	 float centerLineDistance;
 
 public:
 	
@@ -172,6 +187,8 @@ public:
 
 	// 矩形フィルター処理
 	void setFilterRectanglePoints();
+	// センターライン付近にある特徴点の抽出
+	void setCenterLinePoints();
 	// フィルター実行
 	void fileterRun();
 
@@ -193,17 +210,3 @@ private:
 	pro::Image createHoriImage(pro::Image img);
 
 };
-	//pro::Image frame;
-
-	//while(1){
-	//	cap.read((cv::Mat&)frame);
-
-	//	imgInputGray.grayeScale(frame);
-	//	resize(imgInputGray,imgInputGrayZoom,inputZoom,0);
-	//	unsigned char * iarr2 = imgInputGray.getU8Data();
-	//	ipixelsInput = std::vector<float>(iarr2,iarr2 + imgInputGrayZoom.size().width * imgInputGrayZoom.size().height);
-	
-	//	frame.imshow("Capture",1);
-	//	if(cv::waitKey(30) >= 0) break;
-	//	delete[] iarr2;
-	//}

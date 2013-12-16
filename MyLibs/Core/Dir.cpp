@@ -17,17 +17,18 @@ Dir::Dir(void){
 	ErrorShow = false;
 }
 
-Dir::Dir(bool flag)
+Dir::Dir(bool eflag)
 {
 	path = fs::system_complete(".");
-	ErrorShow = flag;
+	ErrorShow = eflag;
 }
 
-Dir::Dir(const fs::path& path,bool flag){
-	if(!isPath(path))
-		throw DirException(DirException::PATH_ERROR,path.string(),"Dir.cpp","Dir::Dir(boost::filesystem::path&)",__LINE__);
-	this->path = fs::system_complete(path);
-	ErrorShow = flag;
+Dir::Dir(const fs::path& path,bool eflag){
+	//if(!isPath(path))
+	//	throw DirException(DirException::PATH_ERROR,path.string(),"Dir.cpp","Dir::Dir(boost::filesystem::path&)",__LINE__);
+	this->path = fs::system_complete(".");
+	ErrorShow = eflag;
+	cd(path);
 }
 
 Dir::~Dir(void)
@@ -121,6 +122,11 @@ const string Dir::getFileName(const string path){
 const string Dir::getRemoveFilename(const string path){
 	fs::path p(path);
 	return p.remove_filename().string();
+}
+
+const string Dir::getStem(const string path){
+	fs::path p(path);
+	return p.stem().string();
 }
 
 void Dir::move(std::string src,std::string dst){

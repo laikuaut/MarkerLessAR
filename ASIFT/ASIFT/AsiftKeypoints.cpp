@@ -207,6 +207,49 @@ void AsiftKeypoints::filterRectangle(cv::Point2f pt1,cv::Point2f pt2){
 	num = keypointsTotal();
 }
 
+void AsiftKeypoints::filterCenterLine(cv::Point2f centerPt,float distance){
+	
+	AsiftKeypoints xAxis = AsiftKeypoints(*this);
+	AsiftKeypoints yAxis = AsiftKeypoints(*this);
+
+	for (int tt = 0; tt < (int) xAxis.keys.size(); tt++)
+	{
+		for (int rr = 0; rr < (int) xAxis.keys[tt].size(); rr++)
+		{
+			keypointslist::iterator ptr = xAxis.keys[tt][rr].begin();
+			for(int i=0; i < (int) xAxis.keys[tt][rr].size(); i++)
+			{
+				if(distance < abs(zoom*xAxis.keys[tt][rr][i].y-centerPt.y)){
+					xAxis.keys[tt][rr].erase(xAxis.keys[tt][rr].begin()+i);
+					i--;
+				}
+			}
+		}
+	}
+
+	for (int tt = 0; tt < (int) yAxis.keys.size(); tt++)
+	{
+		for (int rr = 0; rr < (int) yAxis.keys[tt].size(); rr++)
+		{
+			keypointslist::iterator ptr = yAxis.keys[tt][rr].begin();
+			for(int i=0; i < (int) yAxis.keys[tt][rr].size(); i++)	
+			{
+				if(distance < abs(zoom*yAxis.keys[tt][rr][i].x-centerPt.x)){
+					yAxis.keys[tt][rr].erase(yAxis.keys[tt][rr].begin()+i);
+					i--;
+				}
+			}
+		}
+	}
+
+	if(xAxis.keypointsTotal() > yAxis.keypointsTotal()){
+		*this = AsiftKeypoints(xAxis);
+	}else{
+		*this = AsiftKeypoints(yAxis);
+	}
+
+}
+
 void AsiftKeypoints::draw(pro::Image &src){
 
 	for (int tt = 0; tt < (int) keys.size(); tt++)

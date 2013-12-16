@@ -251,7 +251,12 @@ pro::Image Image::imshow(string windowName,int flag){
 		winName = windowName;
 		cv::namedWindow(winName,flag);
 	}
-	cv::imshow(winName,img);
+	if(!img.empty()){
+		cv::imshow(winName,img);
+	}else{
+		throw Exception("‰æ‘œ‚ª“Ç‚İ‚Ü‚ê‚Ä‚¢‚Ü‚¹‚ñB","Image.cpp","Image::imshow(string,int)",__LINE__);
+		return NULL;
+	}
 	return *this;
 }
 

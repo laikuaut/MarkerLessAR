@@ -11,10 +11,7 @@ AsiftMatchings::AsiftMatchings(void)
 AsiftMatchings::AsiftMatchings(AsiftKeypoints keys1,AsiftKeypoints keys2)
 {
 	path = pro::Dir();
-	this->asiftKeys1 = new AsiftKeypoints(keys1);
-	this->asiftKeys2 = new AsiftKeypoints(keys2);
-	//default_sift_parameters(siftparams);
-	siftparams = keys2.siftparams;
+	setKeypoints(keys1,keys2);
 }
 
 
@@ -22,7 +19,15 @@ AsiftMatchings::~AsiftMatchings(void)
 {
 }
 
+void AsiftMatchings::setKeypoints(AsiftKeypoints keys1,AsiftKeypoints keys2){
+	this->asiftKeys1 = new AsiftKeypoints(keys1);
+	this->asiftKeys2 = new AsiftKeypoints(keys2);
+	siftparams = keys2.siftparams;
+}
+
+
 int AsiftMatchings::computeAsiftMatches(int verb){
+	matchings.clear();
 	num = compute_asift_matches(asiftKeys1->tilts,asiftKeys2->tilts,asiftKeys1->w,asiftKeys1->h,asiftKeys2->w,asiftKeys2->h
 			,verb,asiftKeys1->keys,asiftKeys2->keys,matchings,siftparams);
 	return num;

@@ -103,6 +103,145 @@ int main_videoWriter(int argc, char *argv[])
 }
 
 /**
+ *2台カメラでステレオカメラ動画撮影
+ * -vw2
+ */
+int main_videoWriter2(int argc,char *argv[]){
+
+	cv::VideoCapture capLeft(1);
+	cv::VideoCapture capRight(0);
+
+	// 様々な設定...
+	if(argc != 7){
+		std::cout << "input << capLeft.avi,capRight.avi,width,height,time" << endl; 
+		return 0;
+	}
+
+	std::cout << "s:start q:quit" << endl;
+
+	cv::Size cap_size(atoi(argv[4]), atoi(argv[5]));
+	pro::Image frameL,frameR;
+	
+	capLeft.set(CV_CAP_PROP_FRAME_WIDTH, cap_size.width);
+	capLeft.set(CV_CAP_PROP_FRAME_HEIGHT, cap_size.height);
+	//capLeft.open(0);
+	while(1){
+		// 左カメラ設定
+		int key = cv::waitKey(30);
+		// カメラがオープンできたかの確認
+		if(capLeft.isOpened()){
+			capLeft.read((cv::Mat&)frameL);
+			try{
+				frameL.imshow("LeftSetting",1);
+			}catch(pro::Exception const &ex){
+				std::cout << ex.what() << endl;
+			}
+			if(key==' '){
+				break;
+			}
+		}
+		if(key=='q') exit(1);
+		//cout << key-'0' << endl;
+		if((key-'0')>=0 && (key-'0')<=9){
+			if(capLeft.isOpened()){
+				capLeft.release();
+			}
+			capLeft.open(key-'0');
+			capLeft.set(CV_CAP_PROP_FRAME_WIDTH, cap_size.width);
+			capLeft.set(CV_CAP_PROP_FRAME_HEIGHT, cap_size.height);
+		}
+	}
+	cv::destroyWindow("LeftSetting");
+
+	capRight.set(CV_CAP_PROP_FRAME_WIDTH, cap_size.width);
+	capRight.set(CV_CAP_PROP_FRAME_HEIGHT, cap_size.height);
+	//capRight.open(0);
+	while(1){
+		// 右カメラ設定
+		int key = cv::waitKey(30);
+		// カメラがオープンできたかの確認
+		if(capRight.isOpened()){
+			capRight.read((cv::Mat&)frameR);
+			try{
+				frameR.imshow("RightSetting",1);
+			}catch(pro::Exception const &ex){
+				std::cout << ex.what() << endl;
+			}
+			if(key==' '){
+				break;
+			}
+		}
+		if(key=='q') exit(1);
+		//cout << key-'0' << endl;
+		if((key-'0')>=0 && (key-'0')<=9){
+			if(capRight.isOpened()){
+				capRight.release();
+			}
+			capRight.open(key-'0');
+			capRight.set(CV_CAP_PROP_FRAME_WIDTH, cap_size.width);
+			capRight.set(CV_CAP_PROP_FRAME_HEIGHT, cap_size.height);
+		}
+	}
+	cv::destroyWindow("RightSetting");
+
+	// ビデオライタ
+	int fps = 15;
+	cv::VideoWriter writerLeft(argv[2], CV_FOURCC('X','V','I','D'), fps, cap_size);
+	cv::VideoWriter writerRight(argv[3], CV_FOURCC('X','V','I','D'), fps, cap_size);
+
+	//cv::namedWindow("CapLeft", CV_WINDOW_AUTOSIZE|CV_WINDOW_FREERATIO);
+	//cv::namedWindow("CapRight", CV_WINDOW_AUTOSIZE|CV_WINDOW_FREERATIO);
+
+	cv::Mat frameLeft;   
+	cv::Mat frameRight;   
+
+	int start = 0;
+	pro::Timer timer;
+
+	int time = atoi(argv[5]);
+
+	while(1) {
+
+		capLeft >> frameLeft;  // キャプチャ
+		capRight >> frameRight;  // キャプチャ
+
+		// 様々な処理
+		// ...
+		if(start){
+			writerLeft << frameLeft;
+			writerRight << frameRight;
+		}
+
+		if(!frameLeft.empty())
+			cv::imshow(argv[2], frameLeft);
+		if(!frameRight.empty())
+			cv::imshow(argv[3], frameRight);
+
+		int key = cv::waitKey(30);
+
+		// タイマー最大１０秒
+		if(time!=0 && timer.getNow()>time/2*pro::Timer::PER_SEC){
+			break;
+		}
+
+		// sキーで開始
+		if(key == 's'){
+			timer.start();
+			std::cout << ((start==0)?"start":"stop") << endl;
+			start = (start==1)?0:1;
+
+		// qキーで終了
+		}else if(key == 'q')
+			break;
+	}
+
+	writerLeft.release();
+	writerRight.release();
+
+	return 0;
+}
+
+/**
  * 動画読み込み
  * -vr
  */
@@ -154,7 +293,7 @@ int main_videoReader(int argc,char *argv[]){
 
 /**
  * 画像サイズ変更
- * -ir
+ * -ire
  */
 void main_resizeImage(int argc,char *argv[]){
 	if(argc!=6){
@@ -169,6 +308,128 @@ void main_resizeImage(int argc,char *argv[]){
 	out.imshow("out",1);
 	out.save(argv[3]);
 	cv::waitKey(0);
+}
+
+
+/**
+ * 画像撮影2つカメラ
+ * -iw2
+ */
+void main_imageWriter(int argc,char *argv[]){
+	cv::VideoCapture capLeft(1);
+	cv::VideoCapture capRight(0);
+
+	// 様々な設定...
+	if(argc != 6){
+		std::cout << "input << imgLeft.png,imgRight.png,width,height" << endl; 
+		return;
+	}
+
+	std::cout << "s:start q:quit" << endl;
+
+	cv::Size cap_size(atoi(argv[4]), atoi(argv[5]));
+	pro::Image frameL,frameR;
+	
+	capLeft.set(CV_CAP_PROP_FRAME_WIDTH, cap_size.width);
+	capLeft.set(CV_CAP_PROP_FRAME_HEIGHT, cap_size.height);
+	//capLeft.open(0);
+	while(1){
+		// 左カメラ設定
+		int key = cv::waitKey(30);
+		// カメラがオープンできたかの確認
+		if(capLeft.isOpened()){
+			capLeft.read((cv::Mat&)frameL);
+			try{
+				frameL.imshow("LeftSetting",1);
+			}catch(pro::Exception const &ex){
+				std::cout << ex.what() << endl;
+			}
+			if(key==' '){
+				break;
+			}
+		}
+		if(key=='q') exit(1);
+		//cout << key-'0' << endl;
+		if((key-'0')>=0 && (key-'0')<=9){
+			if(capLeft.isOpened()){
+				capLeft.release();
+			}
+			capLeft.open(key-'0');
+			capLeft.set(CV_CAP_PROP_FRAME_WIDTH, cap_size.width);
+			capLeft.set(CV_CAP_PROP_FRAME_HEIGHT, cap_size.height);
+		}
+	}
+	cv::destroyWindow("LeftSetting");
+
+	capRight.set(CV_CAP_PROP_FRAME_WIDTH, cap_size.width);
+	capRight.set(CV_CAP_PROP_FRAME_HEIGHT, cap_size.height);
+	//capRight.open(0);
+	while(1){
+		// 右カメラ設定
+		int key = cv::waitKey(30);
+		// カメラがオープンできたかの確認
+		if(capRight.isOpened()){
+			capRight.read((cv::Mat&)frameR);
+			try{
+				frameR.imshow("RightSetting",1);
+			}catch(pro::Exception const &ex){
+				std::cout << ex.what() << endl;
+			}
+			if(key==' '){
+				break;
+			}
+		}
+		if(key=='q') exit(1);
+		//cout << key-'0' << endl;
+		if((key-'0')>=0 && (key-'0')<=9){
+			if(capRight.isOpened()){
+				capRight.release();
+			}
+			capRight.open(key-'0');
+			capRight.set(CV_CAP_PROP_FRAME_WIDTH, cap_size.width);
+			capRight.set(CV_CAP_PROP_FRAME_HEIGHT, cap_size.height);
+		}
+	}
+	cv::destroyWindow("RightSetting");
+
+	pro::Image frameLeft;
+	pro::Image frameRight;
+
+	int start = 0;
+	pro::Timer timer;
+
+	int time = atoi(argv[5]);
+
+	while(1) {
+
+		capLeft.read((cv::Mat&)frameLeft);  // キャプチャ
+		capRight.read((cv::Mat&)frameRight);  // キャプチャ
+
+		if(!frameLeft.empty())
+			frameLeft.imshow(argv[2],1);
+		if(!frameRight.empty())
+			frameRight.imshow(argv[3],1);
+
+		int key = cv::waitKey(30);
+
+		// sキーで開始
+		if(key == ' '){
+			frameLeft.save(argv[2]);
+			frameRight.save(argv[3]);
+		// qキーで終了
+		}else if(key == 'q')
+			break;
+	}
+
+	return;
+}
+
+/**
+ * 画像読み込み
+ * -ir
+ */
+void main_imageReader(int argc,char *argv[]){
+
 }
 
 /**
@@ -282,14 +543,14 @@ void main_centerLine(int argc,char *argv[]){
 	out_img.line(cv::Point2f(center_x,0),cv::Point2f(center_x,out_img.size().height),cv::Scalar(255,0,0),1);
 
 	asift.computeKeyPoints(Asift::IMAGE_ID_BASE);
-	cout << asift.baseKeys.getNum() << endl;
+	std::cout << asift.baseKeys.getNum() << endl;
 
 	out_img.imshow(output);
 
 	//asift.baseKeys.filterRectangle(cv::Point2f(0,0),cv::Point2f(out_img.size().width,out_img.size().height));
 	asift.setFilterRectanglePoints();
 	asift.fileterRun();
-	cout << asift.baseKeys.getNum() << endl;
+	std::cout << asift.baseKeys.getNum() << endl;
 
 	//asift.baseKeys.draw(out_img);
 
@@ -332,13 +593,14 @@ void main_centerLine(int argc,char *argv[]){
  * -h
  */
 void main_help(){
-	cout << "default : Asift" << endl;
-	cout << "-vw : video writer" << endl;
-	cout << "-vr : video reader" << endl;
-	cout << "-ir : Image resize" << endl;
-	cout << "-cl : center line" << endl;
-	cout << "-isp: Sift or Asift Keypoints Dot Print int Image" << endl;
-	cout << "-h : help show" << endl;
+	std::cout << "default : Asift" << endl;
+	std::cout << "-vw : video writer" << endl;
+	std::cout << "-vw2 : video writer 2 view" << endl;
+	std::cout << "-vr : video reader" << endl;
+	std::cout << "-ire : Image resize" << endl;
+	std::cout << "-cl : center line" << endl;
+	std::cout << "-isp: Sift or Asift Keypoints Dot Print int Image" << endl;
+	std::cout << "-h : help show" << endl;
 }
 
 /**
@@ -351,9 +613,15 @@ void main(int argc,char *argv[]){
 		string option = string(argv[1]);
 		if(option=="-vw"){
 			main_videoWriter(argc,argv);
+		}else if(option=="-vw2"){
+			main_videoWriter2(argc,argv);
 		}else if(option=="-vr"){
 			main_videoReader(argc,argv);
+		}else if(option=="-iw2"){
+			main_imageWriter(argc,argv);
 		}else if(option=="-ir"){
+			main_imageReader(argc,argv);
+		}else if(option=="-ire"){
 			main_resizeImage(argc,argv);
 		}else if(option=="-cl"){
 			main_centerLine(argc,argv);
@@ -363,8 +631,8 @@ void main(int argc,char *argv[]){
 			main_help();
 		}
 	}else{
-		cout << "not command." << endl;
-		cout << "help is -h option." << endl;
+		std::cout << "not command." << endl;
+		std::cout << "help is -h option." << endl;
 	}
 }
 
