@@ -1,51 +1,83 @@
+// Copyright (c) 2013 Shota Taniguchi
+// 
+// This software is released under the MIT License.
+// 
+// http://opensource.org/licenses/mit-license.php
+
 #include "Asift.h"
 
 
 Asift::Asift(void)
 {
+	init(1);
 }
 
+Asift::Asift(string ini_name,string sift_param_ini_name){
+	init(1,ini_name,sift_param_ini_name);
+}
 
 Asift::~Asift(void)
 {
 }
 
-void Asift::init(int readini,string imgBase_name,string imgInput_name,
-			string imgV_name,string imgH_name,
-			string baseKeys_name,string inputKeys_name,
-			string matchings_name,string capIn_name,string capOut_name,
-			int tilt1,int tilt2,int resize_flag){
+void Asift::init(int readini,string ini_name,string sift_param_ini_name){
+			//string imgBase_name,string imgInput_name,
+			//string imgV_name,string imgH_name,
+			//string baseKeys_name,string inputKeys_name,
+			//string matchings_name,string capIn_name,string capOut_name,
+			//int tilt1,int tilt2,int resize_flag){
 
 	/**********************************************
 	 * 設定初期化
 	 */
+	path = pro::Dir();
+
+	/**********************************************
+	 * iniファイルから読み込み
+	 */
+	if(readini){
+		readIni(ini_name);
+	}else{
+		defaultParam();
+	}
+
+}
+
+void Asift::defaultParam(){
+		// 設定ファイル名
+	//iniFileName = "Asift.ini";
+	iniSiftParamName = "SiftParam.ini";
 
 	// ファイル名初期化
-	imgBaseName=imgBase_name;
-	imgInputName=imgInput_name;
-	imgVName=imgV_name;
-	imgHName=imgH_name;
-	baseKeysName = baseKeys_name;
-	inputKeysName = inputKeys_name;
-	matchingsName = matchings_name;
-	capInName = capIn_name;
-	capOutName = capOut_name;
+	imgBaseName="imgBase.png";
+	imgInputName="imgInput.png";
+	imgVName="imgOutVert.png";
+	imgHName="imgOutHori.png";
+	baseKeysName = "baseKeys.txt";
+	inputKeysName = "inputKeys.txt";
+	matchingsName = "matchings.txt";
+	capInName = "capin.avi";
+	capOutName = "capout.avi";
 	xAxisKeysName = "xAxisKeys.txt";
 
 	// ディレクトリ初期化
 	videoOutputDir = pro::Dir("videoOutput",false);
 
 	// リサイズフラグ初期化
-	resizeFlag = resize_flag;
+	resizeFlag = 1;
 
 	// キーポイント初期化
-	baseKeys = AsiftKeypoints(tilt1);
-	inputKeys = AsiftKeypoints(tilt2);
+	baseKeys = AsiftKeypoints(7,iniSiftParamName);
+	inputKeys = AsiftKeypoints(7,iniSiftParamName);
 
 	// メッセージ表示フラグ初期化
 	verb = 0;
 	// 連結空白幅初期化
 	bandWidth = 20;
+
+	// リサイズサイズ
+	resizeWidth = IMAGE_X;
+	resizeHeight = IMAGE_Y;
 
 	// オプション初期化
 	baseKeysInputFlag = 0;
@@ -61,14 +93,11 @@ void Asift::init(int readini,string imgBase_name,string imgInput_name,
 	onMouseCount = 0;
 
 	// X軸キーポイントの初期化
-	xAxis = AsiftKeypoints(tilt1);
+	//xAxis = AsiftKeypoints(7,iniSiftParamName);
 
-	/**********************************************
-	 * iniファイルから読み込み
-	 */
-	if(readini){
-		readIni();
-	}
+}
+
+void Asift::initImages(){
 
 	/**********************************************
 	 * 画像読み込み
@@ -87,17 +116,17 @@ void Asift::init(int readini,string imgBase_name,string imgInput_name,
 	 * そのほかの処理の初期化
 	 */
 	// 矩形フィルターを画像全体に初期化
-	baseFilterRect = cv::Rect(0,0,imgBase.size().width,imgBase.size().height);
-	centerPt.x = (baseFilterRect.width - baseFilterRect.x)/2;
-	centerPt.y = (baseFilterRect.height- baseFilterRect.y)/2;
-
+	filterRect = cv::Rect(0,0,imgBase.size().width,imgBase.size().height);
+	centerPt.x = (filterRect.width - filterRect.x)/2;
+	centerPt.y = (filterRect.height- filterRect.y)/2;
 }
 
-void Asift::writeIni(){
-	ptree pt;
-
+void Asift::writeIni(ptree &pt){
 	// write Path
 	pt.put("Path.VideoOutput",videoOutputDir.getFileName());
+
+	// write ini file
+	pt.put("Ini.SiftParam",iniSiftParamName);
 
 	// write File
 	pt.put("File.BaseImage",imgBaseName);
@@ -126,68 +155,89 @@ void Asift::writeIni(){
 	pt.put("OptionFlag.FilterRectOnMouse",filterRectOnMouseFlag);
 
 	// write OptionValue
+	pt.put("OptionValue.ResizeWidth",resizeWidth);
+	pt.put("OptionValue.ResizeHeight",resizeHeight);
 	pt.put("OptionValue.CenterLineDistance",centerLineDistance);
-
-	// write Sift Parameter
-	baseKeys.iniwriteSiftParameters(pt);
-
-	// writing
-	write_ini("Asift.ini",pt);
 }
 
-void Asift::readIni(){
+void Asift::readIni(ptree &pt){
 
+	// read path
+	videoOutputDir = pro::Dir(pt.get_optional<std::string>("Path.VideoOutput").get(),false);
 
-	if(path.isExist("Asift.ini")){
+	// read ini file
+	iniSiftParamName = pt.get_optional<std::string>("Ini.SiftParam").get();
 
-		ptree pt;
-		read_ini("Asift.ini", pt);
+	// read file
+	imgBaseName = pt.get_optional<std::string>("File.BaseImage").get();
+	imgInputName = pt.get_optional<std::string>("File.InputImage").get();
+	imgVName = pt.get_optional<std::string>("File.OutPutVertImage").get();
+	imgHName = pt.get_optional<std::string>("File.OutputHoriImage").get();
+	baseKeysName = pt.get_optional<std::string>("File.OutputKeyPointsBase").get();
+	inputKeysName = pt.get_optional<std::string>("File.OutputKeyPointsInput").get();
+	matchingsName = pt.get_optional<std::string>("File.OutputMatching").get();
+	capInName = pt.get_optional<std::string>("File.CapInput").get();
+	capOutName = pt.get_optional<std::string>("File.CapOutput").get();
+	xAxisKeysName = pt.get_optional<std::string>("File.XAxisKeys").get();
 
-		// read path
-		videoOutputDir = pro::Dir(pt.get_optional<std::string>("Path.VideoOutput").get(),false);
-
-		// read file
-		imgBaseName = pt.get_optional<std::string>("File.BaseImage").get();
-		imgInputName = pt.get_optional<std::string>("File.InputImage").get();
-		imgVName = pt.get_optional<std::string>("File.OutPutVertImage").get();
-		imgHName = pt.get_optional<std::string>("File.OutputHoriImage").get();
-		baseKeysName = pt.get_optional<std::string>("File.OutputKeyPointsBase").get();
-		inputKeysName = pt.get_optional<std::string>("File.OutputKeyPointsInput").get();
-		matchingsName = pt.get_optional<std::string>("File.OutputMatching").get();
-		capInName = pt.get_optional<std::string>("File.CapInput").get();
-		capOutName = pt.get_optional<std::string>("File.CapOutput").get();
-		xAxisKeysName = pt.get_optional<std::string>("File.XAxisKeys").get();
-
-		// read Asift Parameter
-		int tilts1 = pt.get_optional<int>("Asift.BaseTilt").get();
-		int tilts2 = pt.get_optional<int>("Asift.InputTilt").get();
-
-		baseKeys = AsiftKeypoints(tilts1);
-		inputKeys = AsiftKeypoints(tilts2);
+	// read Asift Parameter
+	int tilts1 = pt.get_optional<int>("Asift.BaseTilt").get();
+	int tilts2 = pt.get_optional<int>("Asift.InputTilt").get();
 		
-		// read Asift Parameter options
-		resizeFlag = pt.get_optional<int>("Asift.ResizeFlag").get();
-		verb = pt.get_optional<int>("Asift.Verb").get();
-		bandWidth = pt.get_optional<int>("Asift.BandWidth").get();
+	// read Asift Parameter options
+	resizeFlag = pt.get_optional<int>("Asift.ResizeFlag").get();
+	verb = pt.get_optional<int>("Asift.Verb").get();
+	bandWidth = pt.get_optional<int>("Asift.BandWidth").get();
 
-		// read OptionFlag
-		baseKeysInputFlag = pt.get_optional<int>("OptionFlag.BaseFileInput").get();
-		videoInputFlag = pt.get_optional<int>("OptionFlag.VideoInput").get();
-		videoKeypointsOutputFlag = pt.get_optional<int>("OptionFlag.VideoKeypointsOutput").get();
-		siftDotPrintFlag = pt.get_optional<int>("OptionFlag.SiftDotPrint").get();
-		filterRectOnMouseFlag = pt.get_optional<int>("OptionFlag.FilterRectOnMouse").get();
+	// read OptionFlag
+	baseKeysInputFlag = pt.get_optional<int>("OptionFlag.BaseFileInput").get();
+	videoInputFlag = pt.get_optional<int>("OptionFlag.VideoInput").get();
+	videoKeypointsOutputFlag = pt.get_optional<int>("OptionFlag.VideoKeypointsOutput").get();
+	siftDotPrintFlag = pt.get_optional<int>("OptionFlag.SiftDotPrint").get();
+	filterRectOnMouseFlag = pt.get_optional<int>("OptionFlag.FilterRectOnMouse").get();
 
-		// read OptionValue
-		centerLineDistance = pt.get_optional<int>("OptionValue.CenterLineDistance").get();
+	// read OptionValue
+	resizeWidth = pt.get_optional<int>("OptionValue.ResizeWidth").get();
+	resizeHeight = pt.get_optional<int>("OptionValue.ResizeHeight").get();
+	centerLineDistance = pt.get_optional<int>("OptionValue.CenterLineDistance").get();
+			
+	baseKeys = AsiftKeypoints(tilts1,iniSiftParamName);
+	inputKeys = AsiftKeypoints(tilts2,iniSiftParamName);
+}
 
-		// Read Sift Parameter 
-		baseKeys.inireadSiftParameters(pt);
-		inputKeys.inireadSiftParameters(pt);
+void Asift::writeIni(std::string ini_file_name){
+
+	/**********************************************
+	 * asift ptree
+	 */
+	ptree pt;
+
+	writeIni(pt);
+
+	// writing
+	write_ini(ini_file_name,pt);
+
+}
+
+void Asift::readIni(std::string ini_file_name){
+
+	
+	/**********************************************
+	 * asift ini read
+	 */
+	ptree pt;
+	if(path.isExist(ini_file_name)){
+
+		read_ini(ini_file_name, pt);
+
+		readIni(pt);
 
 	}else{
 
-		std::cout << "not exist Asift.ini" << endl;
-		writeIni();
+		std::cout << "not exist " << ini_file_name << endl;
+		
+		defaultParam();
+		writeIni(ini_file_name);
 
 	}
 
@@ -196,6 +246,11 @@ void Asift::readIni(){
 void Asift::run(){
 	time_t tstart, tend;
 	pro::Timer timer;
+	
+	/***********************************************************
+	 *  画像初期化処理
+	 */
+	initImages();
 	
 	/***********************************************************
 	 *  Keypoints BaseImage
@@ -226,13 +281,14 @@ void Asift::run(){
 	 */
 	if(filterRectOnMouseFlag){
 		std::cout << "keypoints1 Rect Filter set..." << endl;
-			// 矩形フィルター処理
-			setFilterRectanglePoints();
+			// 矩形フィルターセット
+			setFilterRectanglePoints(imgBase);
 		timer.lap();
-			fileterRun();
-		std::cout << "pt1(" << baseFilterRect.x << "," << baseFilterRect.y << ") " << flush;
-		std::cout << "pt2(" << baseFilterRect.x+baseFilterRect.width << "," 
-			<< baseFilterRect.y + baseFilterRect.height << ")" << endl;
+			// フィルタ実行
+			fileterRun(baseKeys);
+		std::cout << "pt1(" << filterRect.x << "," << filterRect.y << ") " << flush;
+		std::cout << "pt2(" << filterRect.x+filterRect.width << "," 
+			<< filterRect.y + filterRect.height << ")" << endl;
 		std::cout << baseKeys.getNum() <<  " ASIFT keypoints are detected." << endl;
 		std::cout << "Keypoints1 computation accomplished in " << (double)timer.getDiff()/pro::Timer::PER_SEC << " seconds." << endl << endl;
 		timer.lap();
@@ -241,7 +297,7 @@ void Asift::run(){
 	/***************************************************************
 	 * X軸付近の特徴点取得
 	 */
-	setCenterLinePoints();
+	setCenterLinePoints(baseKeys);
 	xAxis.draw(imgBase);
 	xAxis.output(xAxisKeysName);
 	
@@ -300,7 +356,7 @@ void Asift::run(){
 
 			std::cout << inputKeys.getNum() <<  " ASIFT keypoints are detected." << endl;
 
-			computeMatching();
+			computeMatching(baseKeys,inputKeys);
 			
 			// ファイル出力処理
 			if(videoKeypointsOutputFlag){
@@ -347,7 +403,7 @@ void Asift::run(){
 		 */
 		std::cout << "Matching the keypoints..." << endl;
 
-			computeMatching();
+			computeMatching(baseKeys,inputKeys);
 		
 		//std::cout << "The two images match! " << matchings.getNum() << " matchings are identified." << endl;
 		std::cout << "Keypoints matching accomplished in " << (double)timer.getDiff()/pro::Timer::PER_SEC << " seconds." << endl << endl;
@@ -371,81 +427,173 @@ void Asift::run(){
 
 }
 
-void Asift::setImage(pro::Image &src,int id){
-	if(id==IMAGE_ID_BASE){
-		imgBaseGray.grayeScale(src);
-		resize(imgBaseGray,imgBaseGrayZoom,baseZoom,resizeFlag);
-		unsigned char * iarr1 = imgBaseGrayZoom.getU8Data();
-		ipixelsBase = std::vector<float>(iarr1,iarr1 + imgBaseGrayZoom.size().width * imgBaseGrayZoom.size().height);
-		delete[] iarr1;
-	}else if(IMAGE_ID_INPUT){
-		imgInputGray.grayeScale(src);
-		resize(imgInputGray,imgInputGrayZoom,inputZoom,resizeFlag);
-		unsigned char * iarr2 = imgInputGrayZoom.getU8Data();
-		ipixelsInput = std::vector<float>(iarr2,iarr2 + imgInputGrayZoom.size().width * imgInputGrayZoom.size().height);
-		delete[] iarr2;
+void Asift::markerCreate(std::string markerName,int tilts,int rectFilterFlag,int imageShow){
+	
+	pro::Timer timer;
+
+	pro::Image imgMarker;
+	AsiftKeypoints markerKeys = AsiftKeypoints(tilts);
+
+	/***************************************************************
+	 * 画像読み込み
+	 */
+	imgMarker.load(markerName);
+	setImage(imgMarker,IMAGE_ID_ELSE,markerKeys);
+
+	
+	/***************************************************************
+	 * キーポイントの計算
+	 */
+	std::cout << "Computing Marker on the image..." << endl;
+	timer.start();
+
+		// キーポイント算出
+		computeKeyPoints(IMAGE_ID_ELSE,markerKeys);
+		markerKeys.draw(imgMarker);
+		
+	std::cout << markerKeys.getNum() <<  " ASIFT keypoints are detected." << endl;
+	std::cout << "markerKeys computation accomplished in " << (double)timer.getDiff()/pro::Timer::PER_SEC << " seconds." << endl << endl;
+	
+	/***************************************************************
+	 * 矩形フィルター処理
+	 */
+	if(rectFilterFlag){
+		std::cout << "markerKeys Rect Filter set..." << endl;
+			// 矩形フィルター処理
+			setFilterRectanglePoints(imgMarker);
+		timer.lap();
+			fileterRun(markerKeys);
+		std::cout << "pt1(" << filterRect.x << "," << filterRect.y << ") " << flush;
+		std::cout << "pt2(" << filterRect.x+filterRect.width << "," 
+			<< filterRect.y + filterRect.height << ")" << endl;
+		std::cout << markerKeys.getNum() <<  " ASIFT keypoints are detected." << endl;
+		std::cout << "markerKeys computation accomplished in " << (double)timer.getDiff()/pro::Timer::PER_SEC << " seconds." << endl << endl;
+		timer.lap();
+	}
+
+	/***************************************************************
+	 * X軸付近の特徴点取得
+	 */
+	setCenterLinePoints(markerKeys);
+	xAxis.output(pro::Dir::getStem(markerName)+"_xAxisKeys.txt");
+	
+	/***************************************************************
+	 * Base Keypoints ファイル出力
+	 */
+	markerKeys.output(pro::Dir::getStem(markerName)+"_Keys.txt");
+	
+	/***************************************************************
+	 * 選択されたキーポイントを描写
+	 */
+	if(imageShow){
+		imgMarker.load(markerName);
+		markerKeys.draw(imgMarker);
+		xAxis.draw(imgMarker,cv::Scalar(255,255,0),cv::Scalar(255,255,0));
+		imgMarker.imshow(pro::Dir::getStem(markerName),1);
+		cv::waitKey(0);
 	}
 }
 
-void Asift::computeKeyPoints(int id){
+void Asift::setImage(pro::Image &src,int id,AsiftKeypoints &keys){
 	if(id==IMAGE_ID_BASE){
-		baseKeys.computeAsiftKeyPoints(ipixelsBase,imgBaseGrayZoom.size().width,imgBaseGrayZoom.size().height,verb,baseZoom);
+		baseKeys.setImage(src,resizeFlag,resizeWidth,resizeHeight);
 	}else if(id==IMAGE_ID_INPUT){
-		inputKeys.computeAsiftKeyPoints(ipixelsInput,imgInputGrayZoom.size().width,imgInputGrayZoom.size().height,verb,inputZoom);
+		inputKeys.setImage(src,resizeFlag,resizeWidth,resizeHeight);
+	}else if(id==IMAGE_ID_ELSE){
+		keys.setImage(src,resizeFlag,resizeWidth,resizeHeight);
 	}
 }
 
-void Asift::computeMatching(){
-	matchings.setKeypoints(baseKeys,inputKeys);
+void Asift::computeKeyPoints(int id,AsiftKeypoints &keys){
+	if(id==IMAGE_ID_BASE){
+		baseKeys.computeAsiftKeyPoints(verb);
+	}else if(id==IMAGE_ID_INPUT){
+		inputKeys.computeAsiftKeyPoints(verb);
+	}else if(id==IMAGE_ID_ELSE){
+		keys.computeAsiftKeyPoints(verb);
+	}
+}
+
+void Asift::computeMatching(AsiftKeypoints keys1,AsiftKeypoints keys2){
+	matchings.setKeypoints(keys1,keys2);
 	matchings.computeAsiftMatches(verb);
 }
 
-void Asift::setFilterRectanglePoints(){
+void Asift::setFilterRectanglePoints(pro::Image &src){
 
 	pro::Image base;
 	string winName="FilterRectangle";
-	base.clone(imgBase);
+	base.clone(src);
 	setMouseEventId(ON_MOUSE_ID_FILTER_RECT);
 	onMouseCount = 0;
+
 	while(1){
+
 		base.imshow(winName);
-		imgBase.clone(base);
+		src.clone(base);
+
 		if(onMouseCount==0){
-			imgBase.circle(cv::Point2f(baseFilterRect.x,baseFilterRect.y),1,cv::Scalar(0,255,0));
+			src.circle(cv::Point2f(filterRect.x,filterRect.y),1,cv::Scalar(0,255,0));
 		}else if(onMouseCount==1){
-			imgBase.circle(cv::Point2f(baseFilterRect.x+baseFilterRect.width
-							,baseFilterRect.y+baseFilterRect.height)
+			src.circle(cv::Point2f(filterRect.x+filterRect.width
+							,filterRect.y+filterRect.height)
 							,2,cv::Scalar(255,255,0));
-			imgBase.rectangle(cv::Point2f(baseFilterRect.x,baseFilterRect.y)
-							,cv::Point2f(baseFilterRect.x+baseFilterRect.width
-							,baseFilterRect.y+baseFilterRect.height),cv::Scalar(0,255,0));
+			src.rectangle(cv::Point2f(filterRect.x,filterRect.y)
+							,cv::Point2f(filterRect.x+filterRect.width
+							,filterRect.y+filterRect.height),cv::Scalar(0,255,0));
 		}else{
 			break;
 		}
 
-		imgBase.imshow(winName);
+		src.imshow(winName);
 
 		cv::waitKey(30);
 
 		cv::setMouseCallback(winName,onMouse,this);
 	}
 	
-	centerPt.x = (baseFilterRect.width - baseFilterRect.x)/2;
-	centerPt.y = (baseFilterRect.height- baseFilterRect.y)/2;
+	centerPt = getCenterPoint(cv::Point2f(filterRect.x,filterRect.y),
+		cv::Point2f(filterRect.x+filterRect.width,filterRect.y+filterRect.height));
 
 	filterFlag = filterFlag | FILTER_RECT_FLAG;
 }
 
-void Asift::setCenterLinePoints(){
-	xAxis = AsiftKeypoints(baseKeys);
+cv::Point2f Asift::getCenterPoint(cv::Point2f pt1,cv::Point2f pt2){
+	
+	int maxX,maxY,minX,minY;
+	cv::Point2f center;
+
+	if(pt1.x>pt2.x){
+		maxX=pt1.x;
+		minX=pt2.x;
+	}else{
+		maxX=pt2.x;
+		minX=pt1.x;
+	}
+	if(pt1.y>pt2.y){
+		maxY=pt1.y;
+		minY=pt2.y;
+	}else{
+		maxY=pt2.y;
+		minY=pt1.y;
+	}
+
+	center.x = (maxX-minX)/2 + minX;
+	center.y = (maxY-minY)/2 + minY;
+
+	return center;
+}
+
+void Asift::setCenterLinePoints(AsiftKeypoints &keys){
+	xAxis = AsiftKeypoints(keys);
 	xAxis.filterCenterLine(centerPt,centerLineDistance);
 }
 
-void Asift::fileterRun(){
+void Asift::fileterRun(AsiftKeypoints &keys){
 	if((filterFlag & FILTER_RECT_FLAG) == 1){
-		baseKeys.filterRectangle(cv::Point2f(baseFilterRect.x,baseFilterRect.y)
-								,cv::Point2f(baseFilterRect.x+baseFilterRect.width
-								,baseFilterRect.y+baseFilterRect.height));
+		keys.filterRectangle(cv::Point2f(filterRect.x,filterRect.y)
+								,cv::Point2f(filterRect.x+filterRect.width
+								,filterRect.y+filterRect.height));
 	}
 }
 
@@ -463,21 +611,21 @@ void Asift::onMouse_filterRect(int event,int x,int y,int flag){
 	switch(event) {
 		case cv::EVENT_MOUSEMOVE:
 			if(onMouseCount==0){
-				baseFilterRect.x = x;
-				baseFilterRect.y = y;
+				filterRect.x = x;
+				filterRect.y = y;
 			}else{
-				baseFilterRect.width = x-baseFilterRect.x;
-				baseFilterRect.height = y-baseFilterRect.y;
+				filterRect.width = x-filterRect.x;
+				filterRect.height = y-filterRect.y;
 			}
 			break;
 		case cv::EVENT_LBUTTONDOWN:
 			if(onMouseCount==0){
-				baseFilterRect.x = x;
-				baseFilterRect.y = y;
+				filterRect.x = x;
+				filterRect.y = y;
 				onMouseCount++;
 			}else{
-				baseFilterRect.width = x-baseFilterRect.x;
-				baseFilterRect.height = y-baseFilterRect.y;
+				filterRect.width = x-filterRect.x;
+				filterRect.height = y-filterRect.y;
 				onMouseCount++;
 			}
 			break;
@@ -491,47 +639,47 @@ void Asift::onMouse_filterRect(int event,int x,int y,int flag){
 	}
 }
 
-void Asift::resize(pro::Image &src,pro::Image &dst,float &zoom,int resizeFlag){
-	if(!resizeFlag){
-		dst.clone(src);
-		zoom = 1;
-	}else{
-		//std::cout << "WARNING: The input images are resized to " << IMAGE_X << "x" << IMAGE_Y << " for ASIFT. " << endl 
-		//<< "         But the results will be normalized to the original image size." << endl << endl;
-		
-		float InitSigma_aa = 1.6;
-		
-		int wS,hS,w,h;
-				
-		float areaS = IMAGE_X * IMAGE_Y;
-
-		w = src.size().width;
-		h = src.size().height;
-
-		float area1 = w * h;
-		zoom = sqrt(area1/areaS);
-		
-		wS = (int) (w / zoom);
-		hS = (int) (h / zoom);
-		
-		/* Anti-aliasing filtering along vertical direction */
-		if ( zoom > 1 )
-		{
-			int ksize;
-			float sigma_aa = InitSigma_aa * zoom / 2;
-			const float GaussTruncate1 = 4.0;
-			ksize = (int)(2.0 * GaussTruncate1 * sigma_aa + 1.0);
-			ksize = MAX(3, ksize);    /* Kernel must be at least 3. */
-			if (ksize % 2 == 0)       /* Make kernel size odd. */
-				ksize++;
-			assert(ksize < 100);
-			cv::GaussianBlur((const cv::Mat&)src, (cv::Mat&)dst, cv::Size(ksize,ksize), sigma_aa, sigma_aa);
-		}
-			
-		dst.resize(src,cv::Size(wS,hS));
-		
-	}
-}
+//void Asift::resize(pro::Image &src,pro::Image &dst,float &zoom,int resizeFlag){
+//	if(!resizeFlag){
+//		dst.clone(src);
+//		zoom = 1;
+//	}else{
+//		//std::cout << "WARNING: The input images are resized to " << IMAGE_X << "x" << IMAGE_Y << " for ASIFT. " << endl 
+//		//<< "         But the results will be normalized to the original image size." << endl << endl;
+//		
+//		float InitSigma_aa = 1.6;
+//		
+//		int wS,hS,w,h;
+//				
+//		float areaS = IMAGE_X * IMAGE_Y;
+//
+//		w = src.size().width;
+//		h = src.size().height;
+//
+//		float area1 = w * h;
+//		zoom = sqrt(area1/areaS);
+//		
+//		wS = (int) (w / zoom);
+//		hS = (int) (h / zoom);
+//		
+//		/* Anti-aliasing filtering along vertical direction */
+//		if ( zoom > 1 )
+//		{
+//			int ksize;
+//			float sigma_aa = InitSigma_aa * zoom / 2;
+//			const float GaussTruncate1 = 4.0;
+//			ksize = (int)(2.0 * GaussTruncate1 * sigma_aa + 1.0);
+//			ksize = MAX(3, ksize);    /* Kernel must be at least 3. */
+//			if (ksize % 2 == 0)       /* Make kernel size odd. */
+//				ksize++;
+//			assert(ksize < 100);
+//			cv::GaussianBlur((const cv::Mat&)src, (cv::Mat&)dst, cv::Size(ksize,ksize), sigma_aa, sigma_aa);
+//		}
+//			
+//		dst.resize(src,cv::Size(wS,hS));
+//		
+//	}
+//}
 
 pro::Image Asift::createVertImage(pro::Image img){
 	pro::Image vertImg;

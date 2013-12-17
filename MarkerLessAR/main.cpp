@@ -12,9 +12,9 @@
 #include <opencv2/calib3d/calib3d.hpp>
 
 #include "../ASIFT/ASIFT/Asift.h"
+#include "MarkerLessAR.h"
 
 #include"../MyLibs/OpenCVLibs/Image.h"
-
 
 using namespace std;
 using namespace pro;
@@ -31,7 +31,19 @@ void main_centerLine(int argc,char *argv[]);
 void main_help();
 
 /**
+ * MarkerLessAR
+ * default
+ */
+void main_MarkerLessAR(int argc,char *argv[]){
+
+	MarkerLessAR mlar;
+	mlar.init(1);
+
+}
+
+/**
  * Asift main
+ * -asift
  */
 void main_Asift(int argc,char *argv[]){
 	Asift asift;
@@ -313,7 +325,6 @@ void main_resizeImage(int argc,char *argv[]){
 	cv::waitKey(0);
 }
 
-
 /**
  * 画像撮影2つカメラ
  * -iw2
@@ -443,6 +454,7 @@ void main_siftDotPrint(int argc,char *argv[]){
 
 	if(argc != 6 && argc!=7){
 		cout << "input >> input.png,output.png,keys.txt,flag=0(0:sift,1:asift),tilt" << endl;
+		return;
 	}
 
 	string input = argv[2];
@@ -453,6 +465,7 @@ void main_siftDotPrint(int argc,char *argv[]){
 	//AsiftKeypoints keys;
 	Asift asift;
 	asift.init(1);
+	asift.initImages();
 	Image in_img,out_img;
 	// 画像読み込み
 	in_img.load(input);
@@ -523,10 +536,12 @@ void main_centerLine(int argc,char *argv[]){
 	
 	Asift asift;
 	asift.init(1);
+	asift.initImages();
 	asift.baseKeys = AsiftKeypoints(1);
 
 	if(argc!=5){
 		cout << "input >> in.png,out.png,distance" << endl;
+		return;
 	}
 	
 	string input = argv[2];
@@ -551,8 +566,8 @@ void main_centerLine(int argc,char *argv[]){
 	out_img.imshow(output);
 
 	//asift.baseKeys.filterRectangle(cv::Point2f(0,0),cv::Point2f(out_img.size().width,out_img.size().height));
-	asift.setFilterRectanglePoints();
-	asift.fileterRun();
+	asift.setFilterRectanglePoints(in_img);
+	asift.fileterRun(asift.baseKeys);
 	std::cout << asift.baseKeys.getNum() << endl;
 
 	//asift.baseKeys.draw(out_img);
@@ -597,6 +612,10 @@ void main_centerLine(int argc,char *argv[]){
  */
 int main_calibrate(int argc,char *argv[])
 {
+	int cameraNum = 0;
+
+	if(argc==3) cameraNum = atoi(argv[2]);
+
 	// 撮影回数
 	const int number_of_patterns = 10;
 
@@ -616,7 +635,7 @@ int main_calibrate(int argc,char *argv[])
 	cv::TermCriteria criteria(CV_TERMCRIT_EPS + CV_TERMCRIT_ITER, 30, 0.1);
 
 	// カメラの接続を確認します
-	cv::VideoCapture capture(2); 
+	cv::VideoCapture capture(cameraNum); 
 
 	// カメラが未接続ならば，強制終了します
 	if (!capture.isOpened()) {
@@ -718,6 +737,13 @@ int main_calibrate(int argc,char *argv[])
 	// 内部パラメータ行列を表示します
 	std::cout << camera_matrix << std::endl;
 
+	// ファイル出力
+	//cv::FileStorage cvfs("CameraCalibrate.xml",CV_STORAGE_WRITE);
+	cv::FileStorage cvfs("CameraCalibrate.xml",CV_STORAGE_APPEND);
+	stringstream ss;
+	ss << "Camera" << cameraNum;
+	cv::write(cvfs,ss.str(),camera_matrix);
+
 	// http://www18.atwiki.jp/cvlec/pages/19.html
 	// http://d.hatena.ne.jp/fous/20090909/1252495733#20090909f1
 
@@ -726,11 +752,54 @@ int main_calibrate(int argc,char *argv[])
 }
 
 /**
+ * マーカー作成
+ * -mc
+ */
+void main_markerCreate(int argc,char *argv[]){
+
+	if(argc!=4 && argc!=5 && argc!=6){
+		cout << "input >> marker.png,titls,rectFilterFlag=1,imageShow=1" << endl;
+		return;
+	}
+
+	string markerName = argv[2];
+	int tilts = atoi(argv[3]);
+	
+	int rectFlag = 1;
+	if(argc==5)
+		rectFlag = atoi(argv[4]);
+
+	int showFlag = 1;
+	if(argc==6)
+		showFlag = atoi(argv[5]);
+
+	Asift asift;
+	asift.init(1);
+	asift.markerCreate(markerName,tilts,rectFlag,showFlag);
+}
+
+/**
+ * キャリブレーション読み込み
+ * -rcab
+ */
+void main_readCalibrate(int argc,char *argv[]){
+    cv::Mat cm;
+ 
+    cv::FileStorage cvfs("CameraCalibrate.xml", CV_STORAGE_READ);
+    cv::FileNode node(cvfs.fs, NULL);
+
+    cv::read(node["Camera0"], cm);
+
+    std::cout << cm << std::endl;
+}
+
+/**
  * ヘルプ表示 
  * -h
  */
 void main_help(){
-	std::cout << "default : Asift" << endl;
+	std::cout << "default : MarkerLessAR" << endl;
+	std::cout << "-asift : Asift Run" << endl;
 	std::cout << "-vw : video writer" << endl;
 	std::cout << "-vw2 : video writer 2 view" << endl;
 	std::cout << "-vr : video reader" << endl;
@@ -739,6 +808,8 @@ void main_help(){
 	std::cout << "-isp: Sift or Asift Keypoints Dot Print int Image" << endl;
 	std::cout << "-cl : center line" << endl;
 	std::cout << "-calibrate : calibrate Camera." << endl;
+	std::cout << "-mc : marker create" << endl;
+	std::cout << "-rcab : main_readCalibrate" << endl;
 	std::cout << "-h : help show" << endl;
 }
 
@@ -747,10 +818,12 @@ void main_help(){
  */
 void main(int argc,char *argv[]){
 	if(argc==1 || argv[1][0]!='-'){
-		main_Asift(argc,argv);
+		main_MarkerLessAR(argc,argv);
 	}else if(argc>1){
 		string option = string(argv[1]);
-		if(option=="-vw"){
+		if(option=="-asift"){
+			main_Asift(argc,argv);
+		}else if(option=="-vw"){
 			main_videoWriter(argc,argv);
 		}else if(option=="-vw2"){
 			main_videoWriter2(argc,argv);
@@ -768,6 +841,12 @@ void main(int argc,char *argv[]){
 			main_siftDotPrint(argc,argv);
 		}else if(option=="-calibrate"){
 			main_calibrate(argc,argv);
+		}else if(option=="-mc"){
+			main_markerCreate(argc,argv);
+		}else if(option=="-rcab"){
+			main_readCalibrate(argc,argv);
+		}else if(option=="-test"){
+
 		}else if(option=="-h"){
 			main_help();
 		}

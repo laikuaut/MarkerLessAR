@@ -1,26 +1,41 @@
+// Copyright (c) 2013 Shota Taniguchi
+// 
+// This software is released under the MIT License.
+// 
+// http://opensource.org/licenses/mit-license.php
+
 #include "AsiftKeypoints.h"
 
 
-AsiftKeypoints::AsiftKeypoints(int tilts)
+AsiftKeypoints::AsiftKeypoints(int tilts,std::string ini_name)
 {
 	path = pro::Dir();
 	this->tilts = tilts;
-	//inireadSiftParameters();
-	default_sift_parameters(siftparams);
+	inireadSiftParameters(ini_name);
 	num = 0;
-	w = h = 0;
+	w = 0,h = 0;
 }
 
 AsiftKeypoints::~AsiftKeypoints(void)
 {
+
 }
 
-int AsiftKeypoints::computeAsiftKeyPoints(vector<float>& image, int width, int height, int verb,float zoom)
+int AsiftKeypoints::computeAsiftKeyPoints(int verb)
 {
-	w = width,h = height;
-	this->zoom = zoom;
 	keys.clear();
-	num = compute_asift_keypoints(image,width,height,tilts,verb,keys,siftparams);
+	num = compute_asift_keypoints(imgPixels,w,h,tilts,verb,keys,siftparams);
+	return num;
+}
+
+int AsiftKeypoints::keypointsTotal(){
+	num=0;
+	for (int tt = 0; tt < (int) keys.size(); tt++){
+		for (int rr = 0; rr < (int) keys[tt].size(); rr++)
+		{
+			num += (int) keys[tt][rr].size();
+		}
+	}
 	return num;
 }
 
@@ -32,11 +47,20 @@ int AsiftKeypoints::getTilts() const{
 	return tilts;
 }
 
+void AsiftKeypoints::setImage(pro::Image &src,int resizeFlag,int width,int height){
+	imgGray.grayeScale(src);
+	resize(imgGray,imgGrayZoom,resizeFlag,width,height);
+	unsigned char * iarr = imgGrayZoom.getU8Data();
+	imgPixels = std::vector<float>(iarr,iarr + w * h);
+	delete[] iarr;
+}
+
+
 void AsiftKeypoints::inireadSiftParameters(ptree &pt){
 	
-	siftparams.OctaveMax	  = pt.get_optional<int>("SIFTParams.OctaveMax").get();
-	siftparams.DoubleImSize	  = pt.get_optional<int>("SIFTParams.DoubleImSize"  ).get();
-	siftparams.order		  = pt.get_optional<int>("SIFTParams.order"		  ).get();
+	siftparams.OctaveMax	  = pt.get_optional<int>("SIFTParams.OctaveMax"		  ).get();
+	siftparams.DoubleImSize	  = pt.get_optional<int>("SIFTParams.DoubleImSize"    ).get();
+	siftparams.order		  = pt.get_optional<int>("SIFTParams.order"			  ).get();
 	siftparams.InitSigma	  = pt.get_optional<float>("SIFTParams.InitSigma"	  ).get();
 	siftparams.BorderDist	  = pt.get_optional<int>("SIFTParams.BorderDist"	  ).get();
 	siftparams.Scales		  = pt.get_optional<int>("SIFTParams.Scales"		  ).get();
@@ -47,9 +71,9 @@ void AsiftKeypoints::inireadSiftParameters(ptree &pt){
 	siftparams.OriSigma		  = pt.get_optional<float>("SIFTParams.OriSigma"	  ).get();
 	siftparams.OriHistThresh  = pt.get_optional<float>("SIFTParams.OriHistThresh" ).get();
 	siftparams.MaxIndexVal	  = pt.get_optional<float>("SIFTParams.MaxIndexVal"	  ).get();
-	siftparams.MagFactor	  = pt.get_optional<int>("SIFTParams.MagFactor"	  ).get();
+	siftparams.MagFactor	  = pt.get_optional<int>("SIFTParams.MagFactor"		  ).get();
 	siftparams.IndexSigma	  = pt.get_optional<float>("SIFTParams.IndexSigma"	  ).get();
-	siftparams.IgnoreGradSign = pt.get_optional<int>("SIFTParams.IgnoreGradSign").get();
+	siftparams.IgnoreGradSign = pt.get_optional<int>("SIFTParams.IgnoreGradSign"  ).get();
 	siftparams.MatchRatio	  = pt.get_optional<float>("SIFTParams.MatchRatio"	  ).get();
 	siftparams.MatchXradius	  = pt.get_optional<float>("SIFTParams.MatchXradius"  ).get();
 	siftparams.MatchYradius	  = pt.get_optional<float>("SIFTParams.MatchYradius"  ).get();
@@ -61,6 +85,7 @@ void AsiftKeypoints::iniwriteSiftParameters(ptree &pt){
 }
 
 void AsiftKeypoints::iniwriteSiftParameters(ptree &pt,siftPar par){
+
 	pt.put("SIFTParams.OctaveMax"	  ,par.OctaveMax	 );
 	pt.put("SIFTParams.DoubleImSize"  ,par.DoubleImSize	 );
 	pt.put("SIFTParams.order"		  ,par.order		 );
@@ -80,6 +105,50 @@ void AsiftKeypoints::iniwriteSiftParameters(ptree &pt,siftPar par){
 	pt.put("SIFTParams.MatchRatio"	  ,par.MatchRatio	 );
 	pt.put("SIFTParams.MatchXradius"  ,par.MatchXradius	 );
 	pt.put("SIFTParams.MatchYradius"  ,par.MatchYradius	 );
+
+}
+
+void AsiftKeypoints::inireadSiftParameters(std::string name){
+
+	ptree pt;
+	
+	if(this->path.isExist(name)){
+
+		read_ini(name, pt);
+
+		inireadSiftParameters(pt);
+
+	}else{
+		
+		std::cout << "not exist " << name << endl;
+		
+		default_sift_parameters(siftparams);
+
+		iniwriteSiftParameters(name);
+
+
+	}
+
+}
+
+void AsiftKeypoints::iniwriteSiftParameters(std::string name){
+
+	ptree pt;
+	
+	iniwriteSiftParameters(pt);
+
+	write_ini(name,pt);
+
+}
+
+void AsiftKeypoints::iniwriteSiftParameters(std::string name,siftPar par){
+
+	ptree pt;
+	
+	iniwriteSiftParameters(pt,par);
+
+	write_ini(name,pt);
+
 }
 
 void AsiftKeypoints::output(string name){
@@ -91,7 +160,7 @@ void AsiftKeypoints::output(string name){
 		// Follow the same convention of David Lowe: 
 		// the first line contains the number of keypoints and the length of the desciptors (128)
 		of << tilts << " " << w << " " << h << " " << zoom << std::endl;  
-		of << getNum() << "  " << VecLength << "  " << std::endl;
+		of << getNum()<< "  " << VecLength << "  " << std::endl;
 		of << (int) keys.size() << std::endl;
 		for (int tt = 0; tt < (int) keys.size(); tt++)
 		{
@@ -204,7 +273,7 @@ void AsiftKeypoints::filterRectangle(cv::Point2f pt1,cv::Point2f pt2){
 		}	
 	}
 
-	num = keypointsTotal();
+	keypointsTotal();
 }
 
 void AsiftKeypoints::filterCenterLine(cv::Point2f centerPt,float distance){
@@ -248,9 +317,10 @@ void AsiftKeypoints::filterCenterLine(cv::Point2f centerPt,float distance){
 		*this = AsiftKeypoints(yAxis);
 	}
 
+	keypointsTotal();
 }
 
-void AsiftKeypoints::draw(pro::Image &src){
+void AsiftKeypoints::draw(pro::Image &src,cv::Scalar siftcol,cv::Scalar asiftcol){
 
 	for (int tt = 0; tt < (int) keys.size(); tt++)
 	{
@@ -259,12 +329,14 @@ void AsiftKeypoints::draw(pro::Image &src){
 			keypointslist::iterator ptr = keys[tt][rr].begin();
 			for(int i=0; i < (int) keys[tt][rr].size(); i++, ptr++)	
 			{
+				// 色の選択
 				cv::Scalar color;
 				if(tt == 0){
-					color = cv::Scalar(0,0,255);
+					color = siftcol;
 				}else{
-					color = cv::Scalar(255,0,0);
+					color = asiftcol;
 				}
+
 				// 中心点の描写
 				src.circle(cv::Point2f(zoom*ptr->x,zoom*ptr->y),1,color);
 				// スケールの描写
@@ -280,13 +352,47 @@ void AsiftKeypoints::draw(pro::Image &src){
 	}
 }
 
-int AsiftKeypoints::keypointsTotal() const{
-	int num_keys_total=0;
-	for (int tt = 0; tt < (int) keys.size(); tt++){
-		for (int rr = 0; rr < (int) keys[tt].size(); rr++)
+void AsiftKeypoints::resize(pro::Image &src,pro::Image &dst,int resizeFlag,int width,int height){
+	if(!resizeFlag){
+		dst.clone(src);
+		zoom = 1;
+	}else{
+		//std::cout << "WARNING: The input images are resized to " << IMAGE_X << "x" << IMAGE_Y << " for ASIFT. " << endl 
+		//<< "         But the results will be normalized to the original image size." << endl << endl;
+		
+		float InitSigma_aa = 1.6;
+		
+		int wS,hS,w,h;
+				
+		float areaS = width * height;
+
+		w = src.size().width;
+		h = src.size().height;
+
+		float area1 = w * h;
+		zoom = sqrt(area1/areaS);
+		
+		wS = (int) (w / zoom);
+		hS = (int) (h / zoom);
+		
+		/* Anti-aliasing filtering along vertical direction */
+		if ( zoom > 1 )
 		{
-			num_keys_total += (int) keys[tt][rr].size();
+			int ksize;
+			float sigma_aa = InitSigma_aa * zoom / 2;
+			const float GaussTruncate1 = 4.0;
+			ksize = (int)(2.0 * GaussTruncate1 * sigma_aa + 1.0);
+			ksize = MAX(3, ksize);    /* Kernel must be at least 3. */
+			if (ksize % 2 == 0)       /* Make kernel size odd. */
+				ksize++;
+			assert(ksize < 100);
+			cv::GaussianBlur((const cv::Mat&)src, (cv::Mat&)dst, cv::Size(ksize,ksize), sigma_aa, sigma_aa);
 		}
+			
+		dst.resize(src,cv::Size(wS,hS));
+
+		this->w = wS;
+		this->h = hS;
+		
 	}
-	return num_keys_total;
 }
