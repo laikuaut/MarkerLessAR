@@ -9,9 +9,12 @@
 #include<gl\GL.h>
 #include<gl\GLU.h>
 
+#include <opencv2/calib3d/calib3d.hpp>
+
 #include "../ASIFT/ASIFT/Asift.h"
 
 #include"../MyLibs/OpenCVLibs/Image.h"
+
 
 using namespace std;
 using namespace pro;
@@ -589,6 +592,140 @@ void main_centerLine(int argc,char *argv[]){
 }
 
 /**
+ * カメラキャリブレーション
+ * -calibrate
+ */
+int main_calibrate(int argc,char *argv[])
+{
+	// 撮影回数
+	const int number_of_patterns = 10;
+
+	// チェッカーパターンの交点の数
+	const cv::Size pattern_size(13, 9);
+
+	// 格子の長さ [mm]
+	const int length = 19.538;
+
+	// 交点の画像座標
+	std::vector<std::vector<cv::Point2f>> image_points(number_of_patterns);
+
+	// 交点のワールド座標
+	std::vector<std::vector<cv::Point3f>> world_points(number_of_patterns);
+
+	// 
+	cv::TermCriteria criteria(CV_TERMCRIT_EPS + CV_TERMCRIT_ITER, 30, 0.1);
+
+	// カメラの接続を確認します
+	cv::VideoCapture capture(2); 
+
+	// カメラが未接続ならば，強制終了します
+	if (!capture.isOpened()) {
+		return -1;
+	}
+
+	// カメラ画像
+	cv::Mat camera_image;
+
+	// グレースケール画像
+	cv::Mat grayscale_image;
+
+	// カメラ画像表示ウィンドウを作ります
+	cv::namedWindow("Camera Image");
+
+	// グレースケール画像表示ウィンドウを作ります
+	cv::namedWindow("Grayscale Image");
+
+	int i = 0;
+	while (i < number_of_patterns) {
+		// カメラ画像を取得します
+		capture >> camera_image;
+
+		// カメラ画像をグレースケール画像へ変換します
+		cv::cvtColor(camera_image, grayscale_image, CV_BGR2GRAY);
+
+		// グレースケール画像を表示します
+		cv::imshow("Grascale Image", grayscale_image);
+
+		// 1[ms]キー入力がなければ，カメラ画像の取得をやり直します
+		if (cv::waitKey(1) < 0) {
+			continue;
+		}
+
+		// チェッカーパターンの交点を検出します
+		if (!cv::findChessboardCorners(grayscale_image, pattern_size, image_points[i])) {
+			// 交点検出に失敗したので，やり直します
+			continue;
+		}
+
+		// 交点をサブピクセル精度に修正します
+		cv::cornerSubPix(
+			grayscale_image,	// 画像
+			image_points[i],	// 交点
+			cv::Size(11, 11),	// 
+			cv::Size(-1, -1),	// 
+			criteria);			// 
+
+		// 修正後の交点をカメラ画像へ描画します
+		cv::drawChessboardCorners(
+			camera_image,				// カメラ画像
+			pattern_size,				// チェッカーパターンの大きさ
+			cv::Mat(image_points[i]),	// 交点
+			true);
+
+		// カメラ画像を表示します
+		cv::imshow("Camera Image", camera_image);
+
+		// 
+		i++;
+
+		// 
+		std::cout << i << "回目の検出ができました．" << std::endl;
+	}
+
+	// 交点のワールド座標を計算します
+	for (int i = 0; i < number_of_patterns; i++) {
+		for (int j = 0; j < pattern_size.area(); j++) {
+			world_points[i].push_back(
+				cv::Point3f(
+					static_cast<float>(j % pattern_size.width * length),
+					static_cast<float>(j / pattern_size.width * length),
+					0.0));
+		}
+	}
+
+	// 内部パラメータ行列
+	cv::Mat camera_matrix;
+
+	// 歪み係数ベクトル
+	cv::Mat distortions;
+
+	// 回転ベクトル
+	std::vector<cv::Mat> rotation_vectors;
+
+	// 並進ベクトル
+	std::vector<cv::Mat> translation_vectors;
+
+	// キャリブレーションを行います
+	cv::calibrateCamera(
+		world_points,			// 交点のワールド座標
+		image_points,			// 交点の画像座標
+		camera_image.size(),	// カメラ画像の大きさ
+		camera_matrix,			// 内部パラメータ行列
+		distortions,			// 歪み係数ベクトル
+		rotation_vectors,		// 回転ベクトル
+		translation_vectors);	// 並進ベクトル
+
+	// 内部パラメータ行列を表示します
+	std::cout << camera_matrix << std::endl;
+
+	// http://www18.atwiki.jp/cvlec/pages/19.html
+	// http://d.hatena.ne.jp/fous/20090909/1252495733#20090909f1
+
+	// 正常終了します
+	return 0;
+}
+
+/**
  * ヘルプ表示 
  * -h
  */
@@ -597,9 +734,11 @@ void main_help(){
 	std::cout << "-vw : video writer" << endl;
 	std::cout << "-vw2 : video writer 2 view" << endl;
 	std::cout << "-vr : video reader" << endl;
+	std::cout << "-iw2 : image writer 2 view" << endl;
 	std::cout << "-ire : Image resize" << endl;
-	std::cout << "-cl : center line" << endl;
 	std::cout << "-isp: Sift or Asift Keypoints Dot Print int Image" << endl;
+	std::cout << "-cl : center line" << endl;
+	std::cout << "-calibrate : calibrate Camera." << endl;
 	std::cout << "-h : help show" << endl;
 }
 
@@ -627,6 +766,8 @@ void main(int argc,char *argv[]){
 			main_centerLine(argc,argv);
 		}else if(option=="-isp"){
 			main_siftDotPrint(argc,argv);
+		}else if(option=="-calibrate"){
+			main_calibrate(argc,argv);
 		}else if(option=="-h"){
 			main_help();
 		}
