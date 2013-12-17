@@ -330,7 +330,7 @@ void main_resizeImage(int argc,char *argv[]){
  * -iw2
  */
 void main_imageWriter(int argc,char *argv[]){
-	cv::VideoCapture capLeft(1);
+	cv::VideoCapture capLeft(0);
 	cv::VideoCapture capRight(0);
 
 	// 様々な設定...
@@ -426,7 +426,7 @@ void main_imageWriter(int argc,char *argv[]){
 
 		int key = cv::waitKey(30);
 
-		// sキーで開始
+		// space 撮影
 		if(key == ' '){
 			frameLeft.save(argv[2]);
 			frameRight.save(argv[3]);
