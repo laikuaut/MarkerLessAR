@@ -55,6 +55,11 @@ void AsiftKeypoints::setImage(pro::Image &src,int resizeFlag,int width,int heigh
 	delete[] iarr;
 }
 
+void AsiftKeypoints::setImage(pro::Image &src,int resizeFlag,int width,int height,float &zoom){
+	setImage(src,resizeFlag,width,height);
+	zoom = this->zoom;
+}
+
 
 void AsiftKeypoints::inireadSiftParameters(ptree &pt){
 	

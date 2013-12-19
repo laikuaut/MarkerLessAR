@@ -69,6 +69,7 @@ public:
 	// チルト取得
 	int getTilts() const;
 	// 画像の設置
+	void setImage(pro::Image &src,int resizeFlag,int width,int height,float &zoom);
 	void setImage(pro::Image &src,int resizeFlag,int width,int height);
 
 	//　.iniファイル関連 -> ptree へデータを追加　読み書き処理なし

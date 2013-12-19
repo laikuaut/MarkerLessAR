@@ -19,15 +19,19 @@ class PRO_EXPORTS AsiftMatchings
 private:
 
 	int num;
-	AsiftKeypoints *asiftKeys1;
-	AsiftKeypoints *asiftKeys2;
 	siftPar siftparams;
 
 public:
-
+	
+	AsiftKeypoints *asiftKeys1;
+	AsiftKeypoints *asiftKeys2;
 	matchingslist matchings;
 
 	pro::Dir path;
+
+private:
+
+	void filterKeysMatchings(vector< vector< keypointslist > > &keys,int first);
 
 public:
 
@@ -35,7 +39,12 @@ public:
 	AsiftMatchings(AsiftKeypoints keys1,AsiftKeypoints keys2);
 	~AsiftMatchings(void);
 
+
+	// キーポイントのセット
 	void setKeypoints(AsiftKeypoints keys1,AsiftKeypoints keys2);
+
+	// マッチングしたキーポイントのみにする
+	void filterMatching();
 
 	// マッチング絵算
 	int computeAsiftMatches(int verb);

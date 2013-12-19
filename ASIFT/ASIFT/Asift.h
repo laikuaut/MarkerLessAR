@@ -77,14 +77,26 @@ private:
 	// 出力画像ファイル名(V:垂直結合画像,水平結合画像)
 	std::string imgVName,imgHName;
 	// 入力動画名,出力動画名
-	std::string capInName,capOutName;
+	std::string capInName;
+	std::string capVName,capHName;
 	// キーポイント保存ファイル名
 	std::string baseKeysName,inputKeysName;
 	// マッチング保存ファイル名
 	std::string matchingsName;
 	// X軸ファイル名
 	std::string xAxisKeysName;
-
+	
+	/********************************************
+	 * 名前
+	 */
+	// ベース名
+	std::string baseName;
+	// インプット名
+	std::string inputName;
+	// ベース拡張子
+	std::string baseExtention;
+	// インプット拡張子
+	std::string inputExtention;
 	/********************************************
 	 * ディレクトリ名
 	 */
@@ -200,6 +212,8 @@ public:
 	void defaultParam();
 	// 画像読み込み初期化
 	void initImages();
+	// 出力名を設定する
+	void initNames();
 
 	/********************************************
 	 * Asift.iniの作成関数

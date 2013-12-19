@@ -40,7 +40,8 @@ void Asift::init(int readini,string ini_name,string sift_param_ini_name){
 	}else{
 		defaultParam();
 	}
-
+	
+	initNames();
 }
 
 void Asift::defaultParam(){
@@ -51,14 +52,14 @@ void Asift::defaultParam(){
 	// ファイル名初期化
 	imgBaseName="imgBase.png";
 	imgInputName="imgInput.png";
-	imgVName="imgOutVert.png";
-	imgHName="imgOutHori.png";
-	baseKeysName = "baseKeys.txt";
-	inputKeysName = "inputKeys.txt";
-	matchingsName = "matchings.txt";
+	//imgVName="imgOutVert.png";
+	//imgHName="imgOutHori.png";
+	//baseKeysName = "baseKeys.txt";
+	//inputKeysName = "inputKeys.txt";
+	//matchingsName = "matchings.txt";
 	capInName = "capin.avi";
-	capOutName = "capout.avi";
-	xAxisKeysName = "xAxisKeys.txt";
+	//capOutName = "capout.avi";
+	//xAxisKeysName = "xAxisKeys.txt";
 
 	// ディレクトリ初期化
 	videoOutputDir = pro::Dir("videoOutput",false);
@@ -121,6 +122,31 @@ void Asift::initImages(){
 	centerPt.y = (filterRect.height- filterRect.y)/2;
 }
 
+void Asift::initNames(){
+	
+	baseName = pro::Dir::getStem(imgBaseName);
+	baseExtention = pro::Dir::getExtention(imgBaseName);
+	
+
+	baseKeysName = baseName + "_Keys.txt";
+	xAxisKeysName = baseName + "_xAxisKeys.txt";
+
+	if(videoInputFlag){
+		inputName = pro::Dir::getStem(capInName);
+		inputExtention = pro::Dir::getExtention(capInName);
+		capVName = inputName + "_Vert" + inputExtention;
+		capHName = inputName + "_Heri" + inputExtention;
+	}else{
+		inputName = pro::Dir::getStem(imgInputName);
+		inputExtention = pro::Dir::getExtention(imgInputName);
+	}
+	
+	imgVName = inputName + "_Vert" + baseExtention;
+	imgHName = inputName + "_Heri" + baseExtention;
+	inputKeysName = inputName + "_Keys.txt";
+	matchingsName = inputName + "_Matching.txt";
+}
+
 void Asift::writeIni(ptree &pt){
 	// write Path
 	pt.put("Path.VideoOutput",videoOutputDir.getFileName());
@@ -131,14 +157,14 @@ void Asift::writeIni(ptree &pt){
 	// write File
 	pt.put("File.BaseImage",imgBaseName);
 	pt.put("File.InputImage",imgInputName);
-	pt.put("File.OutPutVertImage",imgVName);
-	pt.put("File.OutputHoriImage",imgHName);
-	pt.put("File.OutputKeyPointsBase",baseKeysName);
-	pt.put("File.OutputKeyPointsInput",inputKeysName);
-	pt.put("File.OutputMatching",matchingsName);
+	//pt.put("File.OutPutVertImage",imgVName);
+	//pt.put("File.OutputHoriImage",imgHName);
+	//pt.put("File.OutputKeyPointsBase",baseKeysName);
+	//pt.put("File.OutputKeyPointsInput",inputKeysName);
+	//pt.put("File.OutputMatching",matchingsName);
 	pt.put("File.CapInput",capInName);
-	pt.put("File.CapOutput",capOutName);
-	pt.put("File.XAxisKeys",xAxisKeysName);
+	//pt.put("File.CapOutput",capOutName);
+	//pt.put("File.XAxisKeys",xAxisKeysName);
 	
 	// write Asift parameter
 	pt.put("Asift.BaseTilt",baseKeys.getTilts());
@@ -171,14 +197,14 @@ void Asift::readIni(ptree &pt){
 	// read file
 	imgBaseName = pt.get_optional<std::string>("File.BaseImage").get();
 	imgInputName = pt.get_optional<std::string>("File.InputImage").get();
-	imgVName = pt.get_optional<std::string>("File.OutPutVertImage").get();
-	imgHName = pt.get_optional<std::string>("File.OutputHoriImage").get();
-	baseKeysName = pt.get_optional<std::string>("File.OutputKeyPointsBase").get();
-	inputKeysName = pt.get_optional<std::string>("File.OutputKeyPointsInput").get();
-	matchingsName = pt.get_optional<std::string>("File.OutputMatching").get();
+	//imgVName = pt.get_optional<std::string>("File.OutPutVertImage").get();
+	//imgHName = pt.get_optional<std::string>("File.OutputHoriImage").get();
+	//baseKeysName = pt.get_optional<std::string>("File.OutputKeyPointsBase").get();
+	//inputKeysName = pt.get_optional<std::string>("File.OutputKeyPointsInput").get();
+	//matchingsName = pt.get_optional<std::string>("File.OutputMatching").get();
 	capInName = pt.get_optional<std::string>("File.CapInput").get();
-	capOutName = pt.get_optional<std::string>("File.CapOutput").get();
-	xAxisKeysName = pt.get_optional<std::string>("File.XAxisKeys").get();
+	//capOutName = pt.get_optional<std::string>("File.CapOutput").get();
+	//xAxisKeysName = pt.get_optional<std::string>("File.XAxisKeys").get();
 
 	// read Asift Parameter
 	int tilts1 = pt.get_optional<int>("Asift.BaseTilt").get();
@@ -318,8 +344,8 @@ void Asift::run(){
 
 		// ビデオライタ
 		int fps = 15;
-		cv::VideoWriter writerH("H"+capOutName, CV_FOURCC('X','V','I','D'), fps, cv::Size(imgBase.size().width*2+bandWidth,imgBase.size().height));
-		cv::VideoWriter writerV("V"+capOutName, CV_FOURCC('X','V','I','D'), fps, cv::Size(imgBase.size().width,imgBase.size().height*2+bandWidth));
+		cv::VideoWriter writerH(capHName, CV_FOURCC('X','V','I','D'), fps, cv::Size(imgBase.size().width*2+bandWidth,imgBase.size().height));
+		cv::VideoWriter writerV(capVName, CV_FOURCC('X','V','I','D'), fps, cv::Size(imgBase.size().width,imgBase.size().height*2+bandWidth));
 
 		pro::Image frame;
 
@@ -329,7 +355,7 @@ void Asift::run(){
 
 		// 表示
 		std::cout << "video Input is " << capInName << "." << endl;
-		std::cout << "video Output is " << capOutName << "." << endl;
+		std::cout << "video Output is " << capHName << " " << capVName << "." << endl;
 		cout << "start" << endl;
 
 		// ファイル出力用のディレクトリ作成
@@ -373,7 +399,7 @@ void Asift::run(){
 			//frame.imshow("viwe",1);
 			if(cv::waitKey(30) >= 0) break;
 
-			writerH << createHoriImage(frame).imshow("view");
+			writerH << createHoriImage(frame).imshow("view",1);
 			writerV << createVertImage(frame);
 
 		}
@@ -404,6 +430,9 @@ void Asift::run(){
 		std::cout << "Matching the keypoints..." << endl;
 
 			computeMatching(baseKeys,inputKeys);
+			matchings.filterMatching();
+			matchings.asiftKeys1->draw(imgBase);
+			matchings.asiftKeys2->draw(imgInput);
 		
 		//std::cout << "The two images match! " << matchings.getNum() << " matchings are identified." << endl;
 		std::cout << "Keypoints matching accomplished in " << (double)timer.getDiff()/pro::Timer::PER_SEC << " seconds." << endl << endl;
@@ -496,9 +525,9 @@ void Asift::markerCreate(std::string markerName,int tilts,int rectFilterFlag,int
 
 void Asift::setImage(pro::Image &src,int id,AsiftKeypoints &keys){
 	if(id==IMAGE_ID_BASE){
-		baseKeys.setImage(src,resizeFlag,resizeWidth,resizeHeight);
+		baseKeys.setImage(src,resizeFlag,resizeWidth,resizeHeight,baseZoom);
 	}else if(id==IMAGE_ID_INPUT){
-		inputKeys.setImage(src,resizeFlag,resizeWidth,resizeHeight);
+		inputKeys.setImage(src,resizeFlag,resizeWidth,resizeHeight,inputZoom);
 	}else if(id==IMAGE_ID_ELSE){
 		keys.setImage(src,resizeFlag,resizeWidth,resizeHeight);
 	}

@@ -123,12 +123,12 @@ int main_videoWriter(int argc, char *argv[])
  */
 int main_videoWriter2(int argc,char *argv[]){
 
-	cv::VideoCapture capLeft(1);
-	cv::VideoCapture capRight(0);
+	cv::VideoCapture capLeft;
+	cv::VideoCapture capRight;
 
 	// 様々な設定...
 	if(argc != 7){
-		std::cout << "input << capLeft.avi,capRight.avi,width,height,time" << endl; 
+		std::cout << "input << capLeft.avi capRight.avi width height time" << endl; 
 		return 0;
 	}
 
@@ -140,6 +140,7 @@ int main_videoWriter2(int argc,char *argv[]){
 	capLeft.set(CV_CAP_PROP_FRAME_WIDTH, cap_size.width);
 	capLeft.set(CV_CAP_PROP_FRAME_HEIGHT, cap_size.height);
 	//capLeft.open(0);
+	cv::namedWindow("LeftSetting",1);
 	while(1){
 		// 左カメラ設定
 		int key = cv::waitKey(30);
@@ -171,6 +172,7 @@ int main_videoWriter2(int argc,char *argv[]){
 	capRight.set(CV_CAP_PROP_FRAME_WIDTH, cap_size.width);
 	capRight.set(CV_CAP_PROP_FRAME_HEIGHT, cap_size.height);
 	//capRight.open(0);
+	cv::namedWindow("RightSetting",1);
 	while(1){
 		// 右カメラ設定
 		int key = cv::waitKey(30);
@@ -262,7 +264,7 @@ int main_videoWriter2(int argc,char *argv[]){
  */
 int main_videoReader(int argc,char *argv[]){
 	if(argc!=4){
-		cout << "input >> invideo.avi,outvideo.avi" << endl;
+		cout << "input >> invideo.avi outvideo.avi" << endl;
 		return 0;
 	}
 
@@ -312,7 +314,7 @@ int main_videoReader(int argc,char *argv[]){
  */
 void main_resizeImage(int argc,char *argv[]){
 	if(argc!=6){
-		cout << "input >> input.png,output.png,width,height" << endl;
+		cout << "input >> input.png output.png width height" << endl;
 		return;
 	}
 	int width = atoi(argv[4]);
@@ -330,12 +332,14 @@ void main_resizeImage(int argc,char *argv[]){
  * -iw2
  */
 void main_imageWriter(int argc,char *argv[]){
-	cv::VideoCapture capLeft(0);
-	cv::VideoCapture capRight(0);
+	cv::VideoCapture capLeft;
+	cv::VideoCapture capRight;
+	//cv::VideoCapture capLeft(0);
+	//cv::VideoCapture capRight(0);
 
 	// 様々な設定...
 	if(argc != 6){
-		std::cout << "input << imgLeft.png,imgRight.png,width,height" << endl; 
+		std::cout << "input << imgLeft.png imgRight.png width height" << endl; 
 		return;
 	}
 
@@ -346,6 +350,7 @@ void main_imageWriter(int argc,char *argv[]){
 	
 	capLeft.set(CV_CAP_PROP_FRAME_WIDTH, cap_size.width);
 	capLeft.set(CV_CAP_PROP_FRAME_HEIGHT, cap_size.height);
+	cv::namedWindow("LeftSetting",1);
 	//capLeft.open(0);
 	while(1){
 		// 左カメラ設定
@@ -378,6 +383,7 @@ void main_imageWriter(int argc,char *argv[]){
 	capRight.set(CV_CAP_PROP_FRAME_WIDTH, cap_size.width);
 	capRight.set(CV_CAP_PROP_FRAME_HEIGHT, cap_size.height);
 	//capRight.open(0);
+	cv::namedWindow("RightSetting",1);
 	while(1){
 		// 右カメラ設定
 		int key = cv::waitKey(30);
@@ -453,7 +459,7 @@ void main_imageReader(int argc,char *argv[]){
 void main_siftDotPrint(int argc,char *argv[]){
 
 	if(argc != 6 && argc!=7){
-		cout << "input >> input.png,output.png,keys.txt,flag=0(0:sift,1:asift),tilt" << endl;
+		cout << "input >> input.png output.png keys.txt flag=0(0:sift,1:asift) tilt" << endl;
 		return;
 	}
 
@@ -540,7 +546,7 @@ void main_centerLine(int argc,char *argv[]){
 	asift.baseKeys = AsiftKeypoints(1);
 
 	if(argc!=5){
-		cout << "input >> in.png,out.png,distance" << endl;
+		cout << "input >> in.png out.png distance" << endl;
 		return;
 	}
 	
@@ -612,9 +618,14 @@ void main_centerLine(int argc,char *argv[]){
  */
 int main_calibrate(int argc,char *argv[])
 {
-	int cameraNum = 0;
 
-	if(argc==3) cameraNum = atoi(argv[2]);
+	if(argc!=4){
+		std::cout << "input >> capnum=0 capName=cap0" << std::endl;
+	}
+	
+	// カメラ番号
+	int cameraNum = atoi(argv[2]);
+	string cameraName = argv[3];
 
 	// 撮影回数
 	const int number_of_patterns = 10;
@@ -740,9 +751,7 @@ int main_calibrate(int argc,char *argv[])
 	// ファイル出力
 	//cv::FileStorage cvfs("CameraCalibrate.xml",CV_STORAGE_WRITE);
 	cv::FileStorage cvfs("CameraCalibrate.xml",CV_STORAGE_APPEND);
-	stringstream ss;
-	ss << "Camera" << cameraNum;
-	cv::write(cvfs,ss.str(),camera_matrix);
+	cv::write(cvfs,cameraName,camera_matrix);
 
 	// http://www18.atwiki.jp/cvlec/pages/19.html
 	// http://d.hatena.ne.jp/fous/20090909/1252495733#20090909f1
@@ -758,7 +767,7 @@ int main_calibrate(int argc,char *argv[])
 void main_markerCreate(int argc,char *argv[]){
 
 	if(argc!=4 && argc!=5 && argc!=6){
-		cout << "input >> marker.png,titls,rectFilterFlag=1,imageShow=1" << endl;
+		cout << "input >> marker.png titls rectFilterFlag=1 imageShow=1" << endl;
 		return;
 	}
 
