@@ -156,6 +156,89 @@ void AsiftKeypoints::iniwriteSiftParameters(std::string name,siftPar par){
 
 }
 
+//
+//void AsiftKeypoints::output(string name){
+//	std::ofstream of;
+//	of.open(path.pwd(name));
+//
+//	if (of.is_open())
+//	{
+//		// Follow the same convention of David Lowe: 
+//		// the first line contains the number of keypoints and the length of the desciptors (128)
+//		of << tilts << " " << w << " " << h << " " << zoom << std::endl;  
+//		of << getNum()<< "  " << VecLength << "  " << std::endl;
+//		of << (int) keys.size() << std::endl;
+//		for (int tt = 0; tt < (int) keys.size(); tt++)
+//		{
+//			of << (int) keys[tt].size() << std::endl;
+//			for (int rr = 0; rr < (int) keys[tt].size(); rr++)
+//			{
+//				of << (int) keys[tt][rr].size() << std::endl;
+//				keypointslist::iterator ptr = keys[tt][rr].begin();
+//				for(int i=0; i < (int) keys[tt][rr].size(); i++, ptr++)	
+//				{
+//					of << zoom*ptr->x << "  " << zoom*ptr->y << "  " << zoom*ptr->scale << "  " << ptr->angle;
+//					
+//					for (int ii = 0; ii < (int) VecLength; ii++)
+//					{
+//						of << "  " << ptr->vec[ii];
+//					}
+//					
+//					of << std::endl;
+//				}
+//			}	
+//		}
+//	}
+//	else 
+//	{
+//		std::cerr << "Unable to open the file keys."; 
+//	}
+//
+//	of.close();
+//}
+//
+//void AsiftKeypoints::input(string name){
+//	std::ifstream inf;
+//	keys.clear();
+//	
+//	int detection_num = 0;
+//	int tt_num=0,rr_num=0,key_num=0;
+//
+//	inf.open(path.pwd(name));
+//
+//	inf >> tilts;
+//	inf >> w;
+//	inf >> h;
+//	inf >> zoom;
+//
+//	inf >> num;
+//	inf >> detection_num;
+//	inf >> tt_num;
+//	for(int i=0;i<tt_num;i++){
+//		inf >> rr_num;
+//		vector<keypointslist> keyslists;
+//		for(int j=0;j<rr_num;j++){
+//			inf >> key_num;
+//			keypointslist keyslist;
+//			for(int k=0;k<key_num;k++){
+//				keypoint key;
+//				inf >> key.x; key.x /= zoom;
+//				inf >> key.y; key.y /= zoom;
+//				inf >> key.scale; key.scale /= zoom;
+//				inf >> key.angle;
+//				for(int l=0;l<detection_num;l++){
+//					inf >> key.vec[l];
+//				}
+//				keyslist.push_back(key);
+//			}
+//			keyslists.push_back(keyslist);
+//		}
+//		keys.push_back(keyslists);
+//	}
+//
+//	inf.close();
+//}
+
 void AsiftKeypoints::output(string name){
 	std::ofstream of;
 	of.open(path.pwd(name));
@@ -166,13 +249,13 @@ void AsiftKeypoints::output(string name){
 		// the first line contains the number of keypoints and the length of the desciptors (128)
 		of << tilts << " " << w << " " << h << " " << zoom << std::endl;  
 		of << getNum()<< "  " << VecLength << "  " << std::endl;
-		of << (int) keys.size() << std::endl;
+		//of << (int) keys.size() << std::endl;
 		for (int tt = 0; tt < (int) keys.size(); tt++)
 		{
-			of << (int) keys[tt].size() << std::endl;
+			//of << (int) keys[tt].size() << std::endl;
 			for (int rr = 0; rr < (int) keys[tt].size(); rr++)
 			{
-				of << (int) keys[tt][rr].size() << std::endl;
+				//of << (int) keys[tt][rr].size() << std::endl;
 				keypointslist::iterator ptr = keys[tt][rr].begin();
 				for(int i=0; i < (int) keys[tt][rr].size(); i++, ptr++)	
 				{
@@ -212,12 +295,12 @@ void AsiftKeypoints::input(string name){
 
 	inf >> num;
 	inf >> detection_num;
-	inf >> tt_num;
+	//inf >> tt_num;
 	for(int i=0;i<tt_num;i++){
-		inf >> rr_num;
+		//inf >> rr_num;
 		vector<keypointslist> keyslists;
 		for(int j=0;j<rr_num;j++){
-			inf >> key_num;
+			//inf >> key_num;
 			keypointslist keyslist;
 			for(int k=0;k<key_num;k++){
 				keypoint key;
@@ -237,7 +320,6 @@ void AsiftKeypoints::input(string name){
 
 	inf.close();
 }
-
 void AsiftKeypoints::filterRectangle(cv::Point2f pt1,cv::Point2f pt2){
 
 	// 最大最小の点を取得
@@ -325,6 +407,71 @@ void AsiftKeypoints::filterCenterLine(cv::Point2f centerPt,float distance){
 	keypointsTotal();
 }
 
+void AsiftKeypoints::setOnceKeys(){
+	
+	for (int tt = 0; tt < (int) keys.size(); tt++)
+	{
+		//of << (int) keys[tt].size() << std::endl;
+		for (int rr = 0; rr < (int) keys[tt].size(); rr++)
+		{
+			//of << (int) keys[tt][rr].size() << std::endl;
+			keypointslist::iterator ptr = keys[tt][rr].begin();
+			for(int i=0; i < (int) keys[tt][rr].size(); i++, ptr++)	
+			{
+				keypoint key;
+				key.x = keys[tt][rr][i].x;
+				key.y = keys[tt][rr][i].y;
+				key.scale = keys[tt][rr][i].scale;
+				key.angle = keys[tt][rr][i].angle;
+				for(int l=0;l<VecLength;l++){
+					key.vec[l] = keys[tt][rr][i].vec[l];
+				}
+				onceKeys.push_back(key);
+			}
+
+		}
+
+	}
+
+}
+
+void AsiftKeypoints::tiltsCalc(){
+	
+	int t_min = 1;
+	float t_k = sqrt(2.);
+	int num_rot_t2 = 10;
+	
+	rots = new int[tilts];
+	for(int tt=1;tt<=tilts;tt++){
+		
+		float t = t_min * pow(t_k, tt-1);
+
+		if ( t == 1 )
+		{					
+			// copy the image from vector to array as compute_sift_keypoints uses only array.				
+			rots[0] = 1;
+		}
+		else
+		{
+		  int num_rot1;
+
+		  if(num_rot_t2*t/2 >= 0){
+			  num_rot1 = num_rot_t2*t/2+0.5;
+		  }else{			
+			  num_rot1 = num_rot_t2*t/2-0.5;
+		  }
+
+		  if ( num_rot1%2 == 1 )
+		  {
+			num_rot1 = num_rot1 + 1;
+		  }
+		  num_rot1 = num_rot1 / 2;
+
+		  rots[tt] = num_rot1;
+		}
+	}
+}
+
 void AsiftKeypoints::draw(pro::Image &src,cv::Scalar siftcol,cv::Scalar asiftcol){
 
 	for (int tt = 0; tt < (int) keys.size(); tt++)
@@ -355,6 +502,25 @@ void AsiftKeypoints::draw(pro::Image &src,cv::Scalar siftcol,cv::Scalar asiftcol
 			}
 		}	
 	}
+}
+
+void AsiftKeypoints::drawOnce(pro::Image &src,cv::Scalar col){
+
+	keypointslist::iterator ptr = onceKeys.begin();
+	for(int i=0; i < (int) onceKeys.size(); i++, ptr++)	
+	{
+		// 中心点の描写
+		src.circle(cv::Point2f(zoom*ptr->x,zoom*ptr->y),1,col);
+		// スケールの描写
+		src.circle(cv::Point2f(zoom*ptr->x,zoom*ptr->y),zoom*ptr->scale,col,1);
+		// 特徴点のオリエンテーション方向を描写
+		if(ptr->angle>=0){
+			cv::Point pt2(zoom*ptr->x + zoom*cos(ptr->angle)*ptr->scale,
+				zoom*ptr->y + zoom*sin(ptr->angle)*ptr->scale);
+			src.line(cv::Point2f(zoom*ptr->x,zoom*ptr->y),pt2,col,1);
+		}
+	}
+
 }
 
 void AsiftKeypoints::resize(pro::Image &src,pro::Image &dst,int resizeFlag,int width,int height){

@@ -30,6 +30,8 @@ private:
 
 	// 傾き(Asfitパラメータ)
 	int tilts;
+	// 回転(rot)
+	int *rots;
 	// Sift Parameter
 	siftPar siftparams;
 	// キーポイント数
@@ -50,6 +52,8 @@ public:
 
 	// キーポイント <tilt<rot<keylist<key>>>>
 	vector< vector< keypointslist > > keys;
+	// 一次ベクター用
+	keypointslist onceKeys;
 
 	// キーポイントパス
 	pro::Dir path;
@@ -83,17 +87,26 @@ public:
 
 	// 出力処理
 	void output(string name);
+	//void outputOnce(string name);
 	// 入力処理
 	void input(string name);
+	//void inputOnce(string name);
 
 	// 矩形フィルター処理
 	void filterRectangle(cv::Point2f pt1,cv::Point2f pt2);
 	// センターラインフィルター処理
 	void filterCenterLine(cv::Point2f centerPt,float distance);
 
+	// キーポイントを一次ベクターに変換
+	void setOnceKeys();
+
+	// チルトからサイズ計算
+	void tiltsCalc();
 
 	// キーポイントの描写
 	void draw(pro::Image& src,cv::Scalar siftcol=cv::Scalar(0,0,255),cv::Scalar asiftcol=cv::Scalar(255,0,0));
+	void drawOnce(pro::Image& src,cv::Scalar col=cv::Scalar(255,0,0));
+
 
 private:
 

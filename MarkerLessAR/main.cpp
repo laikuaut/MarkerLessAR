@@ -328,10 +328,50 @@ void main_resizeImage(int argc,char *argv[]){
 }
 
 /**
+ * カメラ撮影
+ * -iw
+ */
+void main_imageWriter(int argc,char *argv[]){
+
+	if(argc!=5){
+		cout << "input >> capnum marker.png startNum" << endl;
+		return;
+	}
+
+	cout << "撮影 : SPACE , 終了 : qキー" << endl;
+
+	cv::VideoCapture cap(atoi(argv[2]));
+
+	pro::Image frame;
+
+	int count = atoi(argv[4]);
+	
+	while(1) {
+
+		cap.read((cv::Mat&)frame);
+		if(!frame.empty())
+			frame.imshow(argv[3],1);
+
+		int key = cv::waitKey(30);
+
+		// space 撮影
+		if(key == ' '){
+			stringstream ss;
+			ss<<pro::Dir::getStem(argv[3]) << std::setfill('0') << std::setw(3) << count++ << pro::Dir::getExtention(argv[3]);
+			frame.save(ss.str());
+			cout << ss.str() << " save." << endl;
+		// qキーで終了
+		}else if(key == 'q')
+			break;
+	}
+	return;
+}
+
+/**
  * 画像撮影2つカメラ
  * -iw2
  */
-void main_imageWriter(int argc,char *argv[]){
+void main_imageWriter2(int argc,char *argv[]){
 	cv::VideoCapture capLeft;
 	cv::VideoCapture capRight;
 	//cv::VideoCapture capLeft(0);
@@ -838,8 +878,10 @@ void main(int argc,char *argv[]){
 			main_videoWriter2(argc,argv);
 		}else if(option=="-vr"){
 			main_videoReader(argc,argv);
-		}else if(option=="-iw2"){
+		}else if(option=="-iw"){
 			main_imageWriter(argc,argv);
+		}else if(option=="-iw2"){
+			main_imageWriter2(argc,argv);
 		}else if(option=="-ir"){
 			main_imageReader(argc,argv);
 		}else if(option=="-ire"){

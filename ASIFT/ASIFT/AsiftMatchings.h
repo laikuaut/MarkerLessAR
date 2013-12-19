@@ -31,6 +31,12 @@ public:
 
 private:
 
+	//void filterKeysMatchings();
+	/**
+	 * 未使用
+	 */
+	void filterKeysMatchings(keypointslist &keys,int first);
+	// マッチングしたキーポイントのみを残す
 	void filterKeysMatchings(vector< vector< keypointslist > > &keys,int first);
 
 public:

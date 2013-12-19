@@ -324,7 +324,7 @@ void Asift::run(){
 	 * XŽ²•t‹ß‚Ì“Á’¥“_Žæ“¾
 	 */
 	setCenterLinePoints(baseKeys);
-	xAxis.draw(imgBase);
+	//xAxis.draw(imgBase);
 	xAxis.output(xAxisKeysName);
 	
 	/***************************************************************
@@ -431,9 +431,17 @@ void Asift::run(){
 
 			computeMatching(baseKeys,inputKeys);
 			matchings.filterMatching();
+			//matchings.asiftKeys1->drawOnce(imgBase);
+			//matchings.asiftKeys2->drawOnce(imgInput);
+			//std::cout << "keys1:" << matchings.asiftKeys1->onceKeys.size() << std::endl;
+			//std::cout << "keys2:" << matchings.asiftKeys2->onceKeys.size() << std::endl;
 			matchings.asiftKeys1->draw(imgBase);
 			matchings.asiftKeys2->draw(imgInput);
-		
+			std::cout << "keys1:" << matchings.asiftKeys1->keypointsTotal() << std::endl;
+			std::cout << "keys2:" << matchings.asiftKeys2->keypointsTotal() << std::endl;
+			std::cout << "matching:" << matchings.matchings.size() << std::endl;
+			
+
 		//std::cout << "The two images match! " << matchings.getNum() << " matchings are identified." << endl;
 		std::cout << "Keypoints matching accomplished in " << (double)timer.getDiff()/pro::Timer::PER_SEC << " seconds." << endl << endl;
 		timer.lap();
