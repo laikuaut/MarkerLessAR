@@ -37,6 +37,7 @@
 
 class PRO_EXPORTS Asift : public pro::MouseEvent
 {
+
 public:
 
 	// カレントパス
@@ -236,6 +237,8 @@ public:
 	 */
 	// 画像の設置
 	void setImage(pro::Image &src,int id,AsiftKeypoints &keys=AsiftKeypoints());
+	// 名前を設置
+	void setNames(std::string imgBaseName,std::string imgInputName);
 
 	/********************************************
 	 * 計算処理

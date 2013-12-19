@@ -8,8 +8,11 @@
 
 #include "../ASIFT/ASIFT/Asift.h"
 
-class MarkerLessAR
+class Asift;
+
+class PRO_EXPORTS MarkerLessAR
 {
+
 public:
 
 	pro::Dir path;
@@ -20,17 +23,47 @@ private:
 	 * 設定ファイル名
 	 */
 	// MarkerLessAR ini File Name
-	//std::string iniFileName;
+	std::string iniAsiftFileName;
 	// Asift Left side ini File Name
-	std::string iniAsiftLeftName;
+	//std::string iniAsiftLeftName;
 	// Asift Right side ini File Name
-	std::string iniAsiftRightName;
+	//std::string iniAsiftRightName;
 
 	/********************************************
 	 * ステレオカメラ
 	 */
 	// camera between distance (mm)
 	int cameraBetween;
+	// 左カメラの番号
+	int cameraLeftNum;
+	// 右カメラの番号
+	int cameraRightNum;
+	// 左カメラの名前
+	std::string cameraLeftName;
+	// 右カメラの名前
+	std::string cameraRightName;
+	// 左カメラの内部パラメータ
+	cv::Mat cameraLeftParam;
+	// 右カメラの内部パラメータ
+	cv::Mat cameraRightParam;
+
+	/*******************************************
+	 * 画像名
+	 */
+	// マーカー画像名
+	std::string imgMarkerName;
+	// 左インプット画像名
+	std::string imgLeftName;
+	// 右インプット画像名
+	std::string imgRightName;
+
+	/*******************************************
+	 * 動画名
+	 */
+	// 左インプット画像名
+	std::string videoLeftName;
+	// 右インプット画像名
+	std::string videoRightName;
 
 public:
 
@@ -41,6 +74,28 @@ public:
 	Asift asiftLeft;
 	// 右側のLeft
 	Asift asiftRight;
+
+	/********************************************
+	 * 画像
+	 */
+	// マーカー画像
+	pro::Image imgMarker;
+	// 左画像
+	pro::Image imgLeft;
+	// 右画像
+	pro::Image imgRight;
+
+	/********************************************
+	 * Asiftマッチング
+	 */
+	// 左右画像のマッチング
+	AsiftMatchings matchingLR;
+
+	/********************************************
+	 * ワールド座標
+	 */
+	// ワールド座標系キーポイント
+	AsiftKeypoints worldKeypoints;
 
 public:
 
@@ -56,6 +111,8 @@ public:
 	void init(int readini,string ini_name="MarkerLessAR.ini");
 	// デフォルト値設定
 	void defaultParam();
+	// Asiftの画像名等MLAR用に初期化
+	void initAsift();
 
 	/********************************************
 	 * iniファイル関連
