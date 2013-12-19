@@ -51,9 +51,11 @@
   <ItemGroup>
     <ClCompile Include="main.cpp" />
     <ClCompile Include="MarkerLessAR.cpp" />
+    <ClCompile Include="StereoCamera.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="MarkerLessAR.h" />
+    <ClInclude Include="StereoCamera.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{F068438C-73BA-4A86-B449-6295BFD0F5E9}</ProjectGuid>

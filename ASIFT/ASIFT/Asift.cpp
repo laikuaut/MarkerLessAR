@@ -95,6 +95,7 @@ void Asift::defaultParam(){
 
 	// X軸キーポイントの初期化
 	//xAxis = AsiftKeypoints(7,iniSiftParamName);
+	centerLineDistance = 20;
 
 }
 
@@ -144,6 +145,14 @@ void Asift::initNames(){
 	imgHName = inputName + "_Heri" + baseExtention;
 	inputKeysName = inputName + "_Keys.txt";
 	matchingsName = inputName + "_Matching.txt";
+}
+
+void Asift::initKeys(int id,int tilts){
+	if(id == IMAGE_ID_BASE){
+		baseKeys = AsiftKeypoints(tilts,iniSiftParamName);
+	}else if(id == IMAGE_ID_INPUT){
+		inputKeys = AsiftKeypoints(tilts,iniSiftParamName);
+	}
 }
 
 void Asift::writeIni(ptree &pt){
@@ -289,7 +298,9 @@ void Asift::run(){
 			computeKeyPoints(IMAGE_ID_BASE);
 		}else{
 			// ファイル入力
-			baseKeys.input(baseKeysName);
+			input(INPUT_ID_KEYS_BASE);
+			input(INPUT_ID_KEYS_XAXIS);
+			//baseKeys.input(baseKeysName);
 		}
 
 		// Sift キーポイントの描写
@@ -324,12 +335,14 @@ void Asift::run(){
 	 */
 	setCenterLinePoints(baseKeys);
 	//xAxis.draw(imgBase);
-	xAxis.output(xAxisKeysName);
+	//xAxis.output(xAxisKeysName);
+	output(OUTPUT_ID_KEYS_XAXIS);
 	
 	/***************************************************************
 	 * Base Keypoints ファイル出力
 	 */
-	baseKeys.output(baseKeysName);
+	//baseKeys.output(baseKeysName);
+	output(OUTPUT_ID_KEYS_BASE);
 
 	/***************************************************************
 	 * 動画読み込み処理
@@ -446,13 +459,17 @@ void Asift::run(){
 		 *  outputs
 		 */
 		// 水平画像作成
-		createHoriImage(imgInput);
+		//createHoriImage(imgInput);
+		output(OUTPUT_ID_HORI,imgInput);
 		// 水平画像作成
-		createVertImage(imgInput);
+		//createVertImage(imgInput);
+		output(OUTPUT_ID_VERT,imgInput);
 		// キーポイントファイル作成
-		inputKeys.output(inputKeysName);
+		output(OUTPUT_ID_KEYS_INPUT);
+		//inputKeys.output(inputKeysName);
 		// マッチングファイル作成
-		matchings.output(matchingsName);
+		output(OUTPUT_ID_MATCHING);
+		//matchings.output(matchingsName);
 	
 	}
 
@@ -507,11 +524,17 @@ void Asift::markerCreate(std::string markerName,int tilts,int rectFilterFlag,int
 	 */
 	setCenterLinePoints(markerKeys);
 	xAxis.output(pro::Dir::getStem(markerName)+"_xAxisKeys.txt");
+	// 一次連続ベクター
+	//xAxis.setOnceKeys();
+	xAxis.outputOnce(pro::Dir::getStem(markerName)+"_xAxisOnceKeys.txt");
 	
 	/***************************************************************
 	 * Base Keypoints ファイル出力
 	 */
 	markerKeys.output(pro::Dir::getStem(markerName)+"_Keys.txt");
+	// 一次連続ベクター
+	//markerKeys.setOnceKeys();
+	markerKeys.outputOnce(pro::Dir::getStem(markerName)+"_OnceKeys.txt");
 	
 	/***************************************************************
 	 * 選択されたキーポイントを描写
@@ -523,6 +546,7 @@ void Asift::markerCreate(std::string markerName,int tilts,int rectFilterFlag,int
 		imgMarker.imshow(pro::Dir::getStem(markerName),1);
 		cv::waitKey(0);
 	}
+
 }
 
 void Asift::setImage(pro::Image &src,int id,AsiftKeypoints &keys){
@@ -535,9 +559,10 @@ void Asift::setImage(pro::Image &src,int id,AsiftKeypoints &keys){
 	}
 }
 
-void Asift::setNames(std::string imgBaseName,std::string imgInputName){
+void Asift::setNames(std::string imgBaseName,std::string imgInputName,std::string videoInputName){
 	this->imgBaseName = imgBaseName;
 	this->imgInputName = imgInputName;
+	this->capInName = videoInputName;
 
 	initNames();
 }
@@ -636,6 +661,29 @@ void Asift::fileterRun(AsiftKeypoints &keys){
 	}
 }
 
+void Asift::input(int id){
+	if(id == INPUT_ID_KEYS_BASE){
+		baseKeys.input(baseKeysName);
+	}else if(id == INPUT_ID_KEYS_XAXIS){
+		xAxis.input(xAxisKeysName);
+	}
+}
+
+void Asift::output(int id,pro::Image src){
+	if(id == OUTPUT_ID_KEYS_BASE){
+		baseKeys.output(baseKeysName);
+	}else if(id == OUTPUT_ID_KEYS_INPUT){
+		inputKeys.output(inputKeysName);
+	}else if(id == OUTPUT_ID_MATCHING){
+		matchings.output(matchingsName);
+	}else if(id == OUTPUT_ID_VERT){
+		createVertImage(src);
+	}else if(id == OUTPUT_ID_HORI){
+		createHoriImage(src);
+	}else if(id == OUTPUT_ID_KEYS_XAXIS){
+		xAxis.output(xAxisKeysName);
+	}
+}
 
 void Asift::setMouseEventId(int id){
 	onMouseId = id;
@@ -720,7 +768,7 @@ void Asift::onMouse_filterRect(int event,int x,int y,int flag){
 //	}
 //}
 
-pro::Image Asift::createVertImage(pro::Image img){
+pro::Image Asift::createVertImage(pro::Image img,AsiftMatchings matchings,std::string name){
 	pro::Image vertImg;
 	vertImg.vertconcat(imgBase,img,bandWidth);
 	matchingslist::iterator ptr = matchings.matchings.begin();
@@ -730,11 +778,15 @@ pro::Image Asift::createVertImage(pro::Image img){
 			cv::Point2f((inputZoom*ptr->second.x),(inputZoom*ptr->second.y) + imgBase.size().height + bandWidth),cv::Scalar::all(255));
 	}
 	if(!videoInputFlag)
-		vertImg.save(imgVName);
+		vertImg.save(name);
 	return vertImg;
 }
 
-pro::Image Asift::createHoriImage(pro::Image img){
+pro::Image Asift::createVertImage(pro::Image img){
+	return createVertImage(img,matchings,imgVName);
+}
+
+pro::Image Asift::createHoriImage(pro::Image img,AsiftMatchings matchings,std::string name){
 	pro::Image horiImg;
 	horiImg.horiconcat(imgBase,img,bandWidth);
 	matchingslist::iterator ptr = matchings.matchings.begin();
@@ -744,6 +796,10 @@ pro::Image Asift::createHoriImage(pro::Image img){
 			cv::Point2f((inputZoom*ptr->second.x) + imgBase.size().width + bandWidth,(inputZoom*ptr->second.y)),cv::Scalar::all(255));
 	}
 	if(!videoInputFlag)
-		horiImg.save(imgHName);
+		horiImg.save(name);
 	return horiImg;
+}
+
+pro::Image Asift::createHoriImage(pro::Image img){
+	return createHoriImage(img,matchings,imgHName);
 }

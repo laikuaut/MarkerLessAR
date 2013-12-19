@@ -38,6 +38,7 @@ void main_MarkerLessAR(int argc,char *argv[]){
 
 	MarkerLessAR mlar;
 	mlar.init(1);
+	mlar.run();
 
 }
 
@@ -863,6 +864,16 @@ void main_help(){
 }
 
 /**
+ * テスト関数
+ * -test
+ */
+void main_test(int argc,char *argv[]){
+	AsiftMatchings asiftM;
+	asiftM.input("marker002.png_LR.txt");
+	asiftM.output("marker002.png_LR__.txt");
+}
+
+/**
  * メイン関数
  */
 void main(int argc,char *argv[]){
@@ -897,7 +908,7 @@ void main(int argc,char *argv[]){
 		}else if(option=="-rcab"){
 			main_readCalibrate(argc,argv);
 		}else if(option=="-test"){
-
+			main_test(argc,argv);
 		}else if(option=="-h"){
 			main_help();
 		}

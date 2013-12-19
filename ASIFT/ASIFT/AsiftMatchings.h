@@ -32,19 +32,19 @@ public:
 private:
 
 	//void filterKeysMatchings();
+
 	/**
 	 * 未使用
 	 */
 	void filterKeysMatchings(keypointslist &keys,int first);
-	// マッチングしたキーポイントのみを残す
-	void filterKeysMatchings(vector< vector< keypointslist > > &keys,int first);
+	// マッチングしたキーポイントのみを残す（失敗）
+	// void filterKeysMatchings(vector< vector< keypointslist > > &keys,int first);
 
 public:
 
 	AsiftMatchings(void);
 	AsiftMatchings(AsiftKeypoints keys1,AsiftKeypoints keys2);
 	~AsiftMatchings(void);
-
 
 	// キーポイントのセット
 	void setKeypoints(AsiftKeypoints keys1,AsiftKeypoints keys2);

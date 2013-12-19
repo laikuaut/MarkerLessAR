@@ -14,6 +14,7 @@ AsiftKeypoints::AsiftKeypoints(int tilts,std::string ini_name)
 	inireadSiftParameters(ini_name);
 	num = 0;
 	w = 0,h = 0;
+	//tiltsCalc();
 }
 
 AsiftKeypoints::~AsiftKeypoints(void)
@@ -25,6 +26,7 @@ int AsiftKeypoints::computeAsiftKeyPoints(int verb)
 {
 	keys.clear();
 	num = compute_asift_keypoints(imgPixels,w,h,tilts,verb,keys,siftparams);
+	setOnceKeys();
 	return num;
 }
 
@@ -249,13 +251,13 @@ void AsiftKeypoints::output(string name){
 		// the first line contains the number of keypoints and the length of the desciptors (128)
 		of << tilts << " " << w << " " << h << " " << zoom << std::endl;  
 		of << getNum()<< "  " << VecLength << "  " << std::endl;
-		//of << (int) keys.size() << std::endl;
+		of << (int) keys.size() << std::endl;
 		for (int tt = 0; tt < (int) keys.size(); tt++)
 		{
-			//of << (int) keys[tt].size() << std::endl;
+			of << (int) keys[tt].size() << std::endl;
 			for (int rr = 0; rr < (int) keys[tt].size(); rr++)
 			{
-				//of << (int) keys[tt][rr].size() << std::endl;
+				of << (int) keys[tt][rr].size() << std::endl;
 				keypointslist::iterator ptr = keys[tt][rr].begin();
 				for(int i=0; i < (int) keys[tt][rr].size(); i++, ptr++)	
 				{
@@ -270,6 +272,47 @@ void AsiftKeypoints::output(string name){
 				}
 			}	
 		}
+	}
+	else 
+	{
+		std::cerr << "Unable to open the file keys."; 
+	}
+
+	of.close();
+}
+
+void AsiftKeypoints::outputOnce(string name){
+	std::ofstream of;
+	of.open(path.pwd(name));
+
+	if (of.is_open())
+	{
+		// Follow the same convention of David Lowe: 
+		// the first line contains the number of keypoints and the length of the desciptors (128)
+		of << tilts << " " << w << " " << h << " " << zoom << std::endl;  
+		of << getNum()<< "  " << VecLength << "  " << std::endl;
+		//of << (int) keys.size() << std::endl;
+		//for (int tt = 0; tt < (int) keys.size(); tt++)
+		//{
+		//	//of << (int) keys[tt].size() << std::endl;
+		//	for (int rr = 0; rr < (int) keys[tt].size(); rr++)
+		//	{
+				//of << (int) keys[tt][rr].size() << std::endl;
+				keypointslist::iterator ptr = onceKeys.begin();
+				//for(int i=0; i < (int) keys[tt][rr].size(); i++, ptr++)	
+				for(int i=0; i < (int) onceKeys.size(); i++, ptr++)	
+				{
+					of << zoom*ptr->x << "  " << zoom*ptr->y << "  " << zoom*ptr->scale << "  " << ptr->angle;
+					
+					for (int ii = 0; ii < (int) VecLength; ii++)
+					{
+						of << "  " << ptr->vec[ii];
+					}
+					
+					of << std::endl;
+				}
+		//	}	
+		//}
 	}
 	else 
 	{
@@ -295,12 +338,13 @@ void AsiftKeypoints::input(string name){
 
 	inf >> num;
 	inf >> detection_num;
-	//inf >> tt_num;
+	inf >> tt_num;
+
 	for(int i=0;i<tt_num;i++){
-		//inf >> rr_num;
+		inf >> rr_num;
 		vector<keypointslist> keyslists;
 		for(int j=0;j<rr_num;j++){
-			//inf >> key_num;
+			inf >> key_num;
 			keypointslist keyslist;
 			for(int k=0;k<key_num;k++){
 				keypoint key;
@@ -320,6 +364,52 @@ void AsiftKeypoints::input(string name){
 
 	inf.close();
 }
+
+void AsiftKeypoints::inputOnce(string name){
+	std::ifstream inf;
+	keys.clear();
+	
+	int detection_num = 0;
+	int tt_num=0,rr_num=0,key_num=0;
+
+	inf.open(path.pwd(name));
+
+	inf >> tilts;
+	inf >> w;
+	inf >> h;
+	inf >> zoom;
+
+	inf >> num;
+	inf >> detection_num;
+
+	//inf >> tt_num;
+	//for(int i=0;i<tt_num;i++){
+		//inf >> rr_num;
+		//vector<keypointslist> keyslists;
+		//for(int j=0;j<rr_num;j++){
+			//inf >> key_num;
+			//keypointslist keyslist;
+			for(int k=0;k<num;k++){
+				keypoint key;
+				inf >> key.x; key.x /= zoom;
+				inf >> key.y; key.y /= zoom;
+				inf >> key.scale; key.scale /= zoom;
+				inf >> key.angle;
+				for(int l=0;l<detection_num;l++){
+					inf >> key.vec[l];
+				}
+				onceKeys.push_back(key);
+				//keyslist.push_back(key);
+			}
+			//keyslists.push_back(keyslist);
+		//}
+		//keys.push_back(keyslists);
+	//}
+
+	inf.close();
+}
+
+
 void AsiftKeypoints::filterRectangle(cv::Point2f pt1,cv::Point2f pt2){
 
 	// ç≈ëÂç≈è¨ÇÃì_ÇéÊìæ
@@ -442,6 +532,8 @@ void AsiftKeypoints::tiltsCalc(){
 	int num_rot_t2 = 10;
 	
 	rots = new int[tilts];
+	keys.resize(tilts);
+
 	for(int tt=1;tt<=tilts;tt++){
 		
 		float t = t_min * pow(t_k, tt-1);
@@ -450,6 +542,8 @@ void AsiftKeypoints::tiltsCalc(){
 		{					
 			// copy the image from vector to array as compute_sift_keypoints uses only array.				
 			rots[0] = 1;
+
+			keys[0].resize(1);
 		}
 		else
 		{
@@ -468,6 +562,8 @@ void AsiftKeypoints::tiltsCalc(){
 		  num_rot1 = num_rot1 / 2;
 
 		  rots[tt] = num_rot1;
+
+		  keys.resize(num_rot1);
 		}
 	}
 }

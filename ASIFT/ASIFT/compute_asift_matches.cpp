@@ -656,7 +656,7 @@ int compute_asift_matches(int num_of_tilts1, int num_of_tilts2, int w1, int h1, 
 			}
 			num_rot1 = num_rot1 / 2;
 		}     
-					
+
 		for  ( rr = 1; rr <= num_rot1; rr++ ) 
 		{   			
 			for (tt2 = 1; tt2 <= num_tilt2; tt2++)				

@@ -54,6 +54,18 @@ public:
 	static const int IMAGE_ID_INPUT = 2;
 	static const int IMAGE_ID_ELSE = 3;
 
+	// 読み込み処理ID
+	static const int INPUT_ID_KEYS_BASE = 1;
+	static const int INPUT_ID_KEYS_XAXIS = 2;
+
+	// 書き込み処理ID
+	static const int OUTPUT_ID_KEYS_BASE = 1;
+	static const int OUTPUT_ID_KEYS_INPUT = 2;
+	static const int OUTPUT_ID_MATCHING = 3;
+	static const int OUTPUT_ID_VERT = 4;
+	static const int OUTPUT_ID_HORI = 5;
+	static const int OUTPUT_ID_KEYS_XAXIS = 6;
+
 	// マウスイベントID
 	static const int ON_MOUSE_ID_FILTER_RECT = 1;
 
@@ -169,8 +181,6 @@ private:
 	/********************************************
 	 * 軸関連
 	 */
-	 // X軸を求めるためのキーポイント候補点
-	 AsiftKeypoints xAxis;
 	 // センターポイント
 	 cv::Point2f centerPt;
 	 // センターからの距離
@@ -184,6 +194,8 @@ public:
 	AsiftKeypoints baseKeys,inputKeys;
 	// マッチングデータ
 	AsiftMatchings matchings;
+	// X軸を求めるためのキーポイント候補点
+	AsiftKeypoints xAxis;
 
 public:
 
@@ -209,12 +221,15 @@ public:
 				string capIn_name="capin.avi",
 				string capOut_name="capout.avi",
 				int tilt1=7,int tilt2=7,int resize_flag=1);*/
+
 	// デフォルト値設定
 	void defaultParam();
 	// 画像読み込み初期化
 	void initImages();
 	// 出力名を設定する
 	void initNames();
+	// キーポイント初期化
+	void initKeys(int id,int tilts);
 
 	/********************************************
 	 * Asift.iniの作成関数
@@ -238,7 +253,7 @@ public:
 	// 画像の設置
 	void setImage(pro::Image &src,int id,AsiftKeypoints &keys=AsiftKeypoints());
 	// 名前を設置
-	void setNames(std::string imgBaseName,std::string imgInputName);
+	void setNames(std::string imgBaseName,std::string imgInputName,std::string videoInputName);
 
 	/********************************************
 	 * 計算処理
@@ -260,8 +275,18 @@ public:
 	// フィルター実行
 	void fileterRun(AsiftKeypoints &keys);
 
-private:
+	/********************************************
+	 * 入出力処理
+	 */
+	void input(int id);
+	void output(int id,pro::Image src=pro::Image());
 	
+	// 垂直画像結合とマッチングライン描写
+	pro::Image createVertImage(pro::Image img,AsiftMatchings matchings,std::string name);
+	// 水平画像結合とマッチングライン描写
+	pro::Image createHoriImage(pro::Image img,AsiftMatchings matchings,std::string name);
+
+private:
 
 	// マウスイベントIDを設定
 	void setMouseEventId(int id);

@@ -87,10 +87,10 @@ public:
 
 	// 出力処理
 	void output(string name);
-	//void outputOnce(string name);
+	void outputOnce(string name);
 	// 入力処理
 	void input(string name);
-	//void inputOnce(string name);
+	void inputOnce(string name);
 
 	// 矩形フィルター処理
 	void filterRectangle(cv::Point2f pt1,cv::Point2f pt2);
@@ -106,7 +106,6 @@ public:
 	// キーポイントの描写
 	void draw(pro::Image& src,cv::Scalar siftcol=cv::Scalar(0,0,255),cv::Scalar asiftcol=cv::Scalar(255,0,0));
 	void drawOnce(pro::Image& src,cv::Scalar col=cv::Scalar(255,0,0));
-
 
 private:
 

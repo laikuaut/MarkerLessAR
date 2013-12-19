@@ -52,59 +52,65 @@ void AsiftMatchings::setKeypoints(AsiftKeypoints keys1,AsiftKeypoints keys2){
 //		matchekeys.push_back(keyslists);
 //	}
 //}
-void AsiftMatchings::filterKeysMatchings(vector< vector< keypointslist > > &keys,int first){
-	
-	vector< vector< keypointslist > > matchekeys;
-	matchingslist::iterator ptr = matchings.begin();
-	
-	bool flag = false;
-	
-	for(int j=0; j < (int) matchings.size(); j++,ptr++)	
-	{	
-		flag = false;
-		for (int tt = 0; tt < (int) keys.size(); tt++)
-		{
-			vector<keypointslist> keyslists;
-			for (int rr = 0; rr < (int) keys[tt].size(); rr++)
-			{
-				keypointslist keylist;
 
-				for(int i=0; i < (int) keys[tt][rr].size(); i++)	
-				{
-					if(first == 1){
-						if(keys[tt][rr][i].x == ptr->first.x &&
-							keys[tt][rr][i].y == ptr->first.y){
-							keylist.push_back(keys[tt][rr][i]);
-							//keys.erase(keys.begin() + i);
-							//i--;
-							//count ++;
-							flag = true;
-							break;
-						}
-					}else{
-						if(keys[tt][rr][i].x == ptr->second.x &&
-							keys[tt][rr][i].y == ptr->second.y){
-							keylist.push_back(keys[tt][rr][i]);
-							//keys.erase(keys.begin() + i);
-							//i--;
-							//count ++;
-							flag = true;
-							break;
-						}
-					}
-				}
-				keyslists.push_back(keylist);
-				if(flag) break;
-			}
-			matchekeys.push_back(keyslists);
-			if(flag) break;
-		}
-	}
-	
-	keys.clear();
-	keys = matchekeys;
-
-}
+/**
+ * Ž¸”s
+ */
+//void AsiftMatchings::filterKeysMatchings(vector< vector< keypointslist > > &keys,int first){
+//	
+//	vector< vector< keypointslist > > matchekeys;
+//	matchingslist::iterator ptr = matchings.begin();
+//	
+//	bool flag = false;
+//	
+//	for(int j=0; j < (int) matchings.size(); j++,ptr++)	
+//	{	
+//		flag = false;
+//		for (int tt = 0; tt < (int) keys.size(); tt++)
+//		{
+//			vector<keypointslist> keyslists;
+//			for (int rr = 0; rr < (int) keys[tt].size(); rr++)
+//			{
+//				keypointslist keylist;
+//
+//				for(int i=0; i < (int) keys[tt][rr].size(); i++)	
+//				{
+//					if(first == 1){
+//						if(keys[tt][rr][i].x == ptr->first.x &&
+//							keys[tt][rr][i].y == ptr->first.y){
+//							keylist.push_back(keys[tt][rr][i]);
+//							//keys.erase(keys.begin() + i);
+//							//i--;
+//							//count ++;
+//							//flag = true;
+//							//break;
+//							//j++,ptr++;
+//						}
+//					}else{
+//						if(keys[tt][rr][i].x == ptr->second.x &&
+//							keys[tt][rr][i].y == ptr->second.y){
+//							keylist.push_back(keys[tt][rr][i]);
+//							//keys.erase(keys.begin() + i);
+//							//i--;
+//							//count ++;
+//							//flag = true;
+//							//break;
+//							//j++,ptr++;
+//						}
+//					}
+//				}
+//				keyslists.push_back(keylist);
+//				//if(flag) break;
+//			}
+//			matchekeys.push_back(keyslists);
+//			//if(flag) break;
+//		}
+//	}
+//	
+//	keys.clear();
+//	keys = matchekeys;
+//
+//}
 
 /**
  * –¢Žg—p
@@ -219,12 +225,14 @@ void AsiftMatchings::filterKeysMatchings(keypointslist &keys,int first){
 }
 
 void AsiftMatchings::filterMatching(){
-	//asiftKeys1->setOnceKeys();
-	//asiftKeys2->setOnceKeys();
-	//filterKeysMatchings(asiftKeys1->onceKeys,1);
-	//filterKeysMatchings(asiftKeys2->onceKeys,0);
-	filterKeysMatchings(asiftKeys1->keys,1);
-	filterKeysMatchings(asiftKeys2->keys,0);
+	asiftKeys1->setOnceKeys();
+	asiftKeys2->setOnceKeys();
+	filterKeysMatchings(asiftKeys1->onceKeys,1);
+	filterKeysMatchings(asiftKeys2->onceKeys,0);
+	//filterKeysMatchings(asiftKeys1->keys,1);
+	//cout << asiftKeys1->keypointsTotal() << endl;
+	//filterKeysMatchings(asiftKeys2->keys,0);
+	//cout << asiftKeys2->keypointsTotal() << endl;
 }
 
 int AsiftMatchings::computeAsiftMatches(int verb){
@@ -235,7 +243,7 @@ int AsiftMatchings::computeAsiftMatches(int verb){
 }
 
 int AsiftMatchings::getNum() const{
-	return num;
+	return matchings.size();
 }
 
 void AsiftMatchings::output(string name){
@@ -248,14 +256,15 @@ void AsiftMatchings::output(string name){
 	{		
 		// Write the number of matchings in the first line
 		of << getNum() << std::endl;
-		
+		of << asiftKeys1->zoom << " " << asiftKeys2->zoom << std::endl;
 		matchingslist::iterator ptr = matchings.begin();
 		for(int i=0; i < (int) matchings.size(); i++, ptr++)
 		{
 			// std::pair‚Åˆ—
 			of << asiftKeys1->zoom*ptr->first.x << "  " 
-				<< asiftKeys1->zoom*ptr->first.y << "  " <<  asiftKeys2->zoom*ptr->second.x << 
-			"  " <<  asiftKeys2->zoom*ptr->second.y << std::endl;
+				<< asiftKeys1->zoom*ptr->first.y << "  " 
+				<<  asiftKeys2->zoom*ptr->second.x << "  " 
+				<<  asiftKeys2->zoom*ptr->second.y << std::endl;
 		}
 	}
 	else 
@@ -264,4 +273,30 @@ void AsiftMatchings::output(string name){
 	}
 
 	of.close();
+}
+
+void AsiftMatchings::input(std::string name){
+	std::ifstream inf;
+	matchings.clear();
+
+	inf.open(path.pwd(name));
+
+	if(!inf.is_open()) return;
+
+	asiftKeys1 = new AsiftKeypoints();
+	asiftKeys2 = new AsiftKeypoints();
+
+	inf >> num;
+	inf >> asiftKeys1->zoom;
+	inf >> asiftKeys2->zoom;
+	for(int i=0;i<num;i++){
+		matching match;
+		inf >> match.first.x;
+		inf >> match.first.y;
+		inf >> match.second.x;
+		inf >> match.second.y;
+		matchings.push_back(match);
+	}
+
+	inf.close();
 }

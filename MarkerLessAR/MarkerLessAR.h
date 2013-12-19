@@ -7,6 +7,7 @@
 #pragma once
 
 #include "../ASIFT/ASIFT/Asift.h"
+#include "StereoCamera.h"
 
 class Asift;
 
@@ -46,6 +47,11 @@ private:
 	cv::Mat cameraLeftParam;
 	// 右カメラの内部パラメータ
 	cv::Mat cameraRightParam;
+
+	// カメラキャリブレーションxmlファイル名
+	std::string calibrateXmlName;
+	// ステレオカメラ
+	StereoCamera stereo;
 
 	/*******************************************
 	 * 画像名
@@ -89,13 +95,16 @@ public:
 	 * Asiftマッチング
 	 */
 	// 左右画像のマッチング
-	AsiftMatchings matchingLR;
+	AsiftMatchings matchingsLR;
+	// 左右Asift
+	Asift asiftLR;
 
 	/********************************************
 	 * ワールド座標
 	 */
 	// ワールド座標系キーポイント
-	AsiftKeypoints worldKeypoints;
+	//AsiftKeypoints worldKeypoints;
+	vector<cv::Point3f> worldPoints;
 
 public:
 
@@ -122,6 +131,22 @@ public:
 	void writeIni(ptree &pt);
 	void readIni(std::string name);
 	void writeIni(std::string name);
+
+	/********************************************
+	 * 入出力処理
+	 */
+	void outputPoint3s(vector<cv::Point3f> point3s,std::string name);
+	vector<cv::Point3f> inputPoint3s(std::string name);
+	
+	/********************************************
+	 * マッチング処理
+	 */
+	matchingslist matchingLR(matchingslist matchingsL,matchingslist matchingsR);
+
+	/********************************************
+	 * ワールド座標系の取得
+	 */
+	vector<cv::Point3f> getWorldPoints(AsiftMatchings mathing);
 
 	/********************************************
 	 * 実行関連
