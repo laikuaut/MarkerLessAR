@@ -224,10 +224,294 @@ vector<cv::Point3f> MarkerLessAR::getWorldPoints(AsiftMatchings matchings){
 	vector<cv::Point3f> wpts;
 	for(int i=0;i<matchings.matchings.size();i++){
 		wpts.push_back(stereo.getWorldPoint(
-			cv::Point2f(matchings.matchings[i].first.x,matchings.matchings[i].first.y),
-			cv::Point2f(matchings.matchings[i].second.x,matchings.matchings[i].second.y)));
+			//cv::Point2f(matchings.matchings[i].first.x,matchings.matchings[i].first.y),
+			//cv::Point2f(matchings.matchings[i].second.x,matchings.matchings[i].second.y)));
+			cv::Point2f(matchings.matchings[i].second.x,matchings.matchings[i].second.y),
+			cv::Point2f(matchings.matchings[i].first.x,matchings.matchings[i].first.y)));
+
 	}
 	return wpts;
+}
+
+void MarkerLessAR::setZAxis(){
+	int DIM=3; // 3次元
+    int SAMPLES=0;
+	
+	std::ifstream ifs;
+	ifs.open(pro::Dir::getStem(imgMarkerName)+"_worldPoints.txt");
+
+	if(!ifs.is_open()){
+		cout << "not open " << pro::Dir::getStem(imgMarkerName)+"_worldPoints.txt" << "..." << endl;
+		return;
+	}
+
+	ifs >> SAMPLES;
+
+    cv::Mat src(SAMPLES,DIM,CV_32FC1);
+    cv::Mat result(DIM,DIM,CV_32FC1); // DIMとSAMPLESのうち小さい方
+    double val;
+ 
+    for(int j=0;j<SAMPLES;j++){
+		for(int i=0;i<DIM;i++){
+			float val;
+			ifs >> val;
+			src.at<float>(j*DIM+i) = val;
+		}
+    }
+
+	ifs.close();
+ 
+    cv::PCA pca(src,cv::Mat(),CV_PCA_DATA_AS_ROW,0);
+ 
+    result=pca.project(src);
+ 
+	// 固有ベクトル
+	//cout << pca.eigenvalues << endl;
+	//for(int i=0;i<pca.eigenvalues.rows;i++){
+	//	cout << pca.eigenvectors << endl;
+	//}
+
+	//std::ofstream ofs;
+	//ofs.open(pro::Dir::getStem(imgMarkerName)+"_ZAxis.txt");
+	//if(!ofs.is_open()){
+	//	cout << "not open ZAxis..." << endl;
+	//	return;
+	//}
+
+	//ofs << pca.eigenvalues.at<float>(2) << endl;
+	for(int i=0;i<pca.eigenvectors.cols;i++){
+		if(pca.eigenvectors.at<float>(2,i) < 0){
+			zAxis[i] = -pca.eigenvectors.at<float>(2,i);
+			//ofs << -pca.eigenvectors.at<float>(2,i) << " " << flush;
+		}else{
+			zAxis[i] = pca.eigenvectors.at<float>(2,i);
+			//ofs << pca.eigenvectors.at<float>(2,i) << " " << flush;
+		}
+	}
+
+	//ofs.close();
+
+    //for(int j=0;j<SAMPLES;j++){
+    //    for(int i=0;i<RDIM;i++){ // 上位RDIM次元だけを表示
+    //        std::cout << std::dec << ((float*)result.data)[j*result.cols+i] << ",";
+    //    }
+    //    std::cout << std::endl;
+    //}
+ 
+    //cv::Mat evalues=pca.eigenvalues;
+    //float sum=0.0f;
+    //for(int i=0;i<pca.eigenvalues.rows;i++){
+    //    sum+=((float*)evalues.data)[i];
+    //}
+ 
+    //float contribution=0.0f;
+    //for(int i=0;i<RDIM;i++){// 上位RDIM次元の寄与率を計算
+    //    contribution+=((float*)evalues.data)[i] / sum;
+    //    std::cout << i+1 << "次元の累積寄与率：" << contribution << std::endl;
+    //}
+ 
+    return ;
+}
+
+
+void MarkerLessAR::setXAxis(){
+	int DIM=3; // 3次元
+    int SAMPLES=0;
+	
+	std::ifstream ifs;
+	ifs.open(pro::Dir::getStem(imgMarkerName)+"_worldPoints_xAxis.txt");
+
+	if(!ifs.is_open()){
+		cout << "not open " << pro::Dir::getStem(imgMarkerName)+"_worldPoints_xAxis.txt" << "..." << endl;
+		return;
+	}
+
+	ifs >> SAMPLES;
+
+    cv::Mat src(SAMPLES,DIM,CV_32FC1);
+    cv::Mat result(DIM,DIM,CV_32FC1); // DIMとSAMPLESのうち小さい方
+    double val;
+ 
+    for(int j=0;j<SAMPLES;j++){
+		for(int i=0;i<DIM;i++){
+			float val;
+			ifs >> val;
+			src.at<float>(j*DIM+i) = val;
+		}
+    }
+
+	ifs.close();
+ 
+    cv::PCA pca(src,cv::Mat(),CV_PCA_DATA_AS_ROW,0);
+ 
+    result=pca.project(src);
+ 
+	// 固有ベクトル
+	//cout << pca.eigenvalues << endl;
+	//for(int i=0;i<pca.eigenvalues.rows;i++){
+	//	cout << pca.eigenvectors << endl;
+	//}
+
+	//std::ofstream ofs;
+	//ofs.open(pro::Dir::getStem(imgMarkerName)+"_XAxis.txt");
+	//if(!ofs.is_open()){
+	//	cout << "not open XAxis..." << endl;
+	//	return;
+	//}
+
+	//ofs << pca.eigenvalues.at<float>(0) << endl;
+	for(int i=0;i<pca.eigenvectors.cols;i++){
+		if(pca.eigenvectors.at<float>(0,0)<0){
+			xAxis[i] = -pca.eigenvectors.at<float>(0,i);
+			//ofs << -pca.eigenvectors.at<float>(0,i) << " " << flush;
+		}else{
+			xAxis[i] = pca.eigenvectors.at<float>(0,i);
+			//ofs << pca.eigenvectors.at<float>(0,i) << " " << flush;
+		}
+	}
+
+	//ofs.close();
+
+    return ;
+}
+
+void MarkerLessAR::setYAxis(){
+	//cv::Vec3d vx;
+	//cv::Vec3d vy;
+	//cv::Vec3d vz;
+
+	//std::ifstream xifs,zifs;
+	//xifs.open(pro::Dir::getStem(imgMarkerName)+"_XAxis.txt");
+	//if(!xifs.is_open()){
+	//	cout << "not open XAxis..." << endl;
+	//	return;
+	//}
+	//double val;
+	////xifs>>val;
+	//xifs>>vx[0];
+	//xifs>>vx[1];
+	//xifs>>vx[2];
+
+	//xifs.close();
+
+	//zifs.open(pro::Dir::getStem(imgMarkerName)+"_ZAxis.txt");
+	//if(!zifs.is_open()){
+	//	cout << "not open ZAxis..." << endl;
+	//	return;
+	//}
+	////zifs>>val;
+	//zifs>>vz[0];
+	//zifs>>vz[1];
+	//zifs>>vz[2];
+
+	//zifs.close();
+
+	//vy = vz.cross(vx);
+	yAxis = zAxis.cross(xAxis);
+	
+	//std::ofstream ofs;
+
+	//ofs.open(pro::Dir::getStem(imgMarkerName)+"_YAxis.txt");
+	//if(!ofs.is_open()){
+	//	cout << "not open YAxis..." << endl;
+	//	return;
+	//}
+	//ofs << vy[0] << " " << vy[1] << " " << vy[2] << endl;
+
+	//ofs.close();
+
+}
+
+void MarkerLessAR::setCenterAxis(){
+	
+	std::ifstream ifs;
+	ifs.open(pro::Dir::getStem(imgMarkerName)+"_worldPoints.txt");
+	int num;
+
+	if(!ifs.is_open()){
+		cout << "not open " << pro::Dir::getStem(imgMarkerName)+"_worldPoints.txt" << "..." << endl;
+		return;
+	}
+
+	ifs >> num;
+	//cv::Point3f center=cv::Point3f(0,0,0);
+
+    double val;
+
+	for(int i=0;i<3;i++){
+		tAxis[i] = 0;
+	} 
+	
+	for(int j=0;j<num;j++){
+		for(int i=0;i<3;i++){
+			double val;
+			ifs >> val;
+			tAxis[i]+=val;
+		}
+		//cv::Point3f val;
+		//ifs >> val.x;
+		//ifs >> val.y;
+		//ifs >> val.z;
+		//center+=val;
+	}
+
+	//center.x/=num;
+	//center.y/=num;
+	//center.z/=num;
+
+	
+	for(int i=0;i<3;i++){
+		tAxis[i] /= num;
+	} 
+
+	//std::ofstream ofs;
+
+	//ofs.open(pro::Dir::getStem(imgMarkerName)+"_CenterAxis.txt");
+	//if(!ofs.is_open()){
+	//	cout << "not open CenterAxis..." << endl;
+	//	return;
+	//}
+
+	//ofs << center.x << " " 
+	//	<< center.y << " " 
+	//	<< center.z << endl;
+
+	//ofs.close();
+
+}
+
+void MarkerLessAR::setAxis(){
+	setXAxis();
+	setZAxis();
+	setYAxis();
+	setCenterAxis();
+	outputAxis();
+}
+
+void MarkerLessAR::outputAxis(){
+
+	ofstream ofs;
+	ofs.open(pro::Dir::getStem(imgMarkerName)+"_Axis.txt");
+
+	if(!ofs.is_open()){
+		cout << "not open " << pro::Dir::getStem(imgMarkerName) << "_Axis.txt..." << endl; 
+		return;
+	}
+
+	for(int i=0;i<3;i++){
+		ofs << xAxis[i] << " "
+			<< yAxis[i] << " "
+			<< zAxis[i] << " "
+			<< tAxis[i] << endl;
+	}
+
+	ofs << 0 << " "
+		<< 0 << " "
+		<< 0 << " "
+		<< 1 << endl;
+
+	ofs.close();
+
 }
 
 void MarkerLessAR::run(){
@@ -254,13 +538,13 @@ void MarkerLessAR::run(){
 	cout << "loading marker keys......" << endl;
 
 	asiftLeft.input(Asift::INPUT_ID_KEYS_BASE);
-	cout << "left keys ok !" << endl;
-	asiftRight.input(Asift::INPUT_ID_KEYS_BASE);
-	cout << "left xAxis ok !" << endl;
+	cout << "left keys " << asiftLeft.baseKeys.getNum() << "." << endl;
+	asiftRight.input(Asift::INPUT_ID_KEYS_BASE);	
+	cout << "left keys " << asiftRight.baseKeys.getNum() << "." << endl;
 	asiftLeft.input(Asift::INPUT_ID_KEYS_XAXIS);
-	cout << "right keys ok !" << endl;
+	cout << "right xAxis keys " << asiftLeft.xAxis.getNum() << "." << endl;
 	asiftRight.input(Asift::INPUT_ID_KEYS_XAXIS);
-	cout << "right xAxis ok !" << endl;
+	cout << "right xAxis keys " << asiftRight.xAxis.getNum() << "." << endl;
 	
 	/************************************************
 	 * キーポイントの演算
@@ -292,11 +576,13 @@ void MarkerLessAR::run(){
 	matchingsLR.matchings=matchingLR(asiftLeft.matchings.matchings,asiftRight.matchings.matchings);
 	matchingsLR.output(pro::Dir::getStem(imgMarkerName)+"_LR.txt");
 	//asiftLR.createHoriImage(asiftLR.imgInput,matchingsLR,"LRH.png");
+	asiftLR.createHoriImage(asiftLR.imgInput,matchingsLR,pro::Dir::getStem(imgMarkerName)+"_LRH.png");
+	asiftLR.createVertImage(asiftLR.imgInput,matchingsLR,pro::Dir::getStem(imgMarkerName)+"_LRV.png");
 	cout << matchingsLR.getNum() << " matching." << endl;
 
 	// ワールド座標へ変換
 	worldPoints = getWorldPoints(matchingsLR);
-	outputPoint3s(worldPoints,"worldPoints.txt");
+	outputPoint3s(worldPoints,pro::Dir::getStem(imgMarkerName)+"_worldPoints.txt");
 
 	/************************************************
 	 * X軸マッチング
@@ -317,20 +603,21 @@ void MarkerLessAR::run(){
 	matchingsLR.setKeypoints(*asiftLeft.matchings.asiftKeys2,*asiftRight.matchings.asiftKeys2);
 	matchingsLR.matchings=matchingLR(asiftLeft.matchings.matchings,asiftRight.matchings.matchings);
 	matchingsLR.output(pro::Dir::getStem(imgMarkerName)+"_xAxisLR.txt");
-	asiftLR.createVertImage(asiftLR.imgInput,matchingsLR,"xAxisLRH.png");
+	asiftLR.createHoriImage(asiftLR.imgInput,matchingsLR,pro::Dir::getStem(imgMarkerName)+"_xAxisLRH.png");
+	asiftLR.createVertImage(asiftLR.imgInput,matchingsLR,pro::Dir::getStem(imgMarkerName)+"_xAxisLRV.png");
 	cout << matchingsLR.getNum() << " matching." << endl;
 	
 	// ワールド座標へ変換
 	worldPoints = getWorldPoints(matchingsLR);
-	outputPoint3s(worldPoints,"worldPoints_xAxis.txt");
+	outputPoint3s(worldPoints,pro::Dir::getStem(imgMarkerName)+"_worldPoints_xAxis.txt");
 
 	/************************************************
 	 * 結果出力
 	 */
 	// テスト表示
-	asiftLeft.output(Asift::OUTPUT_ID_HORI,asiftLeft.imgInput);
-	asiftRight.output(Asift::OUTPUT_ID_HORI,asiftRight.imgInput);
-	asiftLR.output(Asift::OUTPUT_ID_HORI,asiftLR.imgInput);
+	//asiftLeft.output(Asift::OUTPUT_ID_HORI,asiftLeft.imgInput);
+	//asiftRight.output(Asift::OUTPUT_ID_HORI,asiftRight.imgInput);
+	//asiftLR.output(Asift::OUTPUT_ID_HORI,asiftLR.imgInput);
 	//cv::waitKey(0);
 
 }

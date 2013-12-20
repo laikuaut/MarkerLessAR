@@ -15,6 +15,7 @@
 #include "MarkerLessAR.h"
 
 #include"../MyLibs/OpenCVLibs/Image.h"
+#include"glmain.h"
 
 using namespace std;
 using namespace pro;
@@ -38,8 +39,8 @@ void main_MarkerLessAR(int argc,char *argv[]){
 
 	MarkerLessAR mlar;
 	mlar.init(1);
-	mlar.run();
-
+	//mlar.run();
+	mlar.setAxis();
 }
 
 /**
@@ -907,6 +908,8 @@ void main(int argc,char *argv[]){
 			main_markerCreate(argc,argv);
 		}else if(option=="-rcab"){
 			main_readCalibrate(argc,argv);
+		}else if(option=="-gl"){
+			glmain(argc,argv);
 		}else if(option=="-test"){
 			main_test(argc,argv);
 		}else if(option=="-h"){

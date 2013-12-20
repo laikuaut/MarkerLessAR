@@ -49,11 +49,13 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="glmain.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="MarkerLessAR.cpp" />
     <ClCompile Include="StereoCamera.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="glmain.h" />
     <ClInclude Include="MarkerLessAR.h" />
     <ClInclude Include="StereoCamera.h" />
   </ItemGroup>

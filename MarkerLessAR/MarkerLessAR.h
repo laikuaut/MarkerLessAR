@@ -106,6 +106,14 @@ public:
 	//AsiftKeypoints worldKeypoints;
 	vector<cv::Point3f> worldPoints;
 
+	/********************************************
+	 * 軸の取得
+	 */
+	cv::Vec3f xAxis;
+	cv::Vec3f yAxis;
+	cv::Vec3f zAxis;
+	cv::Vec3f tAxis;
+
 public:
 
 	// コンストラクタ
@@ -147,6 +155,16 @@ public:
 	 * ワールド座標系の取得
 	 */
 	vector<cv::Point3f> getWorldPoints(AsiftMatchings mathing);
+
+	/********************************************
+	 * 主成分分析
+	 */
+	void setXAxis();
+	void setYAxis();
+	void setZAxis();
+	void setCenterAxis();
+	void setAxis();
+	void outputAxis();
 
 	/********************************************
 	 * 実行関連
