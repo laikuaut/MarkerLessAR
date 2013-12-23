@@ -6,9 +6,11 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <math.h>
 
 #include <gl/glut.h>
 
+#include "../MarkerLessAR/MarkerLessAR.h"
 #include"../MyLibs/OpenCVLibs/Image.h"
 //#include "my_opencv.h"
 
@@ -53,12 +55,164 @@ cv::Mat camera_image;
 // カメラ画像のコピー
 cv::Mat copy_image;
 
+// マーカレスAR
+MarkerLessAR glmlar;
+
+// モデルビュー行列
+GLdouble modelMat[4*4];
+
+void setModelMat(double x1,double x2,double x3,
+				 double y1,double y2,double y3,
+				 double z1,double z2,double z3,
+				 double t1,double t2,double t3){
+	
+	modelMat[0]=x1;
+	modelMat[1]=x2;
+	modelMat[2]=x3;
+	modelMat[3]=0;
+
+	modelMat[4]=y1;
+	modelMat[5]=y2;
+	modelMat[6]=y3;
+	modelMat[7]=0;
+
+	modelMat[8]=z1;
+	modelMat[9]=z2;
+	modelMat[10]=z3;
+	modelMat[11]=0;
+
+	modelMat[12]=t1;
+	modelMat[13]=t2;
+	modelMat[14]=t3;
+	modelMat[15]=1;
+
+}
+
+GLdouble* getModelMat(double x1,double x2,double x3,
+				 double y1,double y2,double y3,
+				 double z1,double z2,double z3,
+				 double t1,double t2,double t3){
+	
+	GLdouble moudelMat[16];
+
+	modelMat[0]=x1;
+	modelMat[1]=x2;
+	modelMat[2]=x3;
+	modelMat[3]=0;
+
+	modelMat[4]=y1;
+	modelMat[5]=y2;
+	modelMat[6]=y3;
+	modelMat[7]=0;
+
+	modelMat[8]=z1;
+	modelMat[9]=z2;
+	modelMat[10]=z3;
+	modelMat[11]=0;
+
+	modelMat[12]=t1;
+	modelMat[13]=t2;
+	modelMat[14]=t3;
+	modelMat[15]=1;
+
+	return modelMat;
+}
+
+
+
 /*
  *	main関数です．
  */
 void glmain(int argc,char *argv[]){
-	// カメラ画像を読み込みます
-	camera_image = cv::imread("./cat.jpg");
+
+	// MarkerLessARの初期化
+	glmlar.init(1);
+	glmlar.initAsift();
+	//if
+	//glmlar.run();
+	//else
+	glmlar.setImages();
+	//glmlar.setKeys();
+
+	// OpenGL表示用画像
+	camera_image = glmlar.asiftLeft.imgInput;
+
+	// 軸行列読み込み
+	glmlar.setAxis();
+	glmlar.setPersMat(1,100);
+	
+	for(int i=0;i<16;i++){
+		modelMat[i]=0;
+	}
+	
+	modelMat[0]=glmlar.xAxis[0];
+	modelMat[1]=glmlar.xAxis[1];
+	modelMat[2]=glmlar.xAxis[2];
+	modelMat[3]=0;
+
+	//modelMat[0]=2;
+	//modelMat[1]=0;
+	//modelMat[2]=0;
+	//modelMat[3]=0;
+
+	//modelMat[0]=glmlar.xAxis[0];
+	//modelMat[1]=0;
+	//modelMat[2]=0;
+	//modelMat[3]=0;
+	
+	modelMat[4]=glmlar.yAxis[0];
+	modelMat[5]=glmlar.yAxis[1];
+	modelMat[6]=glmlar.yAxis[2];
+	modelMat[7]=0;
+
+	//modelMat[4]=0;
+	//modelMat[5]=2;
+	//modelMat[6]=0;
+	//modelMat[7]=0;
+
+	//modelMat[4]=0;
+	//modelMat[5]=glmlar.yAxis[1];
+	//modelMat[6]=0;
+	//modelMat[7]=0;
+	
+	modelMat[8]=glmlar.zAxis[0];
+	modelMat[9]=glmlar.zAxis[1];
+	modelMat[10]=glmlar.zAxis[2];
+	modelMat[11]=0;
+
+	//modelMat[8]=0;
+	//modelMat[9]=0;
+	//modelMat[10]=2;
+	//modelMat[11]=0;
+
+	//modelMat[8]=0;
+	//modelMat[9]=0;
+	//modelMat[10]=glmlar.zAxis[2];
+	//modelMat[11]=0;
+
+	//modelMat[12]=glmlar.tAxis[0];
+	//modelMat[13]=glmlar.tAxis[1];
+	//modelMat[14]=glmlar.tAxis[2];
+	//modelMat[15]=1;
+
+	modelMat[12]=0;
+	modelMat[13]=0;
+	modelMat[14]=0;
+	modelMat[15]=1;
+
+	//setModelMat(1/sqrt(2),0,0,0,2,0,0,0,2,0,0,0);
+
+	//for(int i=0;i<3;i++){
+	//	modelMat[0+4*i] = glmlar.xAxis[i];
+	//	modelMat[1+4*i] = glmlar.yAxis[i];
+	//	modelMat[2+4*i] = glmlar.zAxis[i];
+	//	//modelMat[3+4*i] = glmlar.tAxis[i];
+	//	modelMat[3+4*i] = 0;
+	//}
+	//for(int i=0;i<3;i++){
+	//	modelMat[4*3+i] = 0;
+	//}
+	//modelMat[4*3+3] = 1;
 
 	// カメラ画像をOpenGLの形式に変換します
 	cv::cvtColor(camera_image, copy_image, CV_BGR2RGB);
@@ -161,7 +315,7 @@ void display_function(void)
 
 	// モデルビュー行列を初期化します
 	glMatrixMode(GL_MODELVIEW);
-	glLoadIdentity();
+	//glLoadIdentity();
 
 	// カメラ画像を背景に書き込みます
 	glRasterPos2i(-1, -1);
@@ -179,12 +333,34 @@ void display_function(void)
 	// 視点と視線を設定します
 	// 本番では，コメントにします
 	gluLookAt(
-		2.0, 2.0, 1.5,
+		2.0, 2.0 ,1.5,
 		0.0, 0.0, 0.0,
-		0.0, 1.0, 0.0);
+		0.0, 2.0, 0.0);
+
+	glPushMatrix();
+
+	////y rotate
+	//glMultMatrixd(getModelMat(
+	//	 cos(30.0 * PI/180.0), 0.0,  -1 * sin(30.0 * PI/180.0),
+	//	                  0.0, 1.0,                        0.0,
+	//	 sin(30.0 * PI/180.0), 0.0,       cos(30.0 * PI/180.0),
+	//			       	  0.0, 0.0,                        0.0
+	//)); 
+
+	//glMultMatrixd(getModelMat(
+	//	 0.00245, 0.6006,-0.7994,-0.974336,0.178846,0.1313,0.2218,0.75599,0.61585,-1.0,-1.0,1.0
+	//));  
+
+	//glMultMatrixd(getModelMat(
+	//	 0.00245, 0.6006,-0.7994,-0.974336,0.178846,0.1313,0.2218,0.75599,0.61585,-11.708,2.953,277.390
+	//));
+
+	glMultMatrixd(modelMat);
 
 	// 立方体を描画します
-	glutSolidCube(1.0);
+	glutSolidCube(1);
+
+	glPopMatrix();
 
 	// モデルビュー行列のコピーを復元します
 	glPopMatrix();
@@ -210,15 +386,65 @@ void reshape_function(int width, int height)
 
 	// 透視射影行列を設定します
 	// 本番では，カメラ内部パラメータを用いたglFrustum関数へ変更します
-	gluPerspective(
-		45.0,
-		(double)width / (double)height,
-		1.0,
-		100.0);
+	//gluPerspective(45.0,(double)width / (double)height,1.0,100.0);
+	glFrustum(glmlar.persL,glmlar.persR,glmlar.persB,glmlar.persT,glmlar.persN,glmlar.persF);
+	//glFrustum(0 , 2 , 4 , 0 , 1 , 100);
 
 	// モデルビュー行列を初期化します
 	glMatrixMode(GL_MODELVIEW);
-	glLoadIdentity();
+	glPushMatrix();
+	//glLoadMatrixd(modelMat);
+	//glLoadIdentity();
+	//glMultMatrixd(modelMat);
+
+	////z rotate
+	//glMultMatrixd(getModelMat(
+	//	 cos(90.0 * PI/180.0), sin(90.0 * PI/180.0), 0.0,
+	//	-sin(90.0 * PI/180.0), cos(90.0 * PI/180.0), 0.0,
+	//	                  0.0,                  0.0, 1.0,
+	//			     	  0.0,                  0.0, 0.0
+	//));  
+	
+	//y rotate
+	//glMultMatrixd(getModelMat(
+	//	 cos(30.0 * PI/180.0), 0.0,  -1 * sin(30.0 * PI/180.0),
+	//	                  0.0, 1.0,                        0.0,
+	//	 sin(30.0 * PI/180.0), 0.0,       cos(30.0 * PI/180.0),
+	//			       	  0.0, 0.0,                        0.0
+	//)); 
+
+	//x rotate
+	//glMultMatrixd(getModelMat(
+	//	 1.0, 0.0,					0.0,
+	//	 0.0, cos(30.0 * PI/180.0), -1 * sin(30.0 * PI/180.0),
+	//	 0.0, sin(30.0 * PI/180.0), cos(30.0 * PI/180.0),
+	//	 0.0, 0.0, -10.0
+	//)); 
+
+	////scale
+	//glMultMatrixd(getModelMat(
+	//	 1.0, 0.0, 0.0,
+	//	 0.0, 1.0, 0.0,
+	//	 0.0, 0.0, 2.0,
+	//	 0.0, 0.0, 0.0
+	//));  
+	
+	////default
+	//glMultMatrixd(getModelMat(
+	//	 1.0, 0.0, 0.0,
+	//	 0.0, 1.0, 0.0,
+	//	 0.0, 0.0, 1.0,
+	//	 0.0, 10.0, -100.0
+	//));  
+
+	//glMultMatrixd(getModelMat(
+	//	 0.00245, 0.6006,-0.7994,-0.974336,0.178846,0.1313,0.2218,0.75599,0.61585,-11.708,2.953,277.390
+	//));
+
+	//glMultMatrixd(getModelMat(
+	//	 0.00245, 0.6006,-0.7994,-0.974336,0.178846,0.1313,0.2218,0.75599,0.61585,0.0,0.0,-10.0
+	//));  
+
 }
 
 /*
@@ -256,7 +482,7 @@ void mouse_function(int button, int state, int x, int y)
 			if (state == GLUT_UP) {
 				printf("The left button was pressed at (%d, %d).\n", x, y);
 			} else {
-
+				
 			}
 			break;
 
@@ -264,3 +490,5 @@ void mouse_function(int button, int state, int x, int y)
 			break;
 	}
 }
+
+

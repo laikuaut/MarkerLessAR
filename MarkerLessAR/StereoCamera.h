@@ -13,8 +13,6 @@ class StereoCamera
 {
 private:
 
-
-
 public:
 
 	cv::Mat cameraParamL;
@@ -28,6 +26,7 @@ public:
 
 	void init(std::string xmlName,float camBetween);
 
+	// ワールド座標系を取得する。(カメラL側がワールド座標となる)
 	cv::Point3f getWorldPoint(cv::Point2f Lpt,cv::Point2f Rpt);
 
 private:

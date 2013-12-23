@@ -323,7 +323,7 @@ void main_resizeImage(int argc,char *argv[]){
 	int height = atoi(argv[5]);
 	pro::Image in(argv[2]),out;
 	in.imshow("in",1);
-	out.resize(in,cv::Size(width,height));
+	out.resize(in,cv::Size(width,height),cv::INTER_NEAREST);
 	out.imshow("out",1);
 	out.save(argv[3]);
 	cv::waitKey(0);
@@ -920,6 +920,390 @@ void main(int argc,char *argv[]){
 		std::cout << "help is -h option." << endl;
 	}
 }
+
+/*************************************************************
+
+/**
+ * 合宿用バイナリ出力
+ */
+//int main(int argc,char *argv[]){
+//	if(argc!=2 && argc!= 4 && argc!=5){
+//		cout << "input >> img.png 800 600 1" << endl;
+//	}
+//
+//	pro::Image img;
+//
+//	string name = pro::Dir::getFileName(argv[1]);
+//	string path = pro::Dir::getRemoveFilename(argv[1]);
+//
+//	img.path.cd(path);
+//	img.load(name);
+//
+//	if(argc==4){
+//		img.resize(img,cv::Size(atoi(argv[2]),atoi(argv[3])));
+//	}else if(argc==5 && atoi(argv[4])==1){
+//		img.resize(img,(double)atof(argv[2]),(double)atof(argv[3]));
+//	}
+//
+//	img.grayeScale(img);
+//	img.binarization(img);
+//
+//	int width = img.size().width;
+//	int height = img.size().height;
+//	
+//	unsigned char * iarr = img.getU8Data();
+//
+//	std::ofstream ofs;
+//	std::stringstream ss;
+//	ss << pro::Dir::getStem(argv[1]) << "_" << (height) << "_" << (width) << ".txt";
+//	ofs.open(ss.str());
+//
+//	if(!ofs.is_open()){
+//		return 0;
+//	}
+//
+//	ofs << height << " " << width << " " << flush;
+//	for(int i=0;i<width*height;i++){
+//		if(iarr[i]==255){
+//			ofs << (int)1 << " ";
+//		}else{
+//			ofs << (int)iarr[i] << " ";
+//		}
+//	}
+//
+//	ofs.close();
+//
+//	img.save("bin_"+string(argv[1]));
+//
+//	return 0;
+//
+//}
+
+/**
+ * 座標リミット判定
+ */
+//void limitPoints(int *_p, int row, int col)
+//{
+//    int rowLimit = row - 1;
+//    int colLimit = col - 1;
+//    for (int i = 0; i < 4; i++) {
+//        if (_p[i] < 0) _p[i] = 0;
+//        if ((i % 2) == 0) {
+//            if (_p[i] > rowLimit) _p[i] = rowLimit;
+//        } else {
+//            if (_p[i] > colLimit) _p[i] = colLimit;
+//        }
+//    }
+//}
+
+/**
+ * お絵かき動画作成
+ */
+//int main(int argc,char* argv[]){
+//	
+//	//string name_problem = pro::Dir::getFileName(argv[1]);
+//	//string path_problem = pro::Dir::getRemoveFilename(argv[1]);
+//
+//	std::ifstream ifsans;
+//	std::ifstream ifsproblem;
+//	
+//	cv::Size opt_resize(300,300);
+//
+//	ifsproblem.open(argv[1]);
+//	//ifsans.open(argv[2]);
+//
+//	if(!ifsproblem.is_open()){
+//		cout << "not " << argv[1] << endl;
+//		return 0;
+//	}
+//	
+//	int height;
+//	int width;
+//
+//	ifsproblem >> height;
+//	ifsproblem >> width;
+//
+//	int maxsize = width;
+//	if(height>width)
+//		maxsize = height;
+//	
+//	ifsproblem.close();
+//
+//	pro::Image img;
+//	img.init(maxsize,maxsize);
+//	img.oneColor(cv::Scalar(255,255,255));
+//	//img.grayeScale(img);
+//	//img.binarization(img);
+//
+//	//pro::Image adam;
+//	//adam.load("adam1.png");
+//	//adam.grayeScale(adam);
+//
+//	//img.imshow("test",1);
+//
+//	//cv::waitKey(0);
+//
+//	ifsans.open(argv[2]);
+//
+//	if(!ifsans.is_open()){
+//		cout << "not " << argv[2] << endl;
+//		return 0;
+//	}
+//
+//	cv::Size cap_size(maxsize,maxsize);
+//	int fps = 5;
+//
+//	cv::VideoWriter writerfps5(pro::Dir::getStem(argv[1])+"_5fps.avi", CV_FOURCC('X','V','I','D'), fps, opt_resize);
+//
+//	int p[4];
+//
+//	pro::Image resize;
+//
+//	resize.resize(img,opt_resize,cv::INTER_NEAREST);
+//	
+//	writerfps5.write((const cv::Mat&)resize);
+//	writerfps5.write((const cv::Mat&)resize);
+//	writerfps5.write((const cv::Mat&)resize);
+//	
+//	int count = 0; 
+//
+//	while(1){
+//		
+//		resize.resize(img,opt_resize,cv::INTER_NEAREST);
+//
+//		writerfps5.write((const cv::Mat&)resize);
+//		img.grayeScale(img);
+//
+//		//img.imshow("test",1);
+//
+//		if(ifsans.eof()) break;
+//
+//		ifsans >> p[0];
+//		ifsans >> p[1];
+//		ifsans >> p[2];
+//		ifsans >> p[3];
+//
+//		//cout << p[0] << " " << p[1] << " " << p[2] << " " << p[3] << endl;
+//
+//		unsigned char * iarr = img.getU8Data();
+//
+//		limitPoints(p,height,width);
+//		for (int i = (p[1] < p[3]) ? p[1] : p[3]; i <= ((p[1] < p[3]) ? p[3] : p[1]); i++) {
+//            for (int j = (p[0] < p[2]) ? p[0] : p[2]; j <= ((p[0] < p[2]) ? p[2] : p[0]); j++) {
+//                iarr[j*width+i] = iarr[j*width+i]?0:255;
+//            }
+//        }
+//
+//		img.setU8Data(iarr,width,height,1);
+//		img.grayToColor(img);
+//		
+//		count++;
+//
+//		//if(cv::waitKey(30)!=-1) break;
+//
+//	}
+//	img.grayToColor(img);
+//
+//	for(int i=0;i<10;i++){
+//		writerfps5.write((const cv::Mat&)resize);
+//		//img.imshow("test");
+//	}
+//	//cv::waitKey(0);
+//
+//	ifsans.close();
+//
+//	writerfps5.release();
+//
+//	/************************
+//	 * 10秒で終わる処理
+//	 */
+//	
+//	fps = count/10;
+//	cout << fps << endl;
+//	if(fps==0) fps=1;
+//	cv::VideoWriter writer10sec(pro::Dir::getStem(argv[1])+"_10sec.avi", CV_FOURCC('X','V','I','D'), fps, opt_resize);
+//
+//	ifsans.open(argv[2]);
+//
+//	if(!ifsans.is_open()){
+//		cout << "not " << argv[2] << endl;
+//		return 0;
+//	}
+//
+//
+//	pro::Image img2;
+//	img2.init(maxsize,maxsize);
+//	img2.oneColor(cv::Scalar(255,255,255));
+//
+//	resize.resize(img2,opt_resize,cv::INTER_NEAREST);
+//
+//	for(int i=0;i<fps/2;i++){
+//		writer10sec.write((const cv::Mat&)resize);
+//	}	
+////	int count = 0; 
+//
+//	while(1){
+//
+//		resize.resize(img2,opt_resize,cv::INTER_NEAREST);
+//
+//		writer10sec.write((const cv::Mat&)resize);
+//		img2.grayeScale(img2);
+//
+//		//resize.imshow("test",1);
+//
+//		//cv::waitKey(30);
+//
+//		if(ifsans.eof()) break;
+//
+//		ifsans >> p[0];
+//		ifsans >> p[1];
+//		ifsans >> p[2];
+//		ifsans >> p[3];
+//
+//		//cout << p[0] << " " << p[1] << " " << p[2] << " " << p[3] << endl;
+//
+//		unsigned char * iarr = img2.getU8Data();
+//	
+//		limitPoints(p,height,width);
+//		for (int i = (p[1] < p[3]) ? p[1] : p[3]; i <= ((p[1] < p[3]) ? p[3] : p[1]); i++) {
+//            for (int j = (p[0] < p[2]) ? p[0] : p[2]; j <= ((p[0] < p[2]) ? p[2] : p[0]); j++) {
+//                iarr[j*width+i] = iarr[j*width+i]?0:255;
+//            }
+//        }
+//
+//		img2.setU8Data(iarr,width,height,1);
+//		img2.grayToColor(img2);
+//		
+//		//if(cv::waitKey(30)!=-1) break;
+//
+//	}
+//	img2.grayToColor(img2);
+//
+//	for(int i=0;i<fps*2;i++){
+//		writer10sec.write((const cv::Mat&)resize);
+//		//img.imshow("test");
+//	}
+//
+//	//cv::waitKey(0);
+//
+//	ifsans.close();
+//
+//	//writerfps5.release();
+//
+// }
+
+/**
+ * 6動画同時再生
+ */
+//int main(int argc,char *argv[]){
+//
+//	cv::VideoCapture cap[6];
+//	int openFlag[6];
+//	int endFlag[6];
+//
+//	for(int i=0;i<6;i++){
+//		openFlag[i] = 0;
+//		endFlag[i] = 1;
+//	}
+//
+//	int frameNum=0;
+//
+//	// 動画読み込み処理
+//	for(int i=0;i<argc-1;i++){
+//		cap[i] = cv::VideoCapture(argv[i+1]);
+//		if(!cap[i].isOpened()){
+//			cout << "not cap open " << i << " "<< argv[i+1] <<"...";
+//			exit(1);
+//		}
+//		openFlag[i] = 1;
+//		endFlag[i] = 0;
+//		if(frameNum<cap[i].get(CV_CAP_PROP_FRAME_COUNT)){
+//			frameNum = cap[i].get(CV_CAP_PROP_FRAME_COUNT);
+//		}
+//		//cout << argv[i+1] << endl;
+//	}
+//
+//	//cout << argc << endl;
+//	//for(int i=0;i<6;i++){
+//	//	cout << "openFlag " << openFlag[i] << endl;
+//	//	cout << "endFlag " << endFlag[i] << endl;
+//	//}
+//
+//
+//	// 最大サイズ
+//	cv::Size max_size(300,300);
+//	
+//	// 白画像
+//	pro::Image white;
+//	white.init(max_size.width,max_size.height);
+//	white.oneColor(cv::Scalar::all(0));
+//
+//	int fps = cap[0].get(CV_CAP_PROP_FPS);
+//
+//	// フレーム
+//	pro::Image frame[6];
+//	for(int i=0;i<6;i++){
+//		frame[i].init(300,300);
+//		frame[i].oneColor(cv::Scalar::all(0));
+//	}
+//	// ビデオサイズ
+//	cv::Size movieSize(300*3+20*2,300*2+20);
+//	// 動画書き込み用
+//	cv::VideoWriter writer("6movies.avi", CV_FOURCC('X','V','I','D'), fps,movieSize);
+//
+//	// 動画再生ループ
+//	while(1){
+//		int count=0;
+//		for(int i=0;i<6;i++){
+//			pro::Image backup = frame[i];
+//			if(openFlag[i] && !endFlag[i]){
+//				cap[i].read((cv::Mat&)frame[i]);
+//				//cout << "read:" << i << endl;
+//			}
+//			if(endFlag[i]){
+//				frame[i] = backup;
+//				count++;
+//				//cout << "endFlag["<< i <<"]:" << count << endl;
+//				continue;
+//			}
+//			if(frame[i].empty()){
+//				endFlag[i]=1;
+//				frame[i] = backup;
+//				count++;
+//				//cout << "empty: "<< count << endl;
+//			}
+//		}
+//		
+//		if(count==6){
+//			//cout << count << endl;
+//			break;
+//		}
+//		// 結合後再生画像
+//		pro::Image movie(1,1);
+//		pro::Image movieT(1,1);
+//		pro::Image movieB(1,1);
+//
+//		cv::Scalar brankcol = cv::Scalar(150,150,150);
+//
+//		movieT.horiconcat(frame[0],frame[1],20,brankcol);
+//		movieT.horiconcat(movieT,frame[2],20,brankcol);
+//
+//		movieB.horiconcat(frame[3],frame[4],20,brankcol);
+//		movieB.horiconcat(movieB,frame[5],20,brankcol);
+//
+//		movie.vertconcat(movieT,movieB,20,brankcol);
+//
+//		//movie.imshow("movie",1);
+//		//if(cv::waitKey(30)=='q') break;
+//
+//		writer.write((cv::Mat&)movie);
+//
+//		cout << frameNum-- << "    \r" << flush;
+//	}
+//	
+//
+//
+//}
 
 //int m_ID;
 //Image img;

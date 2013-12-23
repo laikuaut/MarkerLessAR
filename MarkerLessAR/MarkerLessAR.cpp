@@ -76,6 +76,85 @@ void MarkerLessAR::initAsift(){
 
 }
 
+void MarkerLessAR::setImages(){
+	asiftLeft.initImages();
+	asiftRight.initImages();
+}
+
+void MarkerLessAR::setKeys(){
+	
+	asiftLR.initKeys(Asift::IMAGE_ID_BASE,1);
+	asiftLR.initKeys(Asift::IMAGE_ID_INPUT,1);
+	asiftLR.initImages();
+
+	asiftLeft.input(Asift::INPUT_ID_KEYS_BASE);
+	cout << "left keys " << asiftLeft.baseKeys.getNum() << "." << endl;
+	asiftRight.input(Asift::INPUT_ID_KEYS_BASE);	
+	cout << "left keys " << asiftRight.baseKeys.getNum() << "." << endl;
+	asiftLeft.input(Asift::INPUT_ID_KEYS_XAXIS);
+	cout << "right xAxis keys " << asiftLeft.xAxis.getNum() << "." << endl;
+	asiftRight.input(Asift::INPUT_ID_KEYS_XAXIS);
+	cout << "right xAxis keys " << asiftRight.xAxis.getNum() << "." << endl;
+
+}
+
+void MarkerLessAR::computeKeys(){
+
+	std::cout << "Computing Left on the image..." << endl;
+	asiftLeft.computeKeyPoints(Asift::IMAGE_ID_INPUT);
+	std::cout << asiftLeft.inputKeys.getNum() <<  " ASIFT keypoints are detected." << endl;
+	std::cout << "Computing Right on the image..." << endl;
+	asiftRight.computeKeyPoints(Asift::IMAGE_ID_INPUT);
+	std::cout << asiftRight.inputKeys.getNum() <<  " ASIFT keypoints are detected." << endl;
+
+}
+
+void MarkerLessAR::computeMatching(){
+	// 左右それぞれのマッチング処理
+	std::cout << "Matching Left on the keypoints..." << endl;
+	asiftLeft.computeMatching(asiftLeft.baseKeys,asiftLeft.inputKeys);
+	std::cout << "Matching Right on the keypoints..." << endl;
+	asiftRight.computeMatching(asiftRight.baseKeys,asiftRight.inputKeys);
+
+	// マッチング点だけにキーポイントを補正
+	std::cout << "only Left Matching Keyspoints..." << endl;
+	asiftLeft.matchings.filterMatching();
+	std::cout << "only Right Matching Keyspoints..." << endl;
+	asiftRight.matchings.filterMatching();
+
+	// 左右同士のマッチング
+	matchingsLR.setKeypoints(*asiftLeft.matchings.asiftKeys2,*asiftRight.matchings.asiftKeys2);
+	matchingsLR.matchings=matchingLR(asiftLeft.matchings.matchings,asiftRight.matchings.matchings);
+	matchingsLR.output(pro::Dir::getStem(imgMarkerName)+"_LR.txt");
+	//asiftLR.createHoriImage(asiftLR.imgInput,matchingsLR,"LRH.png");
+	asiftLR.createHoriImage(asiftLR.imgInput,matchingsLR,pro::Dir::getStem(imgMarkerName)+"_LRH.png");
+	asiftLR.createVertImage(asiftLR.imgInput,matchingsLR,pro::Dir::getStem(imgMarkerName)+"_LRV.png");
+	cout << matchingsLR.getNum() << " matching." << endl;
+
+}
+
+void MarkerLessAR::computeXAxisMatching(){
+	// 左右それぞれのX軸のマッチング処理
+	std::cout << "Matching Left on the xAxis keypoints..." << endl;
+	asiftLeft.computeMatching(asiftLeft.xAxis,asiftLeft.inputKeys);
+	std::cout << "Matching Right on the xAxis keypoints..." << endl;
+	asiftRight.computeMatching(asiftRight.xAxis,asiftRight.inputKeys);
+	
+	// X軸のマッチング点だけにキーポイントを補正
+	std::cout << "only Left Matching xAxis Keyspoints..." << endl;
+	asiftLeft.matchings.filterMatching();
+	std::cout << "only Right Matching xAxis Keyspoints..." << endl;
+	asiftRight.matchings.filterMatching();
+	
+	// 左右同士のマッチング xAxis
+	matchingsLR.setKeypoints(*asiftLeft.matchings.asiftKeys2,*asiftRight.matchings.asiftKeys2);
+	matchingsLR.matchings=matchingLR(asiftLeft.matchings.matchings,asiftRight.matchings.matchings);
+	matchingsLR.output(pro::Dir::getStem(imgMarkerName)+"_xAxisLR.txt");
+	asiftLR.createHoriImage(asiftLR.imgInput,matchingsLR,pro::Dir::getStem(imgMarkerName)+"_xAxisLRH.png");
+	asiftLR.createVertImage(asiftLR.imgInput,matchingsLR,pro::Dir::getStem(imgMarkerName)+"_xAxisLRV.png");
+	cout << matchingsLR.getNum() << " matching." << endl;
+}
+
 void MarkerLessAR::readIni(ptree &pt){
 
 	// read ini file name
@@ -514,6 +593,32 @@ void MarkerLessAR::outputAxis(){
 
 }
 
+void MarkerLessAR::setPersMat(double znear,double zfar){
+
+	// 透視射影変換行列に必要な計算要素
+	double width,height;
+	double au,av,u0,v0;
+
+	width = asiftLeft.imgInput.size().width;
+	height = asiftLeft.imgInput.size().height;
+
+	stereo.init(calibrateXmlName,cameraBetween);
+
+	au = stereo.cameraParamL.at<double>(0,0);
+	av = stereo.cameraParamL.at<double>(1,1);
+	u0 = stereo.cameraParamL.at<double>(0,2);
+	v0 = stereo.cameraParamL.at<double>(1,2);
+	
+	persN = znear;
+	persF = zfar;
+
+	persL = persN*(width - u0)/au;
+	persR = -persN*u0/au;
+	persT = persN*(height - v0)/av;
+	persB = -persN*v0/av;
+
+}
+
 void MarkerLessAR::run(){
 
 	pro::Timer timer;
@@ -523,62 +628,70 @@ void MarkerLessAR::run(){
 	 */
 	cout << "loading marker image..." << endl; 
 
-	asiftLeft.initImages();
-	cout << "left image ok !" << endl;
-	asiftRight.initImages();
-	cout << "right image ok !" << endl;
-	asiftLR.initKeys(Asift::IMAGE_ID_BASE,1);
-	asiftLR.initKeys(Asift::IMAGE_ID_INPUT,1);
-	asiftLR.initImages();
-	cout << "L&R image ok !" << endl;
+	//asiftLeft.initImages();
+	//cout << "left image ok !" << endl;
+	//asiftRight.initImages();
+	//cout << "right image ok !" << endl;
+	//asiftLR.initKeys(Asift::IMAGE_ID_BASE,1);
+	//asiftLR.initKeys(Asift::IMAGE_ID_INPUT,1);
+	//asiftLR.initImages();
+	//cout << "L&R image ok !" << endl;
+
+	setImages();
 	
 	/************************************************
 	 * マーカーの読み込み
 	 */
 	cout << "loading marker keys......" << endl;
 
-	asiftLeft.input(Asift::INPUT_ID_KEYS_BASE);
-	cout << "left keys " << asiftLeft.baseKeys.getNum() << "." << endl;
-	asiftRight.input(Asift::INPUT_ID_KEYS_BASE);	
-	cout << "left keys " << asiftRight.baseKeys.getNum() << "." << endl;
-	asiftLeft.input(Asift::INPUT_ID_KEYS_XAXIS);
-	cout << "right xAxis keys " << asiftLeft.xAxis.getNum() << "." << endl;
-	asiftRight.input(Asift::INPUT_ID_KEYS_XAXIS);
-	cout << "right xAxis keys " << asiftRight.xAxis.getNum() << "." << endl;
-	
+	//asiftLeft.input(Asift::INPUT_ID_KEYS_BASE);
+	//cout << "left keys " << asiftLeft.baseKeys.getNum() << "." << endl;
+	//asiftRight.input(Asift::INPUT_ID_KEYS_BASE);	
+	//cout << "left keys " << asiftRight.baseKeys.getNum() << "." << endl;
+	//asiftLeft.input(Asift::INPUT_ID_KEYS_XAXIS);
+	//cout << "right xAxis keys " << asiftLeft.xAxis.getNum() << "." << endl;
+	//asiftRight.input(Asift::INPUT_ID_KEYS_XAXIS);
+	//cout << "right xAxis keys " << asiftRight.xAxis.getNum() << "." << endl;
+
+	setKeys();
+
 	/************************************************
 	 * キーポイントの演算
 	 */
-	std::cout << "Computing Left on the image..." << endl;
-	asiftLeft.computeKeyPoints(Asift::IMAGE_ID_INPUT);
-	std::cout << asiftLeft.inputKeys.getNum() <<  " ASIFT keypoints are detected." << endl;
-	std::cout << "Computing Right on the image..." << endl;
-	asiftRight.computeKeyPoints(Asift::IMAGE_ID_INPUT);
-	std::cout << asiftRight.inputKeys.getNum() <<  " ASIFT keypoints are detected." << endl;
+	//std::cout << "Computing Left on the image..." << endl;
+	//asiftLeft.computeKeyPoints(Asift::IMAGE_ID_INPUT);
+	//std::cout << asiftLeft.inputKeys.getNum() <<  " ASIFT keypoints are detected." << endl;
+	//std::cout << "Computing Right on the image..." << endl;
+	//asiftRight.computeKeyPoints(Asift::IMAGE_ID_INPUT);
+	//std::cout << asiftRight.inputKeys.getNum() <<  " ASIFT keypoints are detected." << endl;
+
+	computeKeys();
 
 	/************************************************
 	 * キーポイントマッチング処理
 	 */
-	// 左右それぞれのマッチング処理
-	std::cout << "Matching Left on the keypoints..." << endl;
-	asiftLeft.computeMatching(asiftLeft.baseKeys,asiftLeft.inputKeys);
-	std::cout << "Matching Right on the keypoints..." << endl;
-	asiftRight.computeMatching(asiftRight.baseKeys,asiftRight.inputKeys);
+	//// 左右それぞれのマッチング処理
+	//std::cout << "Matching Left on the keypoints..." << endl;
+	//asiftLeft.computeMatching(asiftLeft.baseKeys,asiftLeft.inputKeys);
+	//std::cout << "Matching Right on the keypoints..." << endl;
+	//asiftRight.computeMatching(asiftRight.baseKeys,asiftRight.inputKeys);
 
-	// マッチング点だけにキーポイントを補正
-	std::cout << "only Left Matching Keyspoints..." << endl;
-	asiftLeft.matchings.filterMatching();
-	std::cout << "only Right Matching Keyspoints..." << endl;
-	asiftRight.matchings.filterMatching();
+	//// マッチング点だけにキーポイントを補正
+	//std::cout << "only Left Matching Keyspoints..." << endl;
+	//asiftLeft.matchings.filterMatching();
+	//std::cout << "only Right Matching Keyspoints..." << endl;
+	//asiftRight.matchings.filterMatching();
 
-	// 左右同士のマッチング
-	matchingsLR.setKeypoints(*asiftLeft.matchings.asiftKeys2,*asiftRight.matchings.asiftKeys2);
-	matchingsLR.matchings=matchingLR(asiftLeft.matchings.matchings,asiftRight.matchings.matchings);
-	matchingsLR.output(pro::Dir::getStem(imgMarkerName)+"_LR.txt");
-	//asiftLR.createHoriImage(asiftLR.imgInput,matchingsLR,"LRH.png");
-	asiftLR.createHoriImage(asiftLR.imgInput,matchingsLR,pro::Dir::getStem(imgMarkerName)+"_LRH.png");
-	asiftLR.createVertImage(asiftLR.imgInput,matchingsLR,pro::Dir::getStem(imgMarkerName)+"_LRV.png");
-	cout << matchingsLR.getNum() << " matching." << endl;
+	//// 左右同士のマッチング
+	//matchingsLR.setKeypoints(*asiftLeft.matchings.asiftKeys2,*asiftRight.matchings.asiftKeys2);
+	//matchingsLR.matchings=matchingLR(asiftLeft.matchings.matchings,asiftRight.matchings.matchings);
+	//matchingsLR.output(pro::Dir::getStem(imgMarkerName)+"_LR.txt");
+	////asiftLR.createHoriImage(asiftLR.imgInput,matchingsLR,"LRH.png");
+	//asiftLR.createHoriImage(asiftLR.imgInput,matchingsLR,pro::Dir::getStem(imgMarkerName)+"_LRH.png");
+	//asiftLR.createVertImage(asiftLR.imgInput,matchingsLR,pro::Dir::getStem(imgMarkerName)+"_LRV.png");
+	//cout << matchingsLR.getNum() << " matching." << endl;
+
+	computeMatching();
 
 	// ワールド座標へ変換
 	worldPoints = getWorldPoints(matchingsLR);
@@ -587,26 +700,28 @@ void MarkerLessAR::run(){
 	/************************************************
 	 * X軸マッチング
 	 */
-	// 左右それぞれのX軸のマッチング処理
-	std::cout << "Matching Left on the xAxis keypoints..." << endl;
-	asiftLeft.computeMatching(asiftLeft.xAxis,asiftLeft.inputKeys);
-	std::cout << "Matching Right on the xAxis keypoints..." << endl;
-	asiftRight.computeMatching(asiftRight.xAxis,asiftRight.inputKeys);
+	//// 左右それぞれのX軸のマッチング処理
+	//std::cout << "Matching Left on the xAxis keypoints..." << endl;
+	//asiftLeft.computeMatching(asiftLeft.xAxis,asiftLeft.inputKeys);
+	//std::cout << "Matching Right on the xAxis keypoints..." << endl;
+	//asiftRight.computeMatching(asiftRight.xAxis,asiftRight.inputKeys);
+	//
+	//// X軸のマッチング点だけにキーポイントを補正
+	//std::cout << "only Left Matching xAxis Keyspoints..." << endl;
+	//asiftLeft.matchings.filterMatching();
+	//std::cout << "only Right Matching xAxis Keyspoints..." << endl;
+	//asiftRight.matchings.filterMatching();
+	//
+	//// 左右同士のマッチング xAxis
+	//matchingsLR.setKeypoints(*asiftLeft.matchings.asiftKeys2,*asiftRight.matchings.asiftKeys2);
+	//matchingsLR.matchings=matchingLR(asiftLeft.matchings.matchings,asiftRight.matchings.matchings);
+	//matchingsLR.output(pro::Dir::getStem(imgMarkerName)+"_xAxisLR.txt");
+	//asiftLR.createHoriImage(asiftLR.imgInput,matchingsLR,pro::Dir::getStem(imgMarkerName)+"_xAxisLRH.png");
+	//asiftLR.createVertImage(asiftLR.imgInput,matchingsLR,pro::Dir::getStem(imgMarkerName)+"_xAxisLRV.png");
+	//cout << matchingsLR.getNum() << " matching." << endl;
 	
-	// X軸のマッチング点だけにキーポイントを補正
-	std::cout << "only Left Matching xAxis Keyspoints..." << endl;
-	asiftLeft.matchings.filterMatching();
-	std::cout << "only Right Matching xAxis Keyspoints..." << endl;
-	asiftRight.matchings.filterMatching();
-	
-	// 左右同士のマッチング xAxis
-	matchingsLR.setKeypoints(*asiftLeft.matchings.asiftKeys2,*asiftRight.matchings.asiftKeys2);
-	matchingsLR.matchings=matchingLR(asiftLeft.matchings.matchings,asiftRight.matchings.matchings);
-	matchingsLR.output(pro::Dir::getStem(imgMarkerName)+"_xAxisLR.txt");
-	asiftLR.createHoriImage(asiftLR.imgInput,matchingsLR,pro::Dir::getStem(imgMarkerName)+"_xAxisLRH.png");
-	asiftLR.createVertImage(asiftLR.imgInput,matchingsLR,pro::Dir::getStem(imgMarkerName)+"_xAxisLRV.png");
-	cout << matchingsLR.getNum() << " matching." << endl;
-	
+	computeXAxisMatching();
+
 	// ワールド座標へ変換
 	worldPoints = getWorldPoints(matchingsLR);
 	outputPoint3s(worldPoints,pro::Dir::getStem(imgMarkerName)+"_worldPoints_xAxis.txt");

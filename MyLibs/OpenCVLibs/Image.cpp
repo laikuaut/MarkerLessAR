@@ -64,15 +64,15 @@ void Image::swap(Image& src){
 	src.clone(tmp);	
 }
 
-void Image::resize(const Image& src){
-	cv::resize(src.img,img,cv::Size(w,h));
+void Image::resize(const Image& src,int interpolation){
+	cv::resize(src.img,img,cv::Size(w,h),0,0,interpolation);
 }
-void Image::resize(const Image& src,double fx,double fy){
-	cv::resize(src.img,img,cv::Size(),fx,fy);
+void Image::resize(const Image& src,double fx,double fy,int interpolation){
+	cv::resize(src.img,img,cv::Size(),fx,fy,interpolation);
 	w_h_reset();
 }
-void Image::resize(const Image& src,cv::Size size){
-	cv::resize(src.img,img,size);
+void Image::resize(const Image& src,cv::Size size,int interpolation){
+	cv::resize(src.img,img,size,0,0,interpolation);
 	w_h_reset();
 }
 
@@ -83,12 +83,12 @@ void Image::rotation(const Image& src,cv::Point2f center,double angle){
 	cv::warpAffine(src.img, img, affine_matrix, src.img.size());
 }
 
-void Image::horiconcat(const Image& src1,const Image& src2,int band_w){
+void Image::horiconcat(const Image& src1,const Image& src2,int band_w,cv::Scalar color){
 	if(band_w<=0){
 		cv::hconcat(src1.img,src2.img,img);
 	}else{
 		Image band(band_w,src1.img.size().height,img.type());
-		band.oneColor(cv::Scalar::all(255));
+		band.oneColor(color);
 		try{
 			cv::hconcat(src1.img,band.img,band.img);
 			cv::hconcat(band.img,src2.img,img);
@@ -101,12 +101,12 @@ void Image::horiconcat(const Image& src1,const Image& src2,int band_w){
 	w_h_reset();
 }
 
-void Image::vertconcat(const Image& src1,const Image& src2,int band_w){
+void Image::vertconcat(const Image& src1,const Image& src2,int band_w,cv::Scalar color){
 	if(band_w<=0){
 		cv::vconcat(src1.img,src2.img,img);
 	}else{
 		Image band(src1.img.size().width,band_w,img.type());
-		band.oneColor(cv::Scalar::all(255));
+		band.oneColor(color);
 		try{
 			cv::vconcat(src1.img,band.img,band.img);
 			cv::vconcat(band.img,src2.img,img);
@@ -121,6 +121,11 @@ void Image::vertconcat(const Image& src1,const Image& src2,int band_w){
 
 void Image::grayeScale(const Image& src){
 	cv::cvtColor(src.img, img, CV_BGR2GRAY);
+	w_h_reset();
+}
+
+void Image::grayToColor(const Image& src){
+	cv::cvtColor(src.img,img,CV_GRAY2BGR);
 	w_h_reset();
 }
 

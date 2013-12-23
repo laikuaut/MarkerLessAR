@@ -114,6 +114,16 @@ public:
 	cv::Vec3f zAxis;
 	cv::Vec3f tAxis;
 
+	/********************************************
+	 * 透視射影行列
+	 */
+	double persL;
+	double persR;
+	double persT;
+	double persB;
+	double persN;
+	double persF;
+
 public:
 
 	// コンストラクタ
@@ -130,6 +140,17 @@ public:
 	void defaultParam();
 	// Asiftの画像名等MLAR用に初期化
 	void initAsift();
+	// 画像設置
+	void setImages();
+	// キーポイント設置
+	void setKeys();
+	
+	/********************************************
+	 * 演算処理
+	 */
+	void computeKeys();
+	void computeMatching();
+	void computeXAxisMatching();
 
 	/********************************************
 	 * iniファイル関連
@@ -165,6 +186,11 @@ public:
 	void setCenterAxis();
 	void setAxis();
 	void outputAxis();
+
+	/********************************************
+	 * 透視射影行列計算
+	 */
+	void setPersMat(double znear,double zfar);
 
 	/********************************************
 	 * 実行関連

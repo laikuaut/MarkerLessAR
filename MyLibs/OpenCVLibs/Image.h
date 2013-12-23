@@ -53,15 +53,16 @@ public:
 	void release();
 	void clone(const Image& src);
 	void swap(Image& src);
-	void resize(const Image& src);
-	void resize(const Image& src,double fx,double fy);
-	void resize(const Image& src,cv::Size size);
+	void resize(const Image& src,int interpolation=1);
+	void resize(const Image& src,double fx,double fy,int interpolation=1);
+	void resize(const Image& src,cv::Size size,int interpolation=1);
 	void rotation(const Image& src,cv::Point2f center,double angle);
 
-	void horiconcat(const Image &src1,const Image &src2,int band_w=0);
-	void vertconcat(const Image &src1,const Image &src2,int band_w=0);
+	void horiconcat(const Image &src1,const Image &src2,int band_w=0,cv::Scalar color=cv::Scalar::all(0));
+	void vertconcat(const Image &src1,const Image &src2,int band_w=0,cv::Scalar color=cv::Scalar::all(0));
 	
 	void grayeScale(const Image& src);
+	void grayToColor(const Image& src);
 	void binarization(const Image& src);
 	void adaptiveBinarization(const Image& src);
 	void oneColor(cv::Scalar scal);
