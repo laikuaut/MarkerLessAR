@@ -1099,6 +1099,8 @@ void main(int argc,char *argv[]){
 //		
 //		count++;
 //
+//		delete[] iarr;
+//
 //		//if(cv::waitKey(30)!=-1) break;
 //
 //	}
@@ -1176,6 +1178,8 @@ void main(int argc,char *argv[]){
 //		
 //		//if(cv::waitKey(30)!=-1) break;
 //
+//		delete[] iarr;
+//
 //	}
 //	img2.grayToColor(img2);
 //
@@ -1238,7 +1242,12 @@ void main(int argc,char *argv[]){
 //	white.init(max_size.width,max_size.height);
 //	white.oneColor(cv::Scalar::all(0));
 //
-//	int fps = cap[0].get(CV_CAP_PROP_FPS);
+//	int fps = 1;
+//	for(int i=0;i<argc-1;i++){
+//		cout << cap[i].get(CV_CAP_PROP_FPS)<<endl;
+//		if(fps<cap[i].get(CV_CAP_PROP_FPS))
+//			fps = cap[i].get(CV_CAP_PROP_FPS);
+//	}
 //
 //	// フレーム
 //	pro::Image frame[6];
@@ -1246,6 +1255,7 @@ void main(int argc,char *argv[]){
 //		frame[i].init(300,300);
 //		frame[i].oneColor(cv::Scalar::all(0));
 //	}
+//
 //	// ビデオサイズ
 //	cv::Size movieSize(300*3+20*2,300*2+20);
 //	// 動画書き込み用

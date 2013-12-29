@@ -93,7 +93,7 @@ GLdouble* getModelMat(double x1,double x2,double x3,
 				 double z1,double z2,double z3,
 				 double t1,double t2,double t3){
 	
-	GLdouble moudelMat[16];
+	GLdouble modelMat[16];
 
 	modelMat[0]=x1;
 	modelMat[1]=x2;
@@ -132,14 +132,13 @@ void glmain(int argc,char *argv[]){
 	//glmlar.run();
 	//else
 	glmlar.setImages();
-	//glmlar.setKeys();
 
 	// OpenGL表示用画像
 	camera_image = glmlar.asiftLeft.imgInput;
 
 	// 軸行列読み込み
 	glmlar.setAxis();
-	glmlar.setPersMat(1,100);
+	glmlar.setPersMat(1,300);
 	
 	for(int i=0;i<16;i++){
 		modelMat[i]=0;
@@ -190,15 +189,15 @@ void glmain(int argc,char *argv[]){
 	//modelMat[10]=glmlar.zAxis[2];
 	//modelMat[11]=0;
 
-	//modelMat[12]=glmlar.tAxis[0];
-	//modelMat[13]=glmlar.tAxis[1];
-	//modelMat[14]=glmlar.tAxis[2];
-	//modelMat[15]=1;
-
-	modelMat[12]=0;
-	modelMat[13]=0;
-	modelMat[14]=0;
+	modelMat[12]=-glmlar.tAxis[0];
+	modelMat[13]=-glmlar.tAxis[1];
+	modelMat[14]=-glmlar.tAxis[2];
 	modelMat[15]=1;
+
+	//modelMat[12]=0;
+	//modelMat[13]=0;
+	//modelMat[14]=-10;
+	//modelMat[15]=1;
 
 	//setModelMat(1/sqrt(2),0,0,0,2,0,0,0,2,0,0,0);
 
@@ -332,10 +331,10 @@ void display_function(void)
 
 	// 視点と視線を設定します
 	// 本番では，コメントにします
-	gluLookAt(
-		2.0, 2.0 ,1.5,
-		0.0, 0.0, 0.0,
-		0.0, 2.0, 0.0);
+	//gluLookAt(
+	//	2.0, 3.0 ,1.5,
+	//	0.0, 0.0, 0.0,
+	//	0.0, 2.0, 0.0);
 
 	glPushMatrix();
 
@@ -358,7 +357,7 @@ void display_function(void)
 	glMultMatrixd(modelMat);
 
 	// 立方体を描画します
-	glutSolidCube(1);
+	glutSolidCube(50);
 
 	glPopMatrix();
 

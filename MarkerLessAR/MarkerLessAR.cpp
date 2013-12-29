@@ -455,50 +455,7 @@ void MarkerLessAR::setXAxis(){
 }
 
 void MarkerLessAR::setYAxis(){
-	//cv::Vec3d vx;
-	//cv::Vec3d vy;
-	//cv::Vec3d vz;
-
-	//std::ifstream xifs,zifs;
-	//xifs.open(pro::Dir::getStem(imgMarkerName)+"_XAxis.txt");
-	//if(!xifs.is_open()){
-	//	cout << "not open XAxis..." << endl;
-	//	return;
-	//}
-	//double val;
-	////xifs>>val;
-	//xifs>>vx[0];
-	//xifs>>vx[1];
-	//xifs>>vx[2];
-
-	//xifs.close();
-
-	//zifs.open(pro::Dir::getStem(imgMarkerName)+"_ZAxis.txt");
-	//if(!zifs.is_open()){
-	//	cout << "not open ZAxis..." << endl;
-	//	return;
-	//}
-	////zifs>>val;
-	//zifs>>vz[0];
-	//zifs>>vz[1];
-	//zifs>>vz[2];
-
-	//zifs.close();
-
-	//vy = vz.cross(vx);
 	yAxis = zAxis.cross(xAxis);
-	
-	//std::ofstream ofs;
-
-	//ofs.open(pro::Dir::getStem(imgMarkerName)+"_YAxis.txt");
-	//if(!ofs.is_open()){
-	//	cout << "not open YAxis..." << endl;
-	//	return;
-	//}
-	//ofs << vy[0] << " " << vy[1] << " " << vy[2] << endl;
-
-	//ofs.close();
-
 }
 
 void MarkerLessAR::setCenterAxis(){
@@ -513,7 +470,6 @@ void MarkerLessAR::setCenterAxis(){
 	}
 
 	ifs >> num;
-	//cv::Point3f center=cv::Point3f(0,0,0);
 
     double val;
 
@@ -527,35 +483,12 @@ void MarkerLessAR::setCenterAxis(){
 			ifs >> val;
 			tAxis[i]+=val;
 		}
-		//cv::Point3f val;
-		//ifs >> val.x;
-		//ifs >> val.y;
-		//ifs >> val.z;
-		//center+=val;
 	}
-
-	//center.x/=num;
-	//center.y/=num;
-	//center.z/=num;
 
 	
 	for(int i=0;i<3;i++){
 		tAxis[i] /= num;
 	} 
-
-	//std::ofstream ofs;
-
-	//ofs.open(pro::Dir::getStem(imgMarkerName)+"_CenterAxis.txt");
-	//if(!ofs.is_open()){
-	//	cout << "not open CenterAxis..." << endl;
-	//	return;
-	//}
-
-	//ofs << center.x << " " 
-	//	<< center.y << " " 
-	//	<< center.z << endl;
-
-	//ofs.close();
 
 }
 

@@ -155,7 +155,6 @@ public:
 	/********************************************
 	 * iniファイル関連
 	 */
-	// 
 	void readIni(ptree &pt);
 	void writeIni(ptree &pt);
 	void readIni(std::string name);
@@ -178,7 +177,7 @@ public:
 	vector<cv::Point3f> getWorldPoints(AsiftMatchings mathing);
 
 	/********************************************
-	 * 主成分分析
+	 * 主成分分析による軸の決定
 	 */
 	void setXAxis();
 	void setYAxis();
