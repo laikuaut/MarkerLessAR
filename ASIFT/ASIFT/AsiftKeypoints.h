@@ -92,8 +92,10 @@ public:
 	void input(string name);
 	void inputOnce(string name);
 
-	// 矩形フィルター処理
+	// 矩形範囲外の削除フィルター処理
 	void filterRectangle(cv::Point2f pt1,cv::Point2f pt2);
+	// 矩形範囲の削除フィルター処理
+	void filterRectangleDel(cv::Rect rects[],int n);
 	// センターラインフィルター処理
 	void filterCenterLine(cv::Point2f centerPt,float distance);
 

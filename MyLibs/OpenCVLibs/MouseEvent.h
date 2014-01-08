@@ -15,11 +15,11 @@ namespace pro{
 
 class PRO_EXPORTS MouseEvent
 {
-public:
+protected:
 
 	int event,x,y,flag;
 
-public:
+protected:
 	MouseEvent(void);
 	~MouseEvent(void);
 

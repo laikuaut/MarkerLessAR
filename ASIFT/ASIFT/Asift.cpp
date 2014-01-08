@@ -94,7 +94,7 @@ void Asift::defaultParam(){
 	onMouseCount = 0;
 
 	// X軸キーポイントの初期化
-	//xAxis = AsiftKeypoints(7,iniSiftParamName);
+	//xAxisKeys = AsiftKeypoints(7,iniSiftParamName);
 	centerLineDistance = 20;
 
 }
@@ -125,25 +125,35 @@ void Asift::initImages(){
 
 void Asift::initNames(){
 	
+	// ベース名取得
 	baseName = pro::Dir::getStem(imgBaseName);
+	// ベース拡張子取得
 	baseExtention = pro::Dir::getExtention(imgBaseName);
 
+	// キーポイント名設定
 	baseKeysName = baseName + "_Keys.txt";
 	xAxisKeysName = baseName + "_xAxisKeys.txt";
 
+	// インプットビデオ系設定
 	if(videoInputFlag){
 		inputName = pro::Dir::getStem(capInName);
 		inputExtention = pro::Dir::getExtention(capInName);
 		capVName = inputName + "_Vert" + inputExtention;
 		capHName = inputName + "_Heri" + inputExtention;
+	// インプット画像系設定
 	}else{
 		inputName = pro::Dir::getStem(imgInputName);
 		inputExtention = pro::Dir::getExtention(imgInputName);
 	}
 	
+	// 水平・垂直画像名設定
 	imgVName = inputName + "_Vert" + baseExtention;
 	imgHName = inputName + "_Heri" + baseExtention;
+	
+	// インプットキーポイント名設定
 	inputKeysName = inputName + "_Keys.txt";
+
+	// マッチング名設定
 	matchingsName = inputName + "_Matching.txt";
 }
 
@@ -318,7 +328,7 @@ void Asift::run(){
 	if(filterRectOnMouseFlag){
 		std::cout << "keypoints1 Rect Filter set..." << endl;
 			// 矩形フィルターセット
-			setFilterRectanglePoints(imgBase);
+			setFilterRect(imgBase);
 		timer.lap();
 			// フィルタ実行
 			fileterRun(baseKeys);
@@ -334,8 +344,8 @@ void Asift::run(){
 	 * X軸付近の特徴点取得
 	 */
 	setCenterLinePoints(baseKeys);
-	//xAxis.draw(imgBase);
-	//xAxis.output(xAxisKeysName);
+	//xAxisKeys.draw(imgBase);
+	//xAxisKeys.output(xAxisKeysName);
 	output(OUTPUT_ID_KEYS_XAXIS);
 	
 	/***************************************************************
@@ -487,7 +497,6 @@ void Asift::markerCreate(std::string markerName,int tilts,int rectFilterFlag,int
 	 */
 	imgMarker.load(markerName);
 	setImage(imgMarker,IMAGE_ID_ELSE,markerKeys);
-
 	
 	/***************************************************************
 	 * キーポイントの計算
@@ -508,7 +517,7 @@ void Asift::markerCreate(std::string markerName,int tilts,int rectFilterFlag,int
 	if(rectFilterFlag){
 		std::cout << "markerKeys Rect Filter set..." << endl;
 			// 矩形フィルター処理
-			setFilterRectanglePoints(imgMarker);
+			setFilterRect(imgMarker);
 		timer.lap();
 			fileterRun(markerKeys);
 		std::cout << "pt1(" << filterRect.x << "," << filterRect.y << ") " << flush;
@@ -523,10 +532,10 @@ void Asift::markerCreate(std::string markerName,int tilts,int rectFilterFlag,int
 	 * X軸付近の特徴点取得
 	 */
 	setCenterLinePoints(markerKeys);
-	xAxis.output(pro::Dir::getStem(markerName)+"_xAxisKeys.txt");
+	xAxisKeys.output(pro::Dir::getStem(markerName)+"_xAxisKeys.txt");
 	// 一次連続ベクター
-	//xAxis.setOnceKeys();
-	xAxis.outputOnce(pro::Dir::getStem(markerName)+"_xAxisOnceKeys.txt");
+	//xAxisKeys.setOnceKeys();
+	xAxisKeys.outputOnce(pro::Dir::getStem(markerName)+"_xAxisOnceKeys.txt");
 	
 	/***************************************************************
 	 * Base Keypoints ファイル出力
@@ -542,7 +551,7 @@ void Asift::markerCreate(std::string markerName,int tilts,int rectFilterFlag,int
 	if(imageShow){
 		imgMarker.load(markerName);
 		markerKeys.draw(imgMarker);
-		xAxis.draw(imgMarker,cv::Scalar(255,255,0),cv::Scalar(255,255,0));
+		xAxisKeys.draw(imgMarker,cv::Scalar(255,255,0),cv::Scalar(255,255,0));
 		imgMarker.imshow(pro::Dir::getStem(markerName),1);
 		cv::waitKey(0);
 	}
@@ -567,7 +576,6 @@ void Asift::setNames(std::string imgBaseName,std::string imgInputName,std::strin
 	initNames();
 }
 
-
 void Asift::computeKeyPoints(int id,AsiftKeypoints &keys){
 	if(id==IMAGE_ID_BASE){
 		baseKeys.computeAsiftKeyPoints(verb);
@@ -583,11 +591,12 @@ void Asift::computeMatching(AsiftKeypoints keys1,AsiftKeypoints keys2){
 	matchings.computeAsiftMatches(verb);
 }
 
-void Asift::setFilterRectanglePoints(pro::Image &src){
+void Asift::setFilterRect(pro::Image &src){
 
 	pro::Image base;
 	string winName="FilterRectangle";
 	base.clone(src);
+
 	setMouseEventId(ON_MOUSE_ID_FILTER_RECT);
 	onMouseCount = 0;
 
@@ -620,6 +629,15 @@ void Asift::setFilterRectanglePoints(pro::Image &src){
 		cv::Point2f(filterRect.x+filterRect.width,filterRect.y+filterRect.height));
 
 	filterFlag = filterFlag | FILTER_RECT_FLAG;
+
+}
+
+
+/**************
+ * 作成中
+ */
+void Asift::setFilterDelRect(pro::Image &src){
+
 }
 
 cv::Point2f Asift::getCenterPoint(cv::Point2f pt1,cv::Point2f pt2){
@@ -649,8 +667,8 @@ cv::Point2f Asift::getCenterPoint(cv::Point2f pt1,cv::Point2f pt2){
 }
 
 void Asift::setCenterLinePoints(AsiftKeypoints &keys){
-	xAxis = AsiftKeypoints(keys);
-	xAxis.filterCenterLine(centerPt,centerLineDistance);
+	xAxisKeys = AsiftKeypoints(keys);
+	xAxisKeys.filterCenterLine(centerPt,centerLineDistance);
 }
 
 void Asift::fileterRun(AsiftKeypoints &keys){
@@ -659,13 +677,17 @@ void Asift::fileterRun(AsiftKeypoints &keys){
 								,cv::Point2f(filterRect.x+filterRect.width
 								,filterRect.y+filterRect.height));
 	}
+	if((filterFlag & FILTER_RECT_DEL_FLAG) == 1){
+		keys.filterRectangleDel(filterDelRect,filterDelRectNum);
+	}
+	filterFlag = 0;
 }
 
 void Asift::input(int id){
 	if(id == INPUT_ID_KEYS_BASE){
 		baseKeys.input(baseKeysName);
 	}else if(id == INPUT_ID_KEYS_XAXIS){
-		xAxis.input(xAxisKeysName);
+		xAxisKeys.input(xAxisKeysName);
 	}
 }
 
@@ -681,7 +703,7 @@ void Asift::output(int id,pro::Image src){
 	}else if(id == OUTPUT_ID_HORI){
 		createHoriImage(src);
 	}else if(id == OUTPUT_ID_KEYS_XAXIS){
-		xAxis.output(xAxisKeysName);
+		xAxisKeys.output(xAxisKeysName);
 	}
 }
 
@@ -692,6 +714,9 @@ void Asift::setMouseEventId(int id){
 void Asift::onMouse_impl(int event,int x,int y,int flag){
 	if(onMouseId==ON_MOUSE_ID_FILTER_RECT)
 		onMouse_filterRect(event,x,y,flag);
+	else if(onMouseId==ON_MOUSE_ID_FILTER_DEL_RECT){
+		onMouse_filterDelRect(event,x,y,flag);
+	}
 }
 
 void Asift::onMouse_filterRect(int event,int x,int y,int flag){
@@ -725,6 +750,15 @@ void Asift::onMouse_filterRect(int event,int x,int y,int flag){
 			break;
 	}
 }
+
+
+/**************
+ * 作成中
+ */
+void Asift::onMouse_filterDelRect(int event,int x,int y,int flag){
+
+}
+
 
 //void Asift::resize(pro::Image &src,pro::Image &dst,float &zoom,int resizeFlag){
 //	if(!resizeFlag){

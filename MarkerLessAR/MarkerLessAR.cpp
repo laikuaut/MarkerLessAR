@@ -90,11 +90,11 @@ void MarkerLessAR::setKeys(){
 	asiftLeft.input(Asift::INPUT_ID_KEYS_BASE);
 	cout << "left keys " << asiftLeft.baseKeys.getNum() << "." << endl;
 	asiftRight.input(Asift::INPUT_ID_KEYS_BASE);	
-	cout << "left keys " << asiftRight.baseKeys.getNum() << "." << endl;
+	cout << "right keys " << asiftRight.baseKeys.getNum() << "." << endl;
 	asiftLeft.input(Asift::INPUT_ID_KEYS_XAXIS);
-	cout << "right xAxis keys " << asiftLeft.xAxis.getNum() << "." << endl;
+	cout << "left xAxis keys " << asiftLeft.xAxisKeys.getNum() << "." << endl;
 	asiftRight.input(Asift::INPUT_ID_KEYS_XAXIS);
-	cout << "right xAxis keys " << asiftRight.xAxis.getNum() << "." << endl;
+	cout << "right xAxis keys " << asiftRight.xAxisKeys.getNum() << "." << endl;
 
 }
 
@@ -136,9 +136,9 @@ void MarkerLessAR::computeMatching(){
 void MarkerLessAR::computeXAxisMatching(){
 	// 左右それぞれのX軸のマッチング処理
 	std::cout << "Matching Left on the xAxis keypoints..." << endl;
-	asiftLeft.computeMatching(asiftLeft.xAxis,asiftLeft.inputKeys);
+	asiftLeft.computeMatching(asiftLeft.xAxisKeys,asiftLeft.inputKeys);
 	std::cout << "Matching Right on the xAxis keypoints..." << endl;
-	asiftRight.computeMatching(asiftRight.xAxis,asiftRight.inputKeys);
+	asiftRight.computeMatching(asiftRight.xAxisKeys,asiftRight.inputKeys);
 	
 	// X軸のマッチング点だけにキーポイントを補正
 	std::cout << "only Left Matching xAxis Keyspoints..." << endl;
@@ -398,10 +398,10 @@ void MarkerLessAR::setXAxis(){
     int SAMPLES=0;
 	
 	std::ifstream ifs;
-	ifs.open(pro::Dir::getStem(imgMarkerName)+"_worldPoints_xAxis.txt");
+	ifs.open(pro::Dir::getStem(imgMarkerName)+"_worldPoints_xAxisKeys.txt");
 
 	if(!ifs.is_open()){
-		cout << "not open " << pro::Dir::getStem(imgMarkerName)+"_worldPoints_xAxis.txt" << "..." << endl;
+		cout << "not open " << pro::Dir::getStem(imgMarkerName)+"_worldPoints_xAxisKeys.txt" << "..." << endl;
 		return;
 	}
 
@@ -432,9 +432,9 @@ void MarkerLessAR::setXAxis(){
 	//}
 
 	//std::ofstream ofs;
-	//ofs.open(pro::Dir::getStem(imgMarkerName)+"_XAxis.txt");
+	//ofs.open(pro::Dir::getStem(imgMarkerName)+"_xAxisKeys.txt");
 	//if(!ofs.is_open()){
-	//	cout << "not open XAxis..." << endl;
+	//	cout << "not open xAxisKeys..." << endl;
 	//	return;
 	//}
 
@@ -582,9 +582,9 @@ void MarkerLessAR::run(){
 	//asiftRight.input(Asift::INPUT_ID_KEYS_BASE);	
 	//cout << "left keys " << asiftRight.baseKeys.getNum() << "." << endl;
 	//asiftLeft.input(Asift::INPUT_ID_KEYS_XAXIS);
-	//cout << "right xAxis keys " << asiftLeft.xAxis.getNum() << "." << endl;
+	//cout << "right xAxis keys " << asiftLeft.xAxisKeys.getNum() << "." << endl;
 	//asiftRight.input(Asift::INPUT_ID_KEYS_XAXIS);
-	//cout << "right xAxis keys " << asiftRight.xAxis.getNum() << "." << endl;
+	//cout << "right xAxis keys " << asiftRight.xAxisKeys.getNum() << "." << endl;
 
 	setKeys();
 
@@ -657,7 +657,7 @@ void MarkerLessAR::run(){
 
 	// ワールド座標へ変換
 	worldPoints = getWorldPoints(matchingsLR);
-	outputPoint3s(worldPoints,pro::Dir::getStem(imgMarkerName)+"_worldPoints_xAxis.txt");
+	outputPoint3s(worldPoints,pro::Dir::getStem(imgMarkerName)+"_worldPoints_xAxisKeys.txt");
 
 	/************************************************
 	 * 結果出力

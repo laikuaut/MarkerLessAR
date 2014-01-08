@@ -36,10 +36,9 @@ void main_help();
  * default
  */
 void main_MarkerLessAR(int argc,char *argv[]){
-
 	MarkerLessAR mlar;
 	mlar.init(1);
-	//mlar.run();
+	mlar.run();
 	mlar.setAxis();
 }
 
@@ -614,7 +613,7 @@ void main_centerLine(int argc,char *argv[]){
 	out_img.imshow(output);
 
 	//asift.baseKeys.filterRectangle(cv::Point2f(0,0),cv::Point2f(out_img.size().width,out_img.size().height));
-	asift.setFilterRectanglePoints(in_img);
+	asift.setFilterRect(in_img);
 	asift.fileterRun(asift.baseKeys);
 	std::cout << asift.baseKeys.getNum() << endl;
 
@@ -825,7 +824,7 @@ void main_markerCreate(int argc,char *argv[]){
 		showFlag = atoi(argv[5]);
 
 	Asift asift;
-	asift.init(1);
+	//asift.init(1);
 	asift.markerCreate(markerName,tilts,rectFlag,showFlag);
 }
 

@@ -68,10 +68,12 @@ public:
 
 	// マウスイベントID
 	static const int ON_MOUSE_ID_FILTER_RECT = 1;
+	static const int ON_MOUSE_ID_FILTER_DEL_RECT = 2;
 
 	// フィルターFlag
 	static const int FILTER_RECT_FLAG = 1;
 	static const int FILTER_CENTER_LINE_FLAG = 2;
+	static const int FILTER_RECT_DEL_FLAG = 4;
 
 private:
 	/********************************************
@@ -153,7 +155,7 @@ private:
 	 */
 	// baseKeys をファイルから読み込むかどうか
 	int baseKeysInputFlag;
-	// 動画読み込み処理のフラグ
+	// 動画読み込み処理のフラ
 	int videoInputFlag;
 	// 動画生成時のInputKeypointsをすべてファイル出力するかどうかのフラグ
 	int videoKeypointsOutputFlag;
@@ -175,6 +177,9 @@ private:
 	 */
 	// base画像のキーポイント矩形フィルター用
 	 cv::Rect filterRect;
+	 // 削除矩形フィルター用
+	 cv::Rect *filterDelRect;
+	 int filterDelRectNum;
 	 // フィルターFlag
 	 int filterFlag;
 
@@ -195,7 +200,7 @@ public:
 	// マッチングデータ
 	AsiftMatchings matchings;
 	// X軸を求めるためのキーポイント候補点
-	AsiftKeypoints xAxis;
+	AsiftKeypoints xAxisKeys;
 
 public:
 
@@ -267,7 +272,9 @@ public:
 	 * フィルタ処理
 	 */
 	// 矩形フィルター処理
-	void setFilterRectanglePoints(pro::Image &src);
+	void setFilterRect(pro::Image &src);
+	// 矩形削除フィルター処理
+	void setFilterDelRect(pro::Image &src);
 	// 中心座標を取得する。
 	cv::Point2f getCenterPoint(cv::Point2f pt1,cv::Point2f pt2);
 	// センターライン付近にある特徴点の抽出
@@ -294,6 +301,8 @@ private:
 	void onMouse_impl(int event,int x,int y,int flag);
 	// 矩形フィルターのマウスイベント
 	void onMouse_filterRect(int event,int x,int y,int flag);
+	// 削除矩形フィルターのマウスイベント
+	void onMouse_filterDelRect(int event,int x,int y,int flag);
 
 	// asiftのリサイズ処理
 	//void resize(pro::Image &src,pro::Image &dst,float &zoom,int resizeFlag);

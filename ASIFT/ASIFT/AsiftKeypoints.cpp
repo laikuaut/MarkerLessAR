@@ -453,6 +453,50 @@ void AsiftKeypoints::filterRectangle(cv::Point2f pt1,cv::Point2f pt2){
 	keypointsTotal();
 }
 
+void AsiftKeypoints::filterRectangleDel(cv::Rect rects[],int n){
+	
+	int maxX,maxY,minX,minY;
+
+
+	for(int j=0;j<n;j++){
+		if(rects[j].x>rects[j].x+rects[j].width){
+			maxX = rects[j].x;
+			minX = rects[j].x+rects[j].width;
+		}else{
+			maxX = rects[j].x+rects[j].width;
+			minX = rects[j].x;
+		}
+		if(rects[j].y>rects[j].y+rects[j].height){
+			maxY = rects[j].y;
+			minY = rects[j].y+rects[j].height;
+		}else{
+			maxY = rects[j].y+rects[j].height;
+			minY = rects[j].y;
+		}
+
+		for (int tt = 0; tt < (int) keys.size(); tt++)
+		{
+			for (int rr = 0; rr < (int) keys[tt].size(); rr++)
+			{
+				keypointslist::iterator ptr = keys[tt][rr].begin();
+				for(int i=0; i < (int) keys[tt][rr].size(); i++)	
+				{
+					// 矩形範囲条件
+					if(zoom*keys[tt][rr][i].x <= maxX  || zoom*keys[tt][rr][i].x >= minX ||
+						zoom*keys[tt][rr][i].y <= maxY || zoom*keys[tt][rr][i].y >= minY){
+							// 範囲外のキーポイントを削除
+						keys[tt][rr].erase(keys[tt][rr].begin()+i);
+						//ptr--; 
+						i--;
+					}
+				}
+			}	
+		}
+	
+	}
+
+}
+
 void AsiftKeypoints::filterCenterLine(cv::Point2f centerPt,float distance){
 	
 	AsiftKeypoints xAxis = AsiftKeypoints(*this);
