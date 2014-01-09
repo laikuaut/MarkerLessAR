@@ -284,7 +284,7 @@ vector<cv::Point3f> MarkerLessAR::inputPoint3s(std::string name){
 }
 
 matchingslist MarkerLessAR::matchingLR(matchingslist matchingsL,matchingslist matchingsR){
-	double radius = 0.1;
+	double radius = 2;
 	matchingslist matchingsLR;
 	for(int i=0;i<matchingsL.size();i++){
 		for(int j=0;j<matchingsR.size();j++){

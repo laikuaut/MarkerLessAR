@@ -77,7 +77,9 @@ public:
 	void reversal(const Image& src);
 
 	void load(string name);
+	void load(Dir path,string name);
 	void save(string name);
+	void save(Dir path,string name);
 
 	bool empty();
 

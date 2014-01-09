@@ -705,6 +705,7 @@ int compute_asift_matches(int num_of_tilts1, int num_of_tilts2, int w1, int h1, 
 		// tiltは画像１，２両方でシミュレートした時から、通常反復点を持つ
 		matchingslist matchings_unique;	
 		vector< vector<float> > Minfoall_unique;			
+		// ユーグリッド距離を使用して近すぎるマッチング点を一点に絞る
 		unique_match1(matchings, matchings_unique, Minfoall, Minfoall_unique);      		
 		matchings = matchings_unique;
 		Minfoall = Minfoall_unique; 

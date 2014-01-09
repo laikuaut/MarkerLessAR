@@ -202,7 +202,33 @@ void Image::load(string name){
 	}
 }
 
+void Image::load(Dir path,string name){
+	try{
+		if(!path.isExist(name))
+			throw FileException(FileException::NOT_EXIST,path.pwd(name),"Image.cpp","Image::Load()",__LINE__);
+		else if(path.isDirectory(name))
+			throw FileException(FileException::DIRECTORY,path.pwd(name),"Image.cpp","Image::Load()",__LINE__);
+		else{
+			img = cv::imread(path.pwd(name), 1);
+			w = img.size().width;
+			h = img.size().height;
+		}
+	}catch(const FileException& e){
+		e.showError();
+		exit(EXIT_FAILURE);
+	}
+}
+
 void Image::save(string name){
+	vector<int> params;
+	params = vector<int>(2);
+	// JPEG圧縮パラメータ
+	params[0] = CV_IMWRITE_JPEG_QUALITY;
+	params[1] = 95;
+	cv::imwrite(path.pwd(name), img , params);
+}
+
+void Image::save(Dir path,string name){
 	vector<int> params;
 	params = vector<int>(2);
 	// JPEG圧縮パラメータ

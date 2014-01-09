@@ -300,3 +300,27 @@ void AsiftMatchings::input(std::string name){
 
 	inf.close();
 }
+
+pro::Image AsiftMatchings::drawHoriImage(pro::Image first,pro::Image second,int bandWidth,std::string name){
+	pro::Image horiImg;
+	horiImg.horiconcat(first,second,bandWidth);
+	matchingslist::iterator ptr = matchings.begin();
+	for(int i=0; i < (int) matchings.size(); i++, ptr++)
+	{		
+		horiImg.line(cv::Point2f((asiftKeys1->zoom*ptr->first.x),(asiftKeys1->zoom*ptr->first.y)), 
+			cv::Point2f((asiftKeys2->zoom*ptr->second.x) + first.size().width + bandWidth,(asiftKeys2->zoom*ptr->second.y)),cv::Scalar::all(255));
+	}
+	return horiImg;
+}
+
+pro::Image AsiftMatchings::drawVertImage(pro::Image first,pro::Image second,int bandWidth,std::string name){
+	pro::Image vertImg;
+	vertImg.vertconcat(first,second,bandWidth);
+	matchingslist::iterator ptr = matchings.begin();
+	for(int i=0; i < (int) matchings.size(); i++, ptr++)
+	{		
+		vertImg.line(cv::Point2f((asiftKeys1->zoom*ptr->first.x),(asiftKeys1->zoom*ptr->first.y)), 
+			cv::Point2f((asiftKeys2->zoom*ptr->second.x),(asiftKeys2->zoom*ptr->second.y) + first.size().height + bandWidth),cv::Scalar::all(255));
+	}
+	return vertImg;
+}

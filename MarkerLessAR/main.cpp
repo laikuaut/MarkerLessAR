@@ -807,25 +807,78 @@ int main_calibrate(int argc,char *argv[])
  */
 void main_markerCreate(int argc,char *argv[]){
 
-	if(argc!=4 && argc!=5 && argc!=6){
-		cout << "input >> marker.png titls rectFilterFlag=1 imageShow=1" << endl;
+	//if(argc!=4 && argc!=5 && argc!=6){
+	//	cout << "input >> marker.png titls rectFilterFlag=1 imageShow=1" << endl;
+	//	return;
+	//}
+
+	//string markerName = argv[2];
+	//int tilts = atoi(argv[3]);
+	//
+	//int rectFlag = 1;
+	//if(argc==5)
+	//	rectFlag = atoi(argv[4]);
+
+	//int showFlag = 1;
+	//if(argc==6)
+	//	showFlag = atoi(argv[5]);
+
+	//Asift asift;
+	////asift.init(1);
+	//asift.markerCreate(markerName,tilts,rectFlag,showFlag);
+
+	
+	if(argc != 6){
+		cout << "input >> cameraNum marker.png tilts startNum" << endl;
 		return;
 	}
 
-	string markerName = argv[2];
-	int tilts = atoi(argv[3]);
+	string markerName = argv[3];
+	int tilts = atoi(argv[4]);
 	
 	int rectFlag = 1;
-	if(argc==5)
-		rectFlag = atoi(argv[4]);
+	//if(argc==5)
+	//	rectFlag = atoi(argv[4]);
 
 	int showFlag = 1;
-	if(argc==6)
-		showFlag = atoi(argv[5]);
+	//if(argc==6)
+	//	showFlag = atoi(argv[5]);
 
+	cout << "撮影 : SPACE , 終了 : qキー" << endl;
+
+	cv::VideoCapture cap(atoi(argv[2]));
+
+	pro::Image frame;
 	Asift asift;
-	//asift.init(1);
-	asift.markerCreate(markerName,tilts,rectFlag,showFlag);
+
+	// パスの設定
+	asift.path.create("markers",pro::Dir::NONE);
+	asift.path.cd("markers");
+	frame.path.cd("markers");
+
+	int count = atoi(argv[5]);
+	
+	while(1) {
+
+		cap.read((cv::Mat&)frame);
+		if(!frame.empty())
+			frame.imshow(argv[3],1);
+
+		int key = cv::waitKey(30);
+
+		// space 撮影
+		if(key == ' '){
+			stringstream ss;
+			ss<<pro::Dir::getStem(argv[3]) << std::setfill('0') << std::setw(3) << count++ << pro::Dir::getExtention(argv[3]);
+			frame.save(ss.str());
+			cout << ss.str() << " save." << endl;
+			asift.markerCreate(ss.str(),tilts,rectFlag,showFlag);
+			cv::destroyAllWindows();
+		// qキーで終了
+		}else if(key == 'q')
+			break;
+	}
+
 }
 
 /**
@@ -868,9 +921,9 @@ void main_help(){
  * -test
  */
 void main_test(int argc,char *argv[]){
-	AsiftMatchings asiftM;
-	asiftM.input("marker002.png_LR.txt");
-	asiftM.output("marker002.png_LR__.txt");
+
+
+
 }
 
 /**

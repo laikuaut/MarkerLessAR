@@ -11,6 +11,7 @@
 #include "compute_asift_matches.h"
 
 #include "../../MyLibs/Core/Dir.h"
+#include "../../MyLibs/OpenCVLibs/Image.h"
 
 class AsiftKeypoints;
 
@@ -57,8 +58,15 @@ public:
 	// マッチング数取得
 	int getNum() const;
 
+	// 入出力処理
 	void output(string name);
 	void input(string name);
+
+	// 水平画像の作成
+	pro::Image drawHoriImage(pro::Image first,pro::Image second,int bandWidth,std::string name);
+
+	// 垂直画像の作成
+	pro::Image drawVertImage(pro::Image first,pro::Image second,int bandWidth,std::string name);
 
 };
 

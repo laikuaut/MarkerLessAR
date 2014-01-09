@@ -49,6 +49,12 @@ void keyboard_function(unsigned char, int, int);
  */
 void mouse_function(int, int, int, int);
 
+/*
+ * 軸レンダー
+ */
+void render_axes(float);
+void render_cuboid(double length_x,double length_y,double length_z);
+
 // カメラ画像
 cv::Mat camera_image;
 
@@ -138,7 +144,7 @@ void glmain(int argc,char *argv[]){
 
 	// 軸行列読み込み
 	glmlar.setAxis();
-	glmlar.setPersMat(1,300);
+	glmlar.setPersMat(100,glmlar.tAxis[2]+200);
 	
 	for(int i=0;i<16;i++){
 		modelMat[i]=0;
@@ -278,10 +284,10 @@ void initialize_opengl(int& argc, char* argv[], int width, int height)
 void initialize_light(void)
 {
 	// 光源処理を有効にします
-	glEnable(GL_LIGHTING);
+	//glEnable(GL_LIGHTING);
 
 	// 光源0番を有効にします
-	glEnable(GL_LIGHT0);
+	//glEnable(GL_LIGHT0);
 }
 
 /*
@@ -336,7 +342,7 @@ void display_function(void)
 	//	0.0, 0.0, 0.0,
 	//	0.0, 2.0, 0.0);
 
-	glPushMatrix();
+	//glPushMatrix();
 
 	////y rotate
 	//glMultMatrixd(getModelMat(
@@ -357,9 +363,11 @@ void display_function(void)
 	glMultMatrixd(modelMat);
 
 	// 立方体を描画します
-	glutSolidCube(50);
+	//glutSolidCube(50);
+	render_cuboid(50,50,50);
+	render_axes(100);
 
-	glPopMatrix();
+	//glPopMatrix();
 
 	// モデルビュー行列のコピーを復元します
 	glPopMatrix();
@@ -385,15 +393,15 @@ void reshape_function(int width, int height)
 
 	// 透視射影行列を設定します
 	// 本番では，カメラ内部パラメータを用いたglFrustum関数へ変更します
-	//gluPerspective(45.0,(double)width / (double)height,1.0,100.0);
+	//gluPerspective(45.0,(double)width / (double)height,1.0,400.0);
 	glFrustum(glmlar.persL,glmlar.persR,glmlar.persB,glmlar.persT,glmlar.persN,glmlar.persF);
 	//glFrustum(0 , 2 , 4 , 0 , 1 , 100);
 
 	// モデルビュー行列を初期化します
 	glMatrixMode(GL_MODELVIEW);
-	glPushMatrix();
+	//glPushMatrix();
 	//glLoadMatrixd(modelMat);
-	//glLoadIdentity();
+	glLoadIdentity();
 	//glMultMatrixd(modelMat);
 
 	////z rotate
@@ -490,4 +498,75 @@ void mouse_function(int button, int state, int x, int y)
 	}
 }
 
+void render_axes(float length){
+	glColor3f(1.0f,0.0f,0.0f);
+	glBegin(GL_LINES);
+		glVertex3f(-length,0.0f,0.0f);
+		glVertex3f(length,0.0f,0.0f);
+	glEnd();
 
+	glColor3f(0.0f,1.0f,0.0f);
+	glBegin(GL_LINES);
+		glVertex3f(0.0f,-length,0.0f);
+		glVertex3f(0.0f,length,0.0f);
+	glEnd();
+
+	glColor3f(0.0f,0.0f,1.0f);
+	glBegin(GL_LINES);
+		glVertex3f(0.0f,0.0f,-length);
+		glVertex3f(0.0f,0.0f,length);
+	glEnd();
+}
+
+
+void render_cuboid(double length_x,double length_y,double length_z){
+	glLineWidth(2.0f);
+	glColor3f(1.0f,1.0f,0.0f);
+	glBegin(GL_LINE_LOOP);
+		glVertex3f((GLfloat)length_x/2,-(GLfloat)length_y/2,(GLfloat)length_z/2);
+		glVertex3f((GLfloat)length_x/2,-(GLfloat)length_y/2,-(GLfloat)length_z/2);
+		glVertex3f((GLfloat)length_x/2,(GLfloat)length_y/2,-(GLfloat)length_z/2);
+		glVertex3f((GLfloat)length_x/2,(GLfloat)length_y/2,(GLfloat)length_z/2);
+	glEnd();
+
+	//glColor3f(0.5f,1.0f,0.5f);
+	glBegin(GL_LINE_LOOP);
+		glVertex3f(-(GLfloat)length_x/2,(GLfloat)length_y/2,(GLfloat)length_z/2);
+		glVertex3f(-(GLfloat)length_x/2,(GLfloat)length_y/2,-(GLfloat)length_z/2);
+		glVertex3f(-(GLfloat)length_x/2,-(GLfloat)length_y/2,-(GLfloat)length_z/2);
+		glVertex3f(-(GLfloat)length_x/2,-(GLfloat)length_y/2,(GLfloat)length_z/2);
+	glEnd();
+
+	//glColor3f(0.5f,0.5f,1.0f);
+	glBegin(GL_LINE_LOOP);
+		glVertex3f((GLfloat)length_x/2,(GLfloat)length_y/2,(GLfloat)length_z/2);
+		glVertex3f((GLfloat)length_x/2,(GLfloat)length_y/2,-(GLfloat)length_z/2);
+		glVertex3f(-(GLfloat)length_x/2,(GLfloat)length_y/2,-(GLfloat)length_z/2);
+		glVertex3f(-(GLfloat)length_x/2,(GLfloat)length_y/2,(GLfloat)length_z/2);
+	glEnd();
+
+	//glColor3f(0.5f,1.0f,1.0f);
+	glBegin(GL_LINE_LOOP);
+		glVertex3f(-(GLfloat)length_x/2,-(GLfloat)length_y/2,(GLfloat)length_z/2);
+		glVertex3f(-(GLfloat)length_x/2,-(GLfloat)length_y/2,-(GLfloat)length_z/2);
+		glVertex3f((GLfloat)length_x/2,-(GLfloat)length_y/2,-(GLfloat)length_z/2);
+		glVertex3f((GLfloat)length_x/2,-(GLfloat)length_y/2,(GLfloat)length_z/2);
+	glEnd();
+
+	//glColor3f(1.0f,1.0f,0.5f);
+	glBegin(GL_LINE_LOOP);
+		glVertex3f(-(GLfloat)length_x/2,(GLfloat)length_y/2,(GLfloat)length_z/2);
+		glVertex3f(-(GLfloat)length_x/2,-(GLfloat)length_y/2,(GLfloat)length_z/2);
+		glVertex3f((GLfloat)length_x/2,-(GLfloat)length_y/2,(GLfloat)length_z/2);
+		glVertex3f((GLfloat)length_x/2,(GLfloat)length_y/2,(GLfloat)length_z/2);
+	glEnd();
+
+	//glColor3f(0.5f,0.5f,0.5f);
+	glBegin(GL_LINE_LOOP);
+		glVertex3f((GLfloat)length_x/2,(GLfloat)length_y/2,-(GLfloat)length_z/2);
+		glVertex3f((GLfloat)length_x/2,-(GLfloat)length_y/2,-(GLfloat)length_z/2);
+		glVertex3f(-(GLfloat)length_x/2,-(GLfloat)length_y/2,-(GLfloat)length_z/2);
+		glVertex3f(-(GLfloat)length_x/2,(GLfloat)length_y/2,-(GLfloat)length_z/2);
+	glEnd();
+
+}

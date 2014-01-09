@@ -68,8 +68,10 @@ void Asift::defaultParam(){
 	resizeFlag = 1;
 
 	// キーポイント初期化
-	baseKeys = AsiftKeypoints(7,iniSiftParamName);
-	inputKeys = AsiftKeypoints(7,iniSiftParamName);
+	initKeys(IMAGE_ID_BASE,7);
+	initKeys(IMAGE_ID_INPUT,7);
+	//baseKeys = AsiftKeypoints(7,iniSiftParamName);
+	//inputKeys = AsiftKeypoints(7,iniSiftParamName);
 
 	// メッセージ表示フラグ初期化
 	verb = 0;
@@ -245,8 +247,10 @@ void Asift::readIni(ptree &pt){
 	resizeHeight = pt.get_optional<int>("OptionValue.ResizeHeight").get();
 	centerLineDistance = pt.get_optional<int>("OptionValue.CenterLineDistance").get();
 			
-	baseKeys = AsiftKeypoints(tilts1,iniSiftParamName);
-	inputKeys = AsiftKeypoints(tilts2,iniSiftParamName);
+	initKeys(IMAGE_ID_BASE,tilts1);
+	initKeys(IMAGE_ID_INPUT,tilts2);
+	//baseKeys = AsiftKeypoints(tilts1,iniSiftParamName);
+	//inputKeys = AsiftKeypoints(tilts2,iniSiftParamName);
 }
 
 void Asift::writeIni(std::string ini_file_name){
@@ -491,11 +495,12 @@ void Asift::markerCreate(std::string markerName,int tilts,int rectFilterFlag,int
 
 	pro::Image imgMarker;
 	AsiftKeypoints markerKeys = AsiftKeypoints(tilts);
+	markerKeys.path = path;
 
 	/***************************************************************
 	 * 画像読み込み
 	 */
-	imgMarker.load(markerName);
+	imgMarker.load(path,markerName);
 	setImage(imgMarker,IMAGE_ID_ELSE,markerKeys);
 	
 	/***************************************************************
@@ -549,7 +554,7 @@ void Asift::markerCreate(std::string markerName,int tilts,int rectFilterFlag,int
 	 * 選択されたキーポイントを描写
 	 */
 	if(imageShow){
-		imgMarker.load(markerName);
+		imgMarker.load(path,markerName);
 		markerKeys.draw(imgMarker);
 		xAxisKeys.draw(imgMarker,cv::Scalar(255,255,0),cv::Scalar(255,255,0));
 		imgMarker.imshow(pro::Dir::getStem(markerName),1);
@@ -804,13 +809,14 @@ void Asift::onMouse_filterDelRect(int event,int x,int y,int flag){
 
 pro::Image Asift::createVertImage(pro::Image img,AsiftMatchings matchings,std::string name){
 	pro::Image vertImg;
-	vertImg.vertconcat(imgBase,img,bandWidth);
-	matchingslist::iterator ptr = matchings.matchings.begin();
-	for(int i=0; i < (int) matchings.matchings.size(); i++, ptr++)
-	{		
-		vertImg.line(cv::Point2f((baseZoom*ptr->first.x),(baseZoom*ptr->first.y)), 
-			cv::Point2f((inputZoom*ptr->second.x),(inputZoom*ptr->second.y) + imgBase.size().height + bandWidth),cv::Scalar::all(255));
-	}
+	//vertImg.vertconcat(imgBase,img,bandWidth);
+	//matchingslist::iterator ptr = matchings.matchings.begin();
+	//for(int i=0; i < (int) matchings.matchings.size(); i++, ptr++)
+	//{		
+	//	vertImg.line(cv::Point2f((baseZoom*ptr->first.x),(baseZoom*ptr->first.y)), 
+	//		cv::Point2f((inputZoom*ptr->second.x),(inputZoom*ptr->second.y) + imgBase.size().height + bandWidth),cv::Scalar::all(255));
+	//}
+	vertImg = matchings.drawVertImage(imgBase,img,bandWidth,name);
 	if(!videoInputFlag)
 		vertImg.save(name);
 	return vertImg;
@@ -822,13 +828,14 @@ pro::Image Asift::createVertImage(pro::Image img){
 
 pro::Image Asift::createHoriImage(pro::Image img,AsiftMatchings matchings,std::string name){
 	pro::Image horiImg;
-	horiImg.horiconcat(imgBase,img,bandWidth);
-	matchingslist::iterator ptr = matchings.matchings.begin();
-	for(int i=0; i < (int) matchings.matchings.size(); i++, ptr++)
-	{		
-		horiImg.line(cv::Point2f((baseZoom*ptr->first.x),(baseZoom*ptr->first.y)), 
-			cv::Point2f((inputZoom*ptr->second.x) + imgBase.size().width + bandWidth,(inputZoom*ptr->second.y)),cv::Scalar::all(255));
-	}
+	//horiImg.horiconcat(imgBase,img,bandWidth);
+	//matchingslist::iterator ptr = matchings.matchings.begin();
+	//for(int i=0; i < (int) matchings.matchings.size(); i++, ptr++)
+	//{		
+	//	horiImg.line(cv::Point2f((baseZoom*ptr->first.x),(baseZoom*ptr->first.y)), 
+	//		cv::Point2f((inputZoom*ptr->second.x) + imgBase.size().width + bandWidth,(inputZoom*ptr->second.y)),cv::Scalar::all(255));
+	//}
+	horiImg = matchings.drawHoriImage(imgBase,img,bandWidth,name);
 	if(!videoInputFlag)
 		horiImg.save(name);
 	return horiImg;
