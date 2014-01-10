@@ -175,6 +175,8 @@ public:
 	 * ƒ[ƒ‹ƒhÀ•WŒn‚Ìæ“¾
 	 */
 	vector<cv::Point3f> getWorldPoints(AsiftMatchings mathing);
+	vector<cv::Point3f> inputWorldPoints();
+	void outputWorldPoints();
 
 	/********************************************
 	 * å¬•ª•ªÍ‚É‚æ‚é²‚ÌŒˆ’è

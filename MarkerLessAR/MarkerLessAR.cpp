@@ -312,6 +312,14 @@ vector<cv::Point3f> MarkerLessAR::getWorldPoints(AsiftMatchings matchings){
 	return wpts;
 }
 
+vector<cv::Point3f> MarkerLessAR::inputWorldPoints(){
+	return inputPoint3s(pro::Dir::getStem(imgMarkerName)+"_worldPoints.txt");
+}
+
+void MarkerLessAR::outputWorldPoints(){
+	outputPoint3s(worldPoints,pro::Dir::getStem(imgMarkerName)+"_worldPoints.txt");
+}
+
 void MarkerLessAR::setZAxis(){
 	int DIM=3; // 3ŽŸŒ³
     int SAMPLES=0;
@@ -541,6 +549,12 @@ void MarkerLessAR::setPersMat(double znear,double zfar){
 	av = stereo.cameraParamL.at<double>(1,1);
 	u0 = stereo.cameraParamL.at<double>(0,2);
 	v0 = stereo.cameraParamL.at<double>(1,2);
+
+	cout << au << endl;
+	cout << av << endl;
+	cout << u0 << endl;
+	cout << v0 << endl;
+
 	
 	persN = znear;
 	persF = zfar;

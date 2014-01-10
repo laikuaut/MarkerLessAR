@@ -128,9 +128,9 @@ cv::Point3f StereoCamera::getWorldPoint(cv::Point2f Lpt,cv::Point2f Rpt){
 	Wmat = Binv*Cmat;
 	//std::cout << Wmat << std::endl;
 	cv::Point3f wpt;
-	wpt.x = Wmat.at<double>(0);
-	wpt.y = Wmat.at<double>(1);
-	wpt.z = Wmat.at<double>(2);
+	wpt.x = Wmat.at<double>(0,0);
+	wpt.y = Wmat.at<double>(1,0);
+	wpt.z = Wmat.at<double>(2,0);
 
 	return wpt;
 }

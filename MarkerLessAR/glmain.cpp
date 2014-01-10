@@ -7,12 +7,17 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+#include <fstream>
+#include <iostream>
 
 #include <gl/glut.h>
+#include <gl\GL.h>
 
 #include "../MarkerLessAR/MarkerLessAR.h"
 #include"../MyLibs/OpenCVLibs/Image.h"
 //#include "my_opencv.h"
+
+using namespace std;
 
 /*
  *	OpenGLを初期化します．
@@ -195,15 +200,15 @@ void glmain(int argc,char *argv[]){
 	//modelMat[10]=glmlar.zAxis[2];
 	//modelMat[11]=0;
 
-	modelMat[12]=-glmlar.tAxis[0];
-	modelMat[13]=-glmlar.tAxis[1];
-	modelMat[14]=-glmlar.tAxis[2];
-	modelMat[15]=1;
-
-	//modelMat[12]=0;
-	//modelMat[13]=0;
-	//modelMat[14]=-10;
+	//modelMat[12]=-glmlar.tAxis[0];
+	//modelMat[13]=-glmlar.tAxis[1];
+	//modelMat[14]=-glmlar.tAxis[2];
 	//modelMat[15]=1;
+
+	modelMat[12]=0.0f;
+	modelMat[13]=0.0f;
+	modelMat[14]=0.0f;
+	modelMat[15]=1;
 
 	//setModelMat(1/sqrt(2),0,0,0,2,0,0,0,2,0,0,0);
 
@@ -266,7 +271,7 @@ void initialize_opengl(int& argc, char* argv[], int width, int height)
 	glutMouseFunc(mouse_function);
 
 	// 背景色を設定します
-	glClearColor(1.0, 1.0, 0.0, 1.0);
+	glClearColor(0.0, 0.0, 0.0, 1.0);
 
 	// デプスバッファを有効にします
 	glEnable(GL_DEPTH_TEST);
@@ -312,7 +317,8 @@ void initialize_material(void)
 void display_function(void)
 {
 	// カラーバッファを初期化します
-	glClear(GL_COLOR_BUFFER_BIT);
+	//glClear(GL_COLOR_BUFFER_BIT);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	// 射影行列を初期化します
 	glMatrixMode(GL_PROJECTION);
@@ -320,7 +326,7 @@ void display_function(void)
 
 	// モデルビュー行列を初期化します
 	glMatrixMode(GL_MODELVIEW);
-	//glLoadIdentity();
+	glLoadIdentity();
 
 	// カメラ画像を背景に書き込みます
 	glRasterPos2i(-1, -1);
@@ -360,17 +366,54 @@ void display_function(void)
 	//	 0.00245, 0.6006,-0.7994,-0.974336,0.178846,0.1313,0.2218,0.75599,0.61585,-11.708,2.953,277.390
 	//));
 
-	glMultMatrixd(modelMat);
+	//glMultMatrixd(modelMat);
+	//glTranslated(0.0f,0.0f,-glmlar.tAxis[2]);
+	//render_axes(500);
 
-	// 立方体を描画します
-	//glutSolidCube(50);
-	render_cuboid(50,50,50);
-	render_axes(100);
+	//// 立方体を描画します
+	////glutSolidCube(50);
+	//render_cuboid(50,50,50);
 
 	//glPopMatrix();
 
 	// モデルビュー行列のコピーを復元します
 	glPopMatrix();
+
+	
+
+	glPushMatrix();
+	glMultMatrixd(getModelMat(
+		 glmlar.xAxis[0], glmlar.xAxis[1],glmlar.xAxis[2],
+		 glmlar.yAxis[0], glmlar.yAxis[1],glmlar.yAxis[2],
+		 glmlar.zAxis[0], glmlar.zAxis[1],glmlar.zAxis[2],
+		 0.0, -glmlar.tAxis[1],-glmlar.tAxis[2]
+		));
+	//glTranslated(glmlar.tAxis[0],glmlar.tAxis[1],10.0f);
+	render_axes(500);
+	render_cuboid(50,50,50);
+	glPopMatrix();
+
+	vector<cv::Point3f> pt3s;
+	pt3s = glmlar.inputWorldPoints();
+	glColor3f(0.0f,1.0f,1.0f);
+	// 点描写
+	for(int i=0;i<pt3s.size();i++){
+		glPushMatrix();
+
+		glMultMatrixd(getModelMat(
+		 glmlar.xAxis[0], glmlar.xAxis[1],glmlar.xAxis[2],
+		 glmlar.yAxis[0], glmlar.yAxis[1],glmlar.yAxis[2],
+		 glmlar.zAxis[0], glmlar.zAxis[1],glmlar.zAxis[2],
+		 pt3s[i].x,pt3s[i].y,-pt3s[i].z
+		 //0.0f,0.0f,0.0f
+		));
+		//glTranslated(pt3s[i].x,pt3s[i].y,-pt3s[i].z);
+		glutSolidCube(1);
+
+		cout << pt3s[i] << endl;
+
+		glPopMatrix();
+	}
 
 	// OpenGLの命令を実行します
 	glFlush();
@@ -516,6 +559,23 @@ void render_axes(float length){
 		glVertex3f(0.0f,0.0f,-length);
 		glVertex3f(0.0f,0.0f,length);
 	glEnd();
+
+	//glBegin(GL_LINES);
+	//	glVertex3f(0.0f,0.0f,0.0f);
+	//	glVertex3f(length,0.0f,0.0f);
+	//glEnd();
+
+	//glColor3f(0.0f,1.0f,0.0f);
+	//glBegin(GL_LINES);
+	//	glVertex3f(0.0f,0.0f,0.0f);
+	//	glVertex3f(0.0f,length,0.0f);
+	//glEnd();
+
+	//glColor3f(0.0f,0.0f,1.0f);
+	//glBegin(GL_LINES);
+	//	glVertex3f(0.0f,0.0f,0.0f);
+	//	glVertex3f(0.0f,0.0f,length);
+	//glEnd();
 }
 
 
