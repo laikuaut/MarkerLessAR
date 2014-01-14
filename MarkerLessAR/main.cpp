@@ -665,8 +665,9 @@ void main_centerLine(int argc,char *argv[]){
 int main_calibrate(int argc,char *argv[])
 {
 
-	if(argc!=4){
-		std::cout << "input >> capnum=0 capName=cap0" << std::endl;
+	if(argc!=6){
+		std::cout << "input >> capnum=0 capName=cap0 width height" << std::endl;
+		return 0;
 	}
 	
 	// カメラ番号
@@ -693,6 +694,11 @@ int main_calibrate(int argc,char *argv[])
 
 	// カメラの接続を確認します
 	cv::VideoCapture capture(cameraNum); 
+	
+	cv::Size cap_size(atoi(argv[4]), atoi(argv[5]));
+	capture.set(CV_CAP_PROP_FRAME_WIDTH, cap_size.width);
+	capture.set(CV_CAP_PROP_FRAME_HEIGHT, cap_size.height);
+
 
 	// カメラが未接続ならば，強制終了します
 	if (!capture.isOpened()) {

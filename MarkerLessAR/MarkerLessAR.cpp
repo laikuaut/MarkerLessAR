@@ -299,7 +299,7 @@ matchingslist MarkerLessAR::matchingLR(matchingslist matchingsL,matchingslist ma
 }
 
 vector<cv::Point3f> MarkerLessAR::getWorldPoints(AsiftMatchings matchings){
-	stereo.init(calibrateXmlName,cameraBetween);
+	stereo.init(calibrateXmlName,cameraBetween,asiftLeft.imgBase.size().width,asiftLeft.imgBase.size().height);
 	vector<cv::Point3f> wpts;
 	for(int i=0;i<matchings.matchings.size();i++){
 		wpts.push_back(stereo.getWorldPoint(
@@ -543,7 +543,7 @@ void MarkerLessAR::setPersMat(double znear,double zfar){
 	width = asiftLeft.imgInput.size().width;
 	height = asiftLeft.imgInput.size().height;
 
-	stereo.init(calibrateXmlName,cameraBetween);
+	stereo.init(calibrateXmlName,cameraBetween,width,height);
 
 	au = stereo.cameraParamL.at<double>(0,0);
 	av = stereo.cameraParamL.at<double>(1,1);
@@ -559,8 +559,8 @@ void MarkerLessAR::setPersMat(double znear,double zfar){
 	persN = znear;
 	persF = zfar;
 
-	persL = persN*(width - u0)/au;
-	persR = -persN*u0/au;
+	persR = persN*(width - u0)/au;
+	persL = -persN*u0/au;
 	persT = persN*(height - v0)/av;
 	persB = -persN*v0/av;
 

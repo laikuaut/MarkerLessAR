@@ -564,6 +564,7 @@ void Asift::markerCreate(std::string markerName,int tilts,int rectFilterFlag,int
 }
 
 void Asift::setImage(pro::Image &src,int id,AsiftKeypoints &keys){
+	//src.flip(src,0);
 	if(id==IMAGE_ID_BASE){
 		baseKeys.setImage(src,resizeFlag,resizeWidth,resizeHeight,baseZoom);
 	}else if(id==IMAGE_ID_INPUT){

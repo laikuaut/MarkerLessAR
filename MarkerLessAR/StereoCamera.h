@@ -20,11 +20,14 @@ public:
 
 	float camBetween;
 
+	int width;
+	int height;
+
 public:
 	StereoCamera(void);
 	~StereoCamera(void);
 
-	void init(std::string xmlName,float camBetween);
+	void init(std::string xmlName,float camBetween,int width,int height);
 
 	// ワールド座標系を取得する。(カメラL側がワールド座標となる)
 	cv::Point3f getWorldPoint(cv::Point2f Lpt,cv::Point2f Rpt);

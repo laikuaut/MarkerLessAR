@@ -57,6 +57,7 @@ public:
 	void resize(const Image& src,double fx,double fy,int interpolation=1);
 	void resize(const Image& src,cv::Size size,int interpolation=1);
 	void rotation(const Image& src,cv::Point2f center,double angle);
+	void flip(const Image& src,int flipCode);
 
 	void horiconcat(const Image &src1,const Image &src2,int band_w=0,cv::Scalar color=cv::Scalar::all(0));
 	void vertconcat(const Image &src1,const Image &src2,int band_w=0,cv::Scalar color=cv::Scalar::all(0));

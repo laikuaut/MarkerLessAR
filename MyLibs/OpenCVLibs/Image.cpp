@@ -83,6 +83,10 @@ void Image::rotation(const Image& src,cv::Point2f center,double angle){
 	cv::warpAffine(src.img, img, affine_matrix, src.img.size());
 }
 
+void Image::flip(const Image& src,int flipcode){
+	cv::flip(src.img,img,flipcode);
+}
+
 void Image::horiconcat(const Image& src1,const Image& src2,int band_w,cv::Scalar color){
 	if(band_w<=0){
 		cv::hconcat(src1.img,src2.img,img);

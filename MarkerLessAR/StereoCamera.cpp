@@ -20,13 +20,19 @@ StereoCamera::~StereoCamera(void)
 
 }
 
-void StereoCamera::init(std::string xmlName,float camBetween){
+void StereoCamera::init(std::string xmlName,float camBetween,int width,int height){
+	this->camBetween = camBetween;
+	this->width = width;
+	this->height = height;
 	getCameraParam(cameraParamL,"Left",xmlName);
 	getCameraParam(cameraParamR,"Right",xmlName);
-	this->camBetween = camBetween;
 }
 
 cv::Point3f StereoCamera::getWorldPoint(cv::Point2f Lpt,cv::Point2f Rpt){
+
+	// OpenGL‚ÌÀ•WŒn‚Ö•ÏŠ·
+	Lpt.y = height - Lpt.y;
+	Rpt.y = height - Rpt.y;
 
 	// ³‹K‰»ƒJƒƒ‰‚Ì“§‹Ë‰es—ñ
 	double normalizations[][4] = {
@@ -50,6 +56,7 @@ cv::Point3f StereoCamera::getWorldPoint(cv::Point2f Lpt,cv::Point2f Rpt){
 	
 	//std::cout << cameraParamL << std::endl;
 	//std::cout << cameraParamR << std::endl;
+	
 
 	// “§‹Ë‰es—ñ
 	cv::Mat persL = cv::Mat(4,3,CV_64FC1);
@@ -143,6 +150,9 @@ void StereoCamera::getCameraParam(cv::Mat &param,std::string paramName,std::stri
     cv::FileNode node(cvfs.fs, NULL);
 
     cv::read(node[paramName], param);
+
+	// OpenGLÀ•WŒn‚Ö•ÏŠ·
+	param.at<double>(1,2) = height - param.at<double>(1,2);
 
 	//std::cout << param.type() << std::endl;
 
