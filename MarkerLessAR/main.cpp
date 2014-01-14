@@ -379,8 +379,8 @@ void main_imageWriter2(int argc,char *argv[]){
 	//cv::VideoCapture capRight(0);
 
 	// 様々な設定...
-	if(argc != 6){
-		std::cout << "input << imgLeft.png imgRight.png width height" << endl; 
+	if(argc != 8){
+		std::cout << "input << imgLeft.png imgRight.png width height start" << endl; 
 		return;
 	}
 
@@ -456,10 +456,12 @@ void main_imageWriter2(int argc,char *argv[]){
 	pro::Image frameLeft;
 	pro::Image frameRight;
 
-	int start = 0;
-	pro::Timer timer;
+	//int start = 0;
+	//pro::Timer timer;
 
-	int time = atoi(argv[5]);
+	//int time = atoi(argv[5]);
+	
+	int count = atoi(argv[6]);
 
 	while(1) {
 
@@ -475,8 +477,11 @@ void main_imageWriter2(int argc,char *argv[]){
 
 		// space 撮影
 		if(key == ' '){
-			frameLeft.save(argv[2]);
-			frameRight.save(argv[3]);
+			stringstream ssl,ssr;
+			ssl<<pro::Dir::getStem(argv[2]) << std::setfill('0') << std::setw(3) << count++ << pro::Dir::getExtention(argv[2]);
+			ssr<<pro::Dir::getStem(argv[3]) << std::setfill('0') << std::setw(3) << count++ << pro::Dir::getExtention(argv[3]);
+			frameLeft.save(ssl.str());
+			frameRight.save(ssr.str());
 		// qキーで終了
 		}else if(key == 'q')
 			break;

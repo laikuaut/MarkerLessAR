@@ -339,7 +339,7 @@ void display_function(void)
 	glClear(GL_DEPTH_BUFFER_BIT);
 
 	// モデルビュー行列のコピーをスタックに保存します
-	glPushMatrix();
+	//glPushMatrix();
 
 	// 視点と視線を設定します
 	// 本番では，コメントにします
@@ -377,7 +377,7 @@ void display_function(void)
 	//glPopMatrix();
 
 	// モデルビュー行列のコピーを復元します
-	glPopMatrix();
+	//glPopMatrix();
 
 	
 
@@ -386,9 +386,10 @@ void display_function(void)
 		 glmlar.xAxis[0], glmlar.xAxis[1],glmlar.xAxis[2],
 		 glmlar.yAxis[0], glmlar.yAxis[1],glmlar.yAxis[2],
 		 glmlar.zAxis[0], glmlar.zAxis[1],glmlar.zAxis[2],
-		 0.0, -glmlar.tAxis[1],-glmlar.tAxis[2]
+		 glmlar.tAxis[0],glmlar.tAxis[1],-glmlar.tAxis[2]
+		 //0.0f,0.0f,-glmlar.tAxis[2]
 		));
-	//glTranslated(glmlar.tAxis[0],glmlar.tAxis[1],10.0f);
+	//glTranslated(glmlar.tAxis[0],glmlar.tAxis[1],0.0f);
 	render_axes(500);
 	render_cuboid(50,50,50);
 	glPopMatrix();
@@ -405,9 +406,9 @@ void display_function(void)
 		 glmlar.yAxis[0], glmlar.yAxis[1],glmlar.yAxis[2],
 		 glmlar.zAxis[0], glmlar.zAxis[1],glmlar.zAxis[2],
 		 pt3s[i].x,pt3s[i].y,-pt3s[i].z
-		 //0.0f,0.0f,0.0f
+		 //0.0f,0.0f,-glmlar.tAxis[2]
 		));
-		//glTranslated(pt3s[i].x,pt3s[i].y,-pt3s[i].z);
+		//glTranslated(pt3s[i].x,pt3s[i].y,0.0f);
 		glutSolidCube(1);
 
 		cout << pt3s[i] << endl;
