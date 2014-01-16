@@ -489,6 +489,20 @@ void Asift::run(){
 
 }
 
+void Asift::run(std::string baseImg,std::string inputImg,int tilt1,int tilt2){
+	
+	imgBaseName = baseImg;
+	imgInputName = inputImg;
+
+	initKeys(IMAGE_ID_BASE,tilt1);
+	initKeys(IMAGE_ID_INPUT,tilt2);
+
+	initNames();
+
+	run();
+}
+
+
 void Asift::markerCreate(std::string markerName,int tilts,int rectFilterFlag,int imageShow){
 	
 	pro::Timer timer;

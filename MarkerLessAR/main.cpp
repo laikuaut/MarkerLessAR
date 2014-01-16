@@ -49,7 +49,15 @@ void main_MarkerLessAR(int argc,char *argv[]){
 void main_Asift(int argc,char *argv[]){
 	Asift asift;
 	asift.init(1);
-	asift.run();
+
+	if(argc!=2 && argc!=6){
+		cout << "input >> base.png input.png tilt1 tilt2" << endl;
+	}
+	if(argc==6){
+		asift.run(argv[2],argv[3],atoi(argv[4]),atoi(argv[5]));
+	}else{
+		asift.run();
+	}
 }
 
 /**
@@ -379,7 +387,7 @@ void main_imageWriter2(int argc,char *argv[]){
 	//cv::VideoCapture capRight(0);
 
 	// 様々な設定...
-	if(argc != 8){
+	if(argc != 7){
 		std::cout << "input << imgLeft.png imgRight.png width height start" << endl; 
 		return;
 	}
@@ -478,7 +486,7 @@ void main_imageWriter2(int argc,char *argv[]){
 		// space 撮影
 		if(key == ' '){
 			stringstream ssl,ssr;
-			ssl<<pro::Dir::getStem(argv[2]) << std::setfill('0') << std::setw(3) << count++ << pro::Dir::getExtention(argv[2]);
+			ssl<<pro::Dir::getStem(argv[2]) << std::setfill('0') << std::setw(3) << count << pro::Dir::getExtention(argv[2]);
 			ssr<<pro::Dir::getStem(argv[3]) << std::setfill('0') << std::setw(3) << count++ << pro::Dir::getExtention(argv[3]);
 			frameLeft.save(ssl.str());
 			frameRight.save(ssr.str());
@@ -839,55 +847,60 @@ void main_markerCreate(int argc,char *argv[]){
 	//asift.markerCreate(markerName,tilts,rectFlag,showFlag);
 
 	
-	if(argc != 6){
+	if(argc!=4 && argc != 6){
 		cout << "input >> cameraNum marker.png tilts startNum" << endl;
+		cout << "input >> marker.png tilts" << endl;
 		return;
 	}
 
-	string markerName = argv[3];
-	int tilts = atoi(argv[4]);
+	if(argc==4){
+
+	}else if(argc==6){
+		string markerName = argv[3];
+		int tilts = atoi(argv[4]);
 	
-	int rectFlag = 1;
-	//if(argc==5)
-	//	rectFlag = atoi(argv[4]);
+		int rectFlag = 1;
+		//if(argc==5)
+		//	rectFlag = atoi(argv[4]);
 
-	int showFlag = 1;
-	//if(argc==6)
-	//	showFlag = atoi(argv[5]);
+		int showFlag = 1;
+		//if(argc==6)
+		//	showFlag = atoi(argv[5]);
 
-	cout << "撮影 : SPACE , 終了 : qキー" << endl;
+		cout << "撮影 : SPACE , 終了 : qキー" << endl;
 
-	cv::VideoCapture cap(atoi(argv[2]));
+		cv::VideoCapture cap(atoi(argv[2]));
 
-	pro::Image frame;
-	Asift asift;
+		pro::Image frame;
+		Asift asift;
 
-	// パスの設定
-	asift.path.create("markers",pro::Dir::NONE);
-	asift.path.cd("markers");
-	frame.path.cd("markers");
+		// パスの設定
+		asift.path.create("markers",pro::Dir::NONE);
+		asift.path.cd("markers");
+		frame.path.cd("markers");
 
-	int count = atoi(argv[5]);
+		int count = atoi(argv[5]);
 	
-	while(1) {
+		while(1) {
 
-		cap.read((cv::Mat&)frame);
-		if(!frame.empty())
-			frame.imshow(argv[3],1);
+			cap.read((cv::Mat&)frame);
+			if(!frame.empty())
+				frame.imshow(argv[3],1);
 
-		int key = cv::waitKey(30);
+			int key = cv::waitKey(30);
 
-		// space 撮影
-		if(key == ' '){
-			stringstream ss;
-			ss<<pro::Dir::getStem(argv[3]) << std::setfill('0') << std::setw(3) << count++ << pro::Dir::getExtention(argv[3]);
-			frame.save(ss.str());
-			cout << ss.str() << " save." << endl;
-			asift.markerCreate(ss.str(),tilts,rectFlag,showFlag);
-			cv::destroyAllWindows();
-		// qキーで終了
-		}else if(key == 'q')
-			break;
+			// space 撮影
+			if(key == ' '){
+				stringstream ss;
+				ss<<pro::Dir::getStem(argv[3]) << std::setfill('0') << std::setw(3) << count++ << pro::Dir::getExtention(argv[3]);
+				frame.save(ss.str());
+				cout << ss.str() << " save." << endl;
+				asift.markerCreate(ss.str(),tilts,rectFlag,showFlag);
+				cv::destroyAllWindows();
+			// qキーで終了
+			}else if(key == 'q')
+				break;
+		}
 	}
 
 }

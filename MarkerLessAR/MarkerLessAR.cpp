@@ -299,14 +299,14 @@ matchingslist MarkerLessAR::matchingLR(matchingslist matchingsL,matchingslist ma
 }
 
 vector<cv::Point3f> MarkerLessAR::getWorldPoints(AsiftMatchings matchings){
-	stereo.init(calibrateXmlName,cameraBetween,asiftLeft.imgBase.size().width,asiftLeft.imgBase.size().height);
+	stereo.init(calibrateXmlName,cameraBetween,asiftLeft.imgInput.size().width,asiftLeft.imgInput.size().height);
 	vector<cv::Point3f> wpts;
 	for(int i=0;i<matchings.matchings.size();i++){
 		wpts.push_back(stereo.getWorldPoint(
-			//cv::Point2f(matchings.matchings[i].first.x,matchings.matchings[i].first.y),
-			//cv::Point2f(matchings.matchings[i].second.x,matchings.matchings[i].second.y)));
-			cv::Point2f(matchings.matchings[i].second.x,matchings.matchings[i].second.y),
-			cv::Point2f(matchings.matchings[i].first.x,matchings.matchings[i].first.y)));
+			cv::Point2f(matchings.matchings[i].first.x,matchings.matchings[i].first.y),
+			cv::Point2f(matchings.matchings[i].second.x,matchings.matchings[i].second.y)));
+			//cv::Point2f(matchings.matchings[i].second.x,matchings.matchings[i].second.y),
+			//cv::Point2f(matchings.matchings[i].first.x,matchings.matchings[i].first.y)));
 
 	}
 	return wpts;
@@ -554,7 +554,8 @@ void MarkerLessAR::setPersMat(double znear,double zfar){
 	cout << av << endl;
 	cout << u0 << endl;
 	cout << v0 << endl;
-
+	cout << width << endl;
+	cout << height << endl;
 	
 	persN = znear;
 	persF = zfar;

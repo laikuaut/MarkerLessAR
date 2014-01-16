@@ -149,84 +149,15 @@ void glmain(int argc,char *argv[]){
 
 	// 軸行列読み込み
 	glmlar.setAxis();
-	if(glmlar.tAxis[2]<1){
-		glmlar.setPersMat(1,glmlar.tAxis[2]+100);
+	if(-glmlar.tAxis[2]<1){
+		glmlar.setPersMat(1,-glmlar.tAxis[2]+100);
 	}else{
-		glmlar.setPersMat(glmlar.tAxis[2]-100,glmlar.tAxis[2]+100);
+		glmlar.setPersMat(-glmlar.tAxis[2]-100,-glmlar.tAxis[2]+100);
 	}
 
 	for(int i=0;i<16;i++){
 		modelMat[i]=0;
 	}
-	
-	modelMat[0]=glmlar.xAxis[0];
-	modelMat[1]=glmlar.xAxis[1];
-	modelMat[2]=glmlar.xAxis[2];
-	modelMat[3]=0;
-
-	//modelMat[0]=2;
-	//modelMat[1]=0;
-	//modelMat[2]=0;
-	//modelMat[3]=0;
-
-	//modelMat[0]=glmlar.xAxis[0];
-	//modelMat[1]=0;
-	//modelMat[2]=0;
-	//modelMat[3]=0;
-	
-	modelMat[4]=glmlar.yAxis[0];
-	modelMat[5]=glmlar.yAxis[1];
-	modelMat[6]=glmlar.yAxis[2];
-	modelMat[7]=0;
-
-	//modelMat[4]=0;
-	//modelMat[5]=2;
-	//modelMat[6]=0;
-	//modelMat[7]=0;
-
-	//modelMat[4]=0;
-	//modelMat[5]=glmlar.yAxis[1];
-	//modelMat[6]=0;
-	//modelMat[7]=0;
-	
-	modelMat[8]=glmlar.zAxis[0];
-	modelMat[9]=glmlar.zAxis[1];
-	modelMat[10]=glmlar.zAxis[2];
-	modelMat[11]=0;
-
-	//modelMat[8]=0;
-	//modelMat[9]=0;
-	//modelMat[10]=2;
-	//modelMat[11]=0;
-
-	//modelMat[8]=0;
-	//modelMat[9]=0;
-	//modelMat[10]=glmlar.zAxis[2];
-	//modelMat[11]=0;
-
-	//modelMat[12]=-glmlar.tAxis[0];
-	//modelMat[13]=-glmlar.tAxis[1];
-	//modelMat[14]=-glmlar.tAxis[2];
-	//modelMat[15]=1;
-
-	modelMat[12]=0.0f;
-	modelMat[13]=0.0f;
-	modelMat[14]=0.0f;
-	modelMat[15]=1;
-
-	//setModelMat(1/sqrt(2),0,0,0,2,0,0,0,2,0,0,0);
-
-	//for(int i=0;i<3;i++){
-	//	modelMat[0+4*i] = glmlar.xAxis[i];
-	//	modelMat[1+4*i] = glmlar.yAxis[i];
-	//	modelMat[2+4*i] = glmlar.zAxis[i];
-	//	//modelMat[3+4*i] = glmlar.tAxis[i];
-	//	modelMat[3+4*i] = 0;
-	//}
-	//for(int i=0;i<3;i++){
-	//	modelMat[4*3+i] = 0;
-	//}
-	//modelMat[4*3+3] = 1;
 
 	// カメラ画像をOpenGLの形式に変換します
 	cv::cvtColor(camera_image, copy_image, CV_BGR2RGB);
@@ -390,10 +321,10 @@ void display_function(void)
 		 glmlar.xAxis[0], glmlar.xAxis[1],glmlar.xAxis[2],
 		 glmlar.yAxis[0], glmlar.yAxis[1],glmlar.yAxis[2],
 		 glmlar.zAxis[0], glmlar.zAxis[1],glmlar.zAxis[2],
-		 //glmlar.tAxis[0]+95, -glmlar.tAxis[1],-glmlar.tAxis[2]
-		 0.0f,0.0f,-glmlar.tAxis[2]
+		 -glmlar.tAxis[0], -glmlar.tAxis[1],glmlar.tAxis[2]
+		 //0.0f,0.0f,glmlar.tAxis[2]
 		));
-	glTranslated(glmlar.tAxis[0]+95,glmlar.tAxis[1],0.0f);
+	//glTranslated(-glmlar.tAxis[0],glmlar.tAxis[1],0.0f);
 	render_axes(500);
 	render_cuboid(50,50,50);
 	glPopMatrix();
@@ -409,10 +340,10 @@ void display_function(void)
 		 glmlar.xAxis[0], glmlar.xAxis[1],glmlar.xAxis[2],
 		 glmlar.yAxis[0], glmlar.yAxis[1],glmlar.yAxis[2],
 		 glmlar.zAxis[0], glmlar.zAxis[1],glmlar.zAxis[2],
-		 0.0f,0.0f,-pt3s[i].z
-		 //0.0f,0.0f,0.0
+		 -pt3s[i].x,-pt3s[i].y,pt3s[i].z
+		 //0.0f,0.0f,pt3s[i].z
 		));
-		glTranslated(pt3s[i].x+95,-pt3s[i].y,0.0f);
+		//glTranslated(-pt3s[i].x,-pt3s[i].y,0.0f);
 		glutSolidCube(1);
 
 		cout << pt3s[i] << endl;
@@ -442,7 +373,13 @@ void reshape_function(int width, int height)
 	// 透視射影行列を設定します
 	// 本番では，カメラ内部パラメータを用いたglFrustum関数へ変更します
 	//gluPerspective(45.0,(double)width / (double)height,1.0,400.0);
-	glFrustum(glmlar.persL,glmlar.persR,glmlar.persB,glmlar.persT,glmlar.persN,glmlar.persF);
+	glFrustum(glmlar.persL+20,glmlar.persR+20,glmlar.persB-20,glmlar.persT-20,glmlar.persN,glmlar.persF);
+	cout << glmlar.persL << endl;
+	cout << glmlar.persR << endl;
+	cout << glmlar.persT << endl;
+	cout << glmlar.persB << endl;
+	cout << glmlar.persN << endl;
+	cout << glmlar.persF << endl;
 	//glFrustum(0 , 2 , 4 , 0 , 1 , 100);
 
 	// モデルビュー行列を初期化します

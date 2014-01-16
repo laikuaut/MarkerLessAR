@@ -24,8 +24,8 @@ void StereoCamera::init(std::string xmlName,float camBetween,int width,int heigh
 	this->camBetween = camBetween;
 	this->width = width;
 	this->height = height;
-	getCameraParam(cameraParamL,"Left",xmlName);
-	getCameraParam(cameraParamR,"Right",xmlName);
+	getCameraParam(cameraParamL,"Left800_600",xmlName);
+	getCameraParam(cameraParamR,"Right800_600",xmlName);
 }
 
 cv::Point3f StereoCamera::getWorldPoint(cv::Point2f Lpt,cv::Point2f Rpt){
@@ -64,6 +64,7 @@ cv::Point3f StereoCamera::getWorldPoint(cv::Point2f Lpt,cv::Point2f Rpt){
 	persL = cameraParamL * normalizationPers * ML;
 	persR = cameraParamR * normalizationPers * MR;
 	
+	//std::cout << cameraParamL << std::endl;
 	//std::cout << persL << std::endl;
 	//std::cout << persR << std::endl;
 
@@ -128,12 +129,15 @@ cv::Point3f StereoCamera::getWorldPoint(cv::Point2f Lpt,cv::Point2f Rpt){
 	cv::Mat Binv = cv::Mat(3,4,CV_64FC1);
 	Binv = (Bmat.t()*Bmat).inv()*Bmat.t();
 	
-	//std::cout << Binv << std::endl;
+	std::cout << Binv << std::endl;
+	std::cout << Cmat << std::endl;
 
 	// ワールド座標系
 	cv::Mat Wmat = cv::Mat(3,1,CV_64FC1);
 	Wmat = Binv*Cmat;
-	//std::cout << Wmat << std::endl;
+	
+	std::cout << Wmat << std::endl;
+	
 	cv::Point3f wpt;
 	wpt.x = Wmat.at<double>(0,0);
 	wpt.y = Wmat.at<double>(1,0);
@@ -153,6 +157,8 @@ void StereoCamera::getCameraParam(cv::Mat &param,std::string paramName,std::stri
 
 	// OpenGL座標系へ変換
 	param.at<double>(1,2) = height - param.at<double>(1,2);
+	//std::cout << height << std::endl;
+	//std::cout << height << std::endl;
 
 	//std::cout << param.type() << std::endl;
 

@@ -249,8 +249,11 @@ public:
 	 */
 	// 基本実行関数
 	void run();
+	// 引数から画像名とパラメータを設定し実行
+	void run(std::string baseImg,std::string inputImg,int tilt1,int tilt2);
 	// マーカー作成
 	void markerCreate(std::string markerName,int tilts,int rectFilterFlag=1,int imageShow=1);
+
 
 	/********************************************
 	 * プロパティ
