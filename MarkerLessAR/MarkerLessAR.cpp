@@ -537,33 +537,35 @@ void MarkerLessAR::outputAxis(){
 void MarkerLessAR::setPersMat(double znear,double zfar){
 
 	// “§‹Ë‰e•ÏŠ·s—ñ‚É•K—v‚ÈŒvZ—v‘f
-	double width,height;
-	double au,av,u0,v0;
+	//double width,height;
+	//double au,av,u0,v0;
 
-	width = asiftLeft.imgInput.size().width;
-	height = asiftLeft.imgInput.size().height;
+	persW = asiftLeft.imgInput.size().width;
+	persH = asiftLeft.imgInput.size().height;
 
-	stereo.init(calibrateXmlName,cameraBetween,width,height);
+	stereo.init(calibrateXmlName,cameraBetween,persW,persH);
 
-	au = stereo.cameraParamL.at<double>(0,0);
-	av = stereo.cameraParamL.at<double>(1,1);
-	u0 = stereo.cameraParamL.at<double>(0,2);
-	v0 = stereo.cameraParamL.at<double>(1,2);
+	persAu = stereo.cameraParamL.at<double>(0,0);
+	persAv = stereo.cameraParamL.at<double>(1,1);
+	persU0 = stereo.cameraParamL.at<double>(0,2);
+	persV0 = stereo.cameraParamL.at<double>(1,2);
 
-	cout << au << endl;
-	cout << av << endl;
-	cout << u0 << endl;
-	cout << v0 << endl;
-	cout << width << endl;
-	cout << height << endl;
+	//cout << au << endl;
+	//cout << av << endl;
+	//cout << u0 << endl;
+	//cout << v0 << endl;
+	//cout << width << endl;
+	//cout << height << endl;
 	
-	persN = znear;
-	persF = zfar;
+	persN = (persAu+persAv)/2.0;
+	//persN = znear;
+	//persF = zfar;
+	//persF = persN+300;
 
-	persR = persN*(width - u0)/au;
-	persL = -persN*u0/au;
-	persT = persN*(height - v0)/av;
-	persB = -persN*v0/av;
+	persR = persN*(persW - persU0)/persAu;
+	persL = -persN*persU0/persAu;
+	persT = persN*(persH - persV0)/persAv;
+	persB = -persN*persV0/persAv;
 
 }
 

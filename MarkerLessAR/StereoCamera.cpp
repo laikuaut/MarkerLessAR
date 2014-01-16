@@ -86,6 +86,10 @@ cv::Point3f StereoCamera::getWorldPoint(cv::Point2f Lpt,cv::Point2f Rpt){
 	//	persR.data[4*2+1]*Rpt.y - persR.data[4*1+1],
 	//	persR.data[4*2+2]*Rpt.y - persR.data[4*1+2]
 	//	);
+
+	std::cout<<Lpt<<std::endl;
+	std::cout<<Rpt<<std::endl;
+
 	cv::Mat Bmat = (cv::Mat_<double>(4,3) << 
 		persL.at<double>(2,0)*Lpt.x - persL.at<double>(0,0),
 		persL.at<double>(2,1)*Lpt.x - persL.at<double>(0,1),
@@ -103,6 +107,7 @@ cv::Point3f StereoCamera::getWorldPoint(cv::Point2f Lpt,cv::Point2f Rpt){
 		persR.at<double>(2,1)*Rpt.y - persR.at<double>(1,1),
 		persR.at<double>(2,2)*Rpt.y - persR.at<double>(1,2)
 		);
+
 	//std::cout << Bmat << std::endl;
 
 	// åWêîçsóÒ
@@ -139,8 +144,8 @@ cv::Point3f StereoCamera::getWorldPoint(cv::Point2f Lpt,cv::Point2f Rpt){
 	std::cout << Wmat << std::endl;
 	
 	cv::Point3f wpt;
-	wpt.x = Wmat.at<double>(0,0);
-	wpt.y = Wmat.at<double>(1,0);
+	wpt.x = -Wmat.at<double>(0,0);
+	wpt.y = -Wmat.at<double>(1,0);
 	wpt.z = Wmat.at<double>(2,0);
 
 	return wpt;
@@ -156,7 +161,7 @@ void StereoCamera::getCameraParam(cv::Mat &param,std::string paramName,std::stri
     cv::read(node[paramName], param);
 
 	// OpenGLç¿ïWånÇ÷ïœä∑
-	param.at<double>(1,2) = height - param.at<double>(1,2);
+	//param.at<double>(1,2) = height - param.at<double>(1,2);
 	//std::cout << height << std::endl;
 	//std::cout << height << std::endl;
 

@@ -47,7 +47,7 @@ private:
 	cv::Mat cameraLeftParam;
 	// 右カメラの内部パラメータ
 	cv::Mat cameraRightParam;
-
+	
 	// カメラキャリブレーションxmlファイル名
 	std::string calibrateXmlName;
 	// ステレオカメラ
@@ -117,12 +117,18 @@ public:
 	/********************************************
 	 * 透視射影行列
 	 */
+	double persAu;
+	double persAv;
+	double persU0;
+	double persV0;
+	double persN;
+	double persF;
+	double persW;
+	double persH;
 	double persL;
 	double persR;
 	double persT;
 	double persB;
-	double persN;
-	double persF;
 
 public:
 

@@ -72,6 +72,7 @@ MarkerLessAR glmlar;
 // モデルビュー行列
 GLdouble modelMat[4*4];
 
+
 void setModelMat(double x1,double x2,double x3,
 				 double y1,double y2,double y3,
 				 double z1,double z2,double z3,
@@ -129,6 +130,35 @@ GLdouble* getModelMat(double x1,double x2,double x3,
 	return modelMat;
 }
 
+GLdouble* getModelMat(double x1,double x2,double x3,double x4,
+				 double y1,double y2,double y3,double y4,
+				 double z1,double z2,double z3,double z4,
+				 double t1,double t2,double t3,double t4){
+	
+	GLdouble modelMat[16];
+
+	modelMat[0]=x1;
+	modelMat[1]=x2;
+	modelMat[2]=x3;
+	modelMat[3]=x4;
+
+	modelMat[4]=y1;
+	modelMat[5]=y2;
+	modelMat[6]=y3;
+	modelMat[7]=y4;
+
+	modelMat[8]=z1;
+	modelMat[9]=z2;
+	modelMat[10]=z3;
+	modelMat[11]=z4;
+
+	modelMat[12]=t1;
+	modelMat[13]=t2;
+	modelMat[14]=t3;
+	modelMat[15]=t4;
+
+	return modelMat;
+}
 
 
 /*
@@ -152,7 +182,7 @@ void glmain(int argc,char *argv[]){
 	if(-glmlar.tAxis[2]<1){
 		glmlar.setPersMat(1,-glmlar.tAxis[2]+100);
 	}else{
-		glmlar.setPersMat(-glmlar.tAxis[2]-100,-glmlar.tAxis[2]+100);
+		glmlar.setPersMat(-glmlar.tAxis[2]-100,-glmlar.tAxis[2]+300);
 	}
 
 	for(int i=0;i<16;i++){
@@ -321,7 +351,7 @@ void display_function(void)
 		 glmlar.xAxis[0], glmlar.xAxis[1],glmlar.xAxis[2],
 		 glmlar.yAxis[0], glmlar.yAxis[1],glmlar.yAxis[2],
 		 glmlar.zAxis[0], glmlar.zAxis[1],glmlar.zAxis[2],
-		 -glmlar.tAxis[0], -glmlar.tAxis[1],glmlar.tAxis[2]
+		 glmlar.tAxis[0], glmlar.tAxis[1],glmlar.tAxis[2]
 		 //0.0f,0.0f,glmlar.tAxis[2]
 		));
 	//glTranslated(-glmlar.tAxis[0],glmlar.tAxis[1],0.0f);
@@ -331,7 +361,7 @@ void display_function(void)
 
 	vector<cv::Point3f> pt3s;
 	pt3s = glmlar.inputWorldPoints();
-	glColor3f(1.0f,0.0f,0.0f);
+	glColor3f(1.0f,1.0f,0.0f);
 	// 点描写
 	for(int i=0;i<pt3s.size();i++){
 		glPushMatrix();
@@ -340,7 +370,7 @@ void display_function(void)
 		 glmlar.xAxis[0], glmlar.xAxis[1],glmlar.xAxis[2],
 		 glmlar.yAxis[0], glmlar.yAxis[1],glmlar.yAxis[2],
 		 glmlar.zAxis[0], glmlar.zAxis[1],glmlar.zAxis[2],
-		 -pt3s[i].x,-pt3s[i].y,pt3s[i].z
+		 pt3s[i].x,pt3s[i].y,pt3s[i].z
 		 //0.0f,0.0f,pt3s[i].z
 		));
 		//glTranslated(-pt3s[i].x,-pt3s[i].y,0.0f);
@@ -373,13 +403,20 @@ void reshape_function(int width, int height)
 	// 透視射影行列を設定します
 	// 本番では，カメラ内部パラメータを用いたglFrustum関数へ変更します
 	//gluPerspective(45.0,(double)width / (double)height,1.0,400.0);
-	glFrustum(glmlar.persL+20,glmlar.persR+20,glmlar.persB-20,glmlar.persT-20,glmlar.persN,glmlar.persF);
-	cout << glmlar.persL << endl;
-	cout << glmlar.persR << endl;
-	cout << glmlar.persT << endl;
-	cout << glmlar.persB << endl;
-	cout << glmlar.persN << endl;
-	cout << glmlar.persF << endl;
+	//glFrustum(glmlar.persL,glmlar.persR,glmlar.persB,glmlar.persT,glmlar.persN,glmlar.persF);
+	glMultMatrixd(getModelMat(
+		2*glmlar.persAu/glmlar.persW, 0, 0, 0,
+		0, 2*glmlar.persAv/glmlar.persH, 0, 0,
+		(glmlar.persW-2*glmlar.persU0)/glmlar.persW, (glmlar.persH-2*glmlar.persV0)/glmlar.persH, -(glmlar.persF+glmlar.persN)/(glmlar.persF-glmlar.persN), -1,
+		0, 0, -(2*glmlar.persF*glmlar.persN)/(glmlar.persF-glmlar.persN), 0
+		));
+
+	//cout << glmlar.persL << endl;
+	//cout << glmlar.persR << endl;
+	//cout << glmlar.persT << endl;
+	//cout << glmlar.persB << endl;
+	//cout << glmlar.persN << endl;
+	//cout << glmlar.persF << endl;
 	//glFrustum(0 , 2 , 4 , 0 , 1 , 100);
 
 	// モデルビュー行列を初期化します
