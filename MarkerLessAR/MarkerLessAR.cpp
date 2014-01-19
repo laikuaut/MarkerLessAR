@@ -113,14 +113,18 @@ void MarkerLessAR::computeMatching(){
 	// 左右それぞれのマッチング処理
 	std::cout << "Matching Left on the keypoints..." << endl;
 	asiftLeft.computeMatching(asiftLeft.baseKeys,asiftLeft.inputKeys);
+	asiftLeft.matchings.output(pro::Dir::getStem(imgMarkerName)+"_Lmatching.txt");
 	std::cout << "Matching Right on the keypoints..." << endl;
 	asiftRight.computeMatching(asiftRight.baseKeys,asiftRight.inputKeys);
+	asiftRight.matchings.output(pro::Dir::getStem(imgMarkerName)+"_Rmatching.txt");
 
 	// マッチング点だけにキーポイントを補正
 	std::cout << "only Left Matching Keyspoints..." << endl;
 	asiftLeft.matchings.filterMatching();
+	//std::cout << "only Left "<< asiftLeft.matchings.asiftKeys1->onceKeys.size() <<" Matching." << endl;
 	std::cout << "only Right Matching Keyspoints..." << endl;
 	asiftRight.matchings.filterMatching();
+	//std::cout << "only Rigth "<< asiftRight.matchings.asiftKeys1->onceKeys.size() <<" Matching." << endl;
 
 	// 左右同士のマッチング
 	matchingsLR.setKeypoints(*asiftLeft.matchings.asiftKeys2,*asiftRight.matchings.asiftKeys2);
@@ -316,6 +320,10 @@ vector<cv::Point3f> MarkerLessAR::inputWorldPoints(){
 	return inputPoint3s(pro::Dir::getStem(imgMarkerName)+"_worldPoints.txt");
 }
 
+vector<cv::Point3f> MarkerLessAR::inputXAxisWorldPoints(){
+	return inputPoint3s(pro::Dir::getStem(imgMarkerName)+"_worldPoints_xAxisKeys.txt");
+}
+
 void MarkerLessAR::outputWorldPoints(){
 	outputPoint3s(worldPoints,pro::Dir::getStem(imgMarkerName)+"_worldPoints.txt");
 }
@@ -401,7 +409,7 @@ void MarkerLessAR::setZAxis(){
 }
 
 
-void MarkerLessAR::setXAxis(){
+int MarkerLessAR::setXAxis(){
 	int DIM=3; // 3次元
     int SAMPLES=0;
 	
@@ -410,10 +418,13 @@ void MarkerLessAR::setXAxis(){
 
 	if(!ifs.is_open()){
 		cout << "not open " << pro::Dir::getStem(imgMarkerName)+"_worldPoints_xAxisKeys.txt" << "..." << endl;
-		return;
+		return 0;
 	}
 
 	ifs >> SAMPLES;
+
+	if(SAMPLES<5)
+		return 0;
 
     cv::Mat src(SAMPLES,DIM,CV_32FC1);
     cv::Mat result(DIM,DIM,CV_32FC1); // DIMとSAMPLESのうち小さい方
@@ -459,11 +470,16 @@ void MarkerLessAR::setXAxis(){
 
 	//ofs.close();
 
-    return ;
+    return SAMPLES;
 }
 
 void MarkerLessAR::setYAxis(){
 	yAxis = zAxis.cross(xAxis);
+	for(int i=0;i<3;i++){
+		if(yAxis[1]<0){
+			yAxis[i] = -yAxis[i];
+		}
+	}
 }
 
 void MarkerLessAR::setCenterAxis(){
@@ -501,7 +517,9 @@ void MarkerLessAR::setCenterAxis(){
 }
 
 void MarkerLessAR::setAxis(){
-	setXAxis();
+	if(!setXAxis()){
+		std::cout << "marker not found." << std::endl;
+	}
 	setZAxis();
 	setYAxis();
 	setCenterAxis();

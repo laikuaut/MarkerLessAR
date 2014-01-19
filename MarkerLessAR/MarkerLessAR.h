@@ -182,12 +182,13 @@ public:
 	 */
 	vector<cv::Point3f> getWorldPoints(AsiftMatchings mathing);
 	vector<cv::Point3f> inputWorldPoints();
+	vector<cv::Point3f> inputXAxisWorldPoints();
 	void outputWorldPoints();
 
 	/********************************************
 	 * å¬•ª•ªÍ‚É‚æ‚é²‚ÌŒˆ’è
 	 */
-	void setXAxis();
+	int setXAxis();
 	void setYAxis();
 	void setZAxis();
 	void setCenterAxis();

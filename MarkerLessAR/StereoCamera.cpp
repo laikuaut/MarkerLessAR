@@ -87,8 +87,8 @@ cv::Point3f StereoCamera::getWorldPoint(cv::Point2f Lpt,cv::Point2f Rpt){
 	//	persR.data[4*2+2]*Rpt.y - persR.data[4*1+2]
 	//	);
 
-	std::cout<<Lpt<<std::endl;
-	std::cout<<Rpt<<std::endl;
+	//std::cout<<Lpt<<std::endl;
+	//std::cout<<Rpt<<std::endl;
 
 	cv::Mat Bmat = (cv::Mat_<double>(4,3) << 
 		persL.at<double>(2,0)*Lpt.x - persL.at<double>(0,0),
@@ -134,14 +134,14 @@ cv::Point3f StereoCamera::getWorldPoint(cv::Point2f Lpt,cv::Point2f Rpt){
 	cv::Mat Binv = cv::Mat(3,4,CV_64FC1);
 	Binv = (Bmat.t()*Bmat).inv()*Bmat.t();
 	
-	std::cout << Binv << std::endl;
-	std::cout << Cmat << std::endl;
+	//std::cout << Binv << std::endl;
+	//std::cout << Cmat << std::endl;
 
 	// ƒ[ƒ‹ƒhÀ•WŒn
 	cv::Mat Wmat = cv::Mat(3,1,CV_64FC1);
 	Wmat = Binv*Cmat;
 	
-	std::cout << Wmat << std::endl;
+	//std::cout << Wmat << std::endl;
 	
 	cv::Point3f wpt;
 	wpt.x = -Wmat.at<double>(0,0);

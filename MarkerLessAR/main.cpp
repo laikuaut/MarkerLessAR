@@ -342,14 +342,18 @@ void main_resizeImage(int argc,char *argv[]){
  */
 void main_imageWriter(int argc,char *argv[]){
 
-	if(argc!=5){
-		cout << "input >> capnum marker.png startNum" << endl;
+	if(argc!=7){
+		cout << "input >> capnum marker.png startNum width height" << endl;
 		return;
 	}
 
 	cout << "撮影 : SPACE , 終了 : qキー" << endl;
 
 	cv::VideoCapture cap(atoi(argv[2]));
+	
+	cv::Size cap_size(atoi(argv[5]), atoi(argv[6]));
+	cap.set(CV_CAP_PROP_FRAME_WIDTH, cap_size.width);
+	cap.set(CV_CAP_PROP_FRAME_HEIGHT, cap_size.height);
 
 	pro::Image frame;
 
@@ -847,15 +851,16 @@ void main_markerCreate(int argc,char *argv[]){
 	//asift.markerCreate(markerName,tilts,rectFlag,showFlag);
 
 	
-	if(argc!=4 && argc != 6){
-		cout << "input >> cameraNum marker.png tilts startNum" << endl;
+	if(argc!=4 && argc != 8){
+		cout << "input >> cameraNum marker.png tilts startNum width height" << endl;
 		cout << "input >> marker.png tilts" << endl;
 		return;
 	}
 
 	if(argc==4){
-
-	}else if(argc==6){
+		Asift asift;
+		asift.markerCreate(argv[2],atoi(argv[3]));
+	}else if(argc==8){
 		string markerName = argv[3];
 		int tilts = atoi(argv[4]);
 	
@@ -870,6 +875,10 @@ void main_markerCreate(int argc,char *argv[]){
 		cout << "撮影 : SPACE , 終了 : qキー" << endl;
 
 		cv::VideoCapture cap(atoi(argv[2]));
+		
+		cv::Size cap_size(atoi(argv[6]), atoi(argv[7]));
+		cap.set(CV_CAP_PROP_FRAME_WIDTH, cap_size.width);
+		cap.set(CV_CAP_PROP_FRAME_HEIGHT, cap_size.height);
 
 		pro::Image frame;
 		Asift asift;

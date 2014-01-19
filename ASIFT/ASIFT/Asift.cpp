@@ -572,6 +572,7 @@ void Asift::markerCreate(std::string markerName,int tilts,int rectFilterFlag,int
 		markerKeys.draw(imgMarker);
 		xAxisKeys.draw(imgMarker,cv::Scalar(255,255,0),cv::Scalar(255,255,0));
 		imgMarker.imshow(pro::Dir::getStem(markerName),1);
+		imgMarker.save(pro::Dir::getStem(markerName)+"_Keys.png");
 		cv::waitKey(0);
 	}
 
@@ -633,7 +634,7 @@ void Asift::setFilterRect(pro::Image &src){
 							,2,cv::Scalar(255,255,0));
 			src.rectangle(cv::Point2f(filterRect.x,filterRect.y)
 							,cv::Point2f(filterRect.x+filterRect.width
-							,filterRect.y+filterRect.height),cv::Scalar(0,255,0));
+							,filterRect.y+filterRect.height),cv::Scalar(0,255,0),3);
 		}else{
 			break;
 		}

@@ -354,15 +354,40 @@ void display_function(void)
 		 glmlar.tAxis[0], glmlar.tAxis[1],glmlar.tAxis[2]
 		 //0.0f,0.0f,glmlar.tAxis[2]
 		));
-	//glTranslated(-glmlar.tAxis[0],glmlar.tAxis[1],0.0f);
+	glTranslated(0.0f,0.0f,25.0f);
 	render_axes(500);
 	render_cuboid(50,50,50);
 	glPopMatrix();
+	
+	
 
+	// XŽ²‚ÌŽOŽŸŒ³“_•`ŽÊ
+	vector<cv::Point3f> pt3s_xAxis;
+	pt3s_xAxis = glmlar.inputXAxisWorldPoints();
+	glColor3f(0.0f,1.0f,1.0f);
+	cout << pt3s_xAxis.size() << endl;
+	for(int i=0;i<pt3s_xAxis.size();i++){
+		glPushMatrix();
+
+		glMultMatrixd(getModelMat(
+		 glmlar.xAxis[0], glmlar.xAxis[1],glmlar.xAxis[2],
+		 glmlar.yAxis[0], glmlar.yAxis[1],glmlar.yAxis[2],
+		 glmlar.zAxis[0], glmlar.zAxis[1],glmlar.zAxis[2],
+		 pt3s_xAxis[i].x,pt3s_xAxis[i].y,pt3s_xAxis[i].z
+		 //0.0f,0.0f,pt3s[i].z
+		));
+		//glTranslated(-pt3s[i].x,-pt3s[i].y,0.0f);
+		glutSolidCube(2.0);
+
+		//cout << pt3s[i] << endl;
+
+		glPopMatrix();
+	}
+	
+	// 3ŽŸŒ³“_•`ŽÊ
 	vector<cv::Point3f> pt3s;
 	pt3s = glmlar.inputWorldPoints();
-	glColor3f(1.0f,1.0f,0.0f);
-	// “_•`ŽÊ
+	glColor3f(1.0f,0.0f,0.0f);
 	for(int i=0;i<pt3s.size();i++){
 		glPushMatrix();
 
@@ -374,9 +399,9 @@ void display_function(void)
 		 //0.0f,0.0f,pt3s[i].z
 		));
 		//glTranslated(-pt3s[i].x,-pt3s[i].y,0.0f);
-		glutSolidCube(1);
+		glutSolidCube(2);
 
-		cout << pt3s[i] << endl;
+		//cout << pt3s[i] << endl;
 
 		glPopMatrix();
 	}
