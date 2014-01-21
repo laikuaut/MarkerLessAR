@@ -354,7 +354,8 @@ void display_function(void)
 		 glmlar.tAxis[0], glmlar.tAxis[1],glmlar.tAxis[2]
 		 //0.0f,0.0f,glmlar.tAxis[2]
 		));
-	glTranslated(0.0f,0.0f,25.0f);
+	//glTranslated(0.0f,0.0f,25.0f);
+	glTranslated(0.0f,0.0f,0.0f);
 	render_axes(500);
 	render_cuboid(50,50,50);
 	glPopMatrix();
@@ -428,14 +429,14 @@ void reshape_function(int width, int height)
 	// 透視射影行列を設定します
 	// 本番では，カメラ内部パラメータを用いたglFrustum関数へ変更します
 	//gluPerspective(45.0,(double)width / (double)height,1.0,400.0);
-	//glFrustum(glmlar.persL,glmlar.persR,glmlar.persB,glmlar.persT,glmlar.persN,glmlar.persF);
-	glMultMatrixd(getModelMat(
-		2*glmlar.persAu/glmlar.persW, 0, 0, 0,
-		0, 2*glmlar.persAv/glmlar.persH, 0, 0,
-		(glmlar.persW-2*glmlar.persU0)/glmlar.persW, (glmlar.persH-2*glmlar.persV0)/glmlar.persH, -(glmlar.persF+glmlar.persN)/(glmlar.persF-glmlar.persN), -1,
-		0, 0, -(2*glmlar.persF*glmlar.persN)/(glmlar.persF-glmlar.persN), 0
-		));
-
+	glFrustum(glmlar.persL,glmlar.persR,glmlar.persB,glmlar.persT,glmlar.persN,glmlar.persF);
+	//glMultMatrixd(getModelMat(
+	//	2*glmlar.persAu/glmlar.persW, 0, 0, 0,
+	//	0, 2*glmlar.persAv/glmlar.persH, 0, 0,
+	//	(glmlar.persW-2*glmlar.persU0)/glmlar.persW, (glmlar.persH-2*glmlar.persV0)/glmlar.persH, -(glmlar.persF+glmlar.persN)/(glmlar.persF-glmlar.persN), -1,
+	//	0, 0, -(2*glmlar.persF*glmlar.persN)/(glmlar.persF-glmlar.persN), 0
+	//	));
+	//cout << glmlar.persF << endl;
 	//cout << glmlar.persL << endl;
 	//cout << glmlar.persR << endl;
 	//cout << glmlar.persT << endl;

@@ -575,9 +575,9 @@ void MarkerLessAR::setPersMat(double znear,double zfar){
 	//cout << width << endl;
 	//cout << height << endl;
 	
-	persN = (persAu+persAv)/2.0;
-	//persN = znear;
-	//persF = zfar;
+	//persN = (persAu+persAv)/2.0;
+	persN = znear;
+	persF = zfar;
 	//persF = persN+300;
 
 	persR = persN*(persW - persU0)/persAu;
