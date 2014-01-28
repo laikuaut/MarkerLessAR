@@ -59,6 +59,7 @@ void mouse_function(int, int, int, int);
  */
 void render_axes(float);
 void render_cuboid(double length_x,double length_y,double length_z);
+void render_plane(double length);
 
 // カメラ画像
 cv::Mat camera_image;
@@ -71,6 +72,9 @@ MarkerLessAR glmlar;
 
 // モデルビュー行列
 GLdouble modelMat[4*4];
+
+// 初期化フラグ
+int initFlag=0;
 
 
 void setModelMat(double x1,double x2,double x3,
@@ -160,14 +164,58 @@ GLdouble* getModelMat(double x1,double x2,double x3,double x4,
 	return modelMat;
 }
 
+void saveImage( const unsigned int imageWidth, const unsigned int imageHeight )
+{
+  const unsigned int channnelNum = 3; // RGBなら3, RGBAなら4
+  void* dataBuffer = NULL;
+  dataBuffer = ( GLubyte* )malloc( imageWidth * imageHeight * channnelNum );
+
+  // 読み取るOpneGLのバッファを指定 GL_FRONT:フロントバッファ　GL_BACK:バックバッファ
+  glReadBuffer( GL_BACK );
+
+  // OpenGLで画面に描画されている内容をバッファに格納
+  glReadPixels(
+	0,                 //読み取る領域の左下隅のx座標
+	0,                 //読み取る領域の左下隅のy座標 //0 or getCurrentWidth() - 1
+	imageWidth,             //読み取る領域の幅
+	imageHeight,            //読み取る領域の高さ
+	GL_BGR_EXT, //it means GL_BGR,           //取得したい色情報の形式
+	GL_UNSIGNED_BYTE,  //読み取ったデータを保存する配列の型
+	dataBuffer      //ビットマップのピクセルデータ（実際にはバイト配列）へのポインタ
+	);
+
+  GLubyte* p = static_cast<GLubyte*>( dataBuffer );
+  std::string fname = "W_"+glmlar.getLeftImgName();
+  IplImage* outImage = cvCreateImage( cvSize( imageWidth, imageHeight ), IPL_DEPTH_8U, 3 );
+
+  for ( unsigned int j = 0; j < imageHeight; ++ j )
+  {
+    for ( unsigned int i = 0; i < imageWidth; ++i )
+    {
+      outImage->imageData[ ( imageHeight - j - 1 ) * outImage->widthStep + i * 3 + 0 ] = *p;
+      outImage->imageData[ ( imageHeight - j - 1 ) * outImage->widthStep + i * 3 + 1 ] = *( p + 1 );
+      outImage->imageData[ ( imageHeight - j - 1 ) * outImage->widthStep + i * 3 + 2 ] = *( p + 2 );
+      p += 3;
+    }
+  }
+
+  cvSaveImage( fname.c_str(), outImage );
+}
 
 /*
  *	main関数です．
  */
-void glmain(int argc,char *argv[]){
+void glmain(int argc,char *argv[],string *strs){
 
 	// MarkerLessARの初期化
-	glmlar.init(1);
+	if(argc==4){
+		if(strs==nullptr)
+			glmlar.init(1,argv[2],argv[3]);
+		else
+			glmlar.init(1,strs[0],strs[1]);
+	}else{
+		glmlar.init(1);
+	}
 	glmlar.initAsift();
 	//if
 	//glmlar.run();
@@ -178,7 +226,13 @@ void glmain(int argc,char *argv[]){
 	camera_image = glmlar.asiftLeft.imgInput;
 
 	// 軸行列読み込み
-	glmlar.setAxis();
+	if(!glmlar.setAxis()){
+		cout << "not Marker" << endl;
+		std::string fname = "W_"+glmlar.getLeftImgName();
+		cv::imwrite(fname.c_str(),camera_image);
+		return;
+		//exit(1);
+	}
 	if(-glmlar.tAxis[2]<1){
 		glmlar.setPersMat(1,-glmlar.tAxis[2]+100);
 	}else{
@@ -197,7 +251,7 @@ void glmain(int argc,char *argv[]){
 	initialize_opengl(argc, argv, copy_image.cols, copy_image.rows);
 
 	// イベントを受け付けます
-	glutMainLoop();
+	//glutMainLoop();
 
 	// 正常終了します
 	return ;
@@ -209,8 +263,10 @@ void glmain(int argc,char *argv[]){
 void initialize_opengl(int& argc, char* argv[], int width, int height)
 {
 	// GLUTを初期化します
-	glutInit(&argc, argv);
-
+	if(initFlag==0){
+		glutInit(&argc, argv);
+		initFlag++;
+	}
 	// ウィンドウの位置を設定します
 	glutInitWindowPosition(0, 0);
 
@@ -221,19 +277,19 @@ void initialize_opengl(int& argc, char* argv[], int width, int height)
 	glutInitDisplayMode(GLUT_DEPTH | GLUT_RGBA);
 
 	// ウィンドウを作ります
-	glutCreateWindow(argv[0]);
+	int id = glutCreateWindow(argv[0]);
 	
 	// ウィンドウ描画関数を設定します
-	glutDisplayFunc(display_function);
+	//glutDisplayFunc(display_function);
 	
 	// ウィンドウサイズ変更関数を設定します
-	glutReshapeFunc(reshape_function);
+	//glutReshapeFunc(reshape_function);
 
 	// キー入力関数を設定します
-	glutKeyboardFunc(keyboard_function);
+	//glutKeyboardFunc(keyboard_function);
 
 	// マウス入力関数を設定します
-	glutMouseFunc(mouse_function);
+	//glutMouseFunc(mouse_function);
 
 	// 背景色を設定します
 	glClearColor(0.0, 0.0, 0.0, 1.0);
@@ -246,6 +302,11 @@ void initialize_opengl(int& argc, char* argv[], int width, int height)
 
 	// 材質を初期化します
 	initialize_material();
+
+	// 単独実行
+	display_function();
+
+	glutDestroyWindow(id);
 }
 
 /*
@@ -354,8 +415,11 @@ void display_function(void)
 		 glmlar.tAxis[0], glmlar.tAxis[1],glmlar.tAxis[2]
 		 //0.0f,0.0f,glmlar.tAxis[2]
 		));
-	//glTranslated(0.0f,0.0f,25.0f);
-	glTranslated(0.0f,0.0f,0.0f);
+	// 平面代わりに表示
+	//render_plane(150);
+
+	glTranslated(0.0f,0.0f,25.0f);
+	//glTranslated(0.0f,0.0f,0.0f);
 	render_axes(500);
 	render_cuboid(50,50,50);
 	glPopMatrix();
@@ -409,6 +473,9 @@ void display_function(void)
 
 	// OpenGLの命令を実行します
 	glFlush();
+
+	saveImage(copy_image.cols, copy_image.rows);
+	//exit(1);
 }
 
 /*
@@ -429,13 +496,13 @@ void reshape_function(int width, int height)
 	// 透視射影行列を設定します
 	// 本番では，カメラ内部パラメータを用いたglFrustum関数へ変更します
 	//gluPerspective(45.0,(double)width / (double)height,1.0,400.0);
-	glFrustum(glmlar.persL,glmlar.persR,glmlar.persB,glmlar.persT,glmlar.persN,glmlar.persF);
-	//glMultMatrixd(getModelMat(
-	//	2*glmlar.persAu/glmlar.persW, 0, 0, 0,
-	//	0, 2*glmlar.persAv/glmlar.persH, 0, 0,
-	//	(glmlar.persW-2*glmlar.persU0)/glmlar.persW, (glmlar.persH-2*glmlar.persV0)/glmlar.persH, -(glmlar.persF+glmlar.persN)/(glmlar.persF-glmlar.persN), -1,
-	//	0, 0, -(2*glmlar.persF*glmlar.persN)/(glmlar.persF-glmlar.persN), 0
-	//	));
+	//glFrustum(glmlar.persL,glmlar.persR,glmlar.persB,glmlar.persT,glmlar.persN,glmlar.persF);
+	glMultMatrixd(getModelMat(
+		2*glmlar.persAu/glmlar.persW, 0, 0, 0,
+		0, 2*glmlar.persAv/glmlar.persH, 0, 0,
+		(glmlar.persW-2*glmlar.persU0)/glmlar.persW, (glmlar.persH-2*glmlar.persV0)/glmlar.persH, -(glmlar.persF+glmlar.persN)/(glmlar.persF-glmlar.persN), -1,
+		0, 0, -(2*glmlar.persF*glmlar.persN)/(glmlar.persF-glmlar.persN), 0
+		));
 	//cout << glmlar.persF << endl;
 	//cout << glmlar.persL << endl;
 	//cout << glmlar.persR << endl;
@@ -633,5 +700,26 @@ void render_cuboid(double length_x,double length_y,double length_z){
 		glVertex3f(-(GLfloat)length_x/2,-(GLfloat)length_y/2,-(GLfloat)length_z/2);
 		glVertex3f(-(GLfloat)length_x/2,(GLfloat)length_y/2,-(GLfloat)length_z/2);
 	glEnd();
+
+}
+
+
+void render_plane(double length){
+	glLineWidth(2.0f);
+	glColor3f(0.0f,0.0f,0.0f);
+
+	double length_div = length/5;
+
+	//glColor3f(0.5f,0.5f,0.5f);
+	for(int i=0;i<5;i++){
+		for(int j=0;j<5;j++){
+		glBegin(GL_LINE_LOOP);
+			glVertex3f((GLfloat)length/2+length_div*(i),(GLfloat)length/2+length_div*(j),0);
+			glVertex3f((GLfloat)length/2+length_div*(i),(GLfloat)length/2-length_div*(j+1),0);
+			glVertex3f((GLfloat)length/2-length_div*(i+1),(GLfloat)length/2-length_div*(j+1),0);
+			glVertex3f((GLfloat)length/2-length_div*(i+1),(GLfloat)length/2+length_div*(j),0);
+		glEnd();
+		}
+	}
 
 }

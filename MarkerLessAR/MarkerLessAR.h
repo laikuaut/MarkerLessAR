@@ -19,6 +19,9 @@ public:
 	pro::Dir path;
 
 private:
+
+	// 一時的な実行速度用変数
+	pro::Timer timer;
 	
 	/********************************************
 	 * 設定ファイル名
@@ -142,6 +145,7 @@ public:
 	 */
 	// 初期化
 	void init(int readini,string ini_name="MarkerLessAR.ini");
+	void init(int readini,string imgLeftName,string imgRightName,string ini_name="MarkerLessAR.ini");
 	// デフォルト値設定
 	void defaultParam();
 	// Asiftの画像名等MLAR用に初期化
@@ -192,7 +196,7 @@ public:
 	void setYAxis();
 	void setZAxis();
 	void setCenterAxis();
-	void setAxis();
+	int setAxis();
 	void outputAxis();
 
 	/********************************************
@@ -206,5 +210,7 @@ public:
 	// 主実行
 	void run();
 
+	// 一時的に
+	string getLeftImgName();
 };
 

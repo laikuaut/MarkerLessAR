@@ -1,3 +1,5 @@
 #pragma once
 
-void glmain(int argc,char *argv[]);
+#include<iostream>
+
+void glmain(int argc,char *argv[],std::string *strs=nullptr);

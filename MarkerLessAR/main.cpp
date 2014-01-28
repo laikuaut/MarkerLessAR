@@ -37,7 +37,26 @@ void main_help();
  */
 void main_MarkerLessAR(int argc,char *argv[]){
 	MarkerLessAR mlar;
-	mlar.init(1);
+	if(argc==3){
+		mlar.init(1,argv[1],argv[2]);
+	}else{
+		mlar.init(1);
+	}
+	mlar.run();
+	mlar.setAxis();
+}
+
+/**
+ * MarkerLessAR
+ * string 用
+ */
+void main_MarkerLessAR(int argc,string strs[]){
+	MarkerLessAR mlar;
+	if(argc==3){
+		mlar.init(1,strs[0],strs[1]);
+	}else{
+		mlar.init(1);
+	}
 	mlar.run();
 	mlar.setAxis();
 }
@@ -59,6 +78,137 @@ void main_Asift(int argc,char *argv[]){
 		asift.run();
 	}
 }
+
+/**
+ * MArkerLessAR at Video
+ * -vexe 
+ */
+void main_MarkerLessARVideo(int argc,char *argv[]){
+
+	if(argc!=5 && argc!=4 && argc!=6){
+		cout << "input >> Left.avi Right.avi startFrame endFrame" << endl;
+		return;
+	}
+
+	cv::VideoCapture lcap(argv[2]);
+	cv::VideoCapture rcap(argv[3]);
+	// ファイルがオープンできたかの確認
+	if(!lcap.isOpened()) return;
+	if(!rcap.isOpened()) return;
+	
+	int width = lcap.get(CV_CAP_PROP_FRAME_WIDTH);
+	int height = lcap.get(CV_CAP_PROP_FRAME_HEIGHT);
+	
+	// ビデオライタ
+	int fps = 15;
+	stringstream glss;
+	glss << "gl_" << argv[2];	
+	cv::VideoWriter writer(glss.str(), CV_FOURCC('X','V','I','D'), fps, cv::Size(width,height));
+	
+	cv::namedWindow(argv[2], 0);
+	cv::namedWindow(argv[3], 0);
+	cv::namedWindow("gl", 0);
+
+	int count=0;
+	int test=0;
+	int startFrame=0;
+	int endFrame=0;
+	if(argc>=5) startFrame = atoi(argv[4]);
+	if(argc==6) endFrame = atoi(argv[5]);
+
+	int errornum[] = {11,15,21,26,29,33,38,44,45,48,58,65,83,-1};
+	int ecount=0;
+	
+	while(1) {
+
+
+			pro::Image lframe;
+			pro::Image rframe;
+			pro::Image glframe;
+		
+				//std::cout << test++ << std::endl;
+
+			string lname,rname;
+			stringstream lss,rss;
+		
+			lss<<pro::Dir::getStem(argv[2]) << std::setfill('0') << std::setw(3) << count << ".png";
+			rss<<pro::Dir::getStem(argv[3]) << std::setfill('0') << std::setw(3) << count << ".png";
+
+			lcap.read((cv::Mat&)lframe);  // Lキャプチャ
+			rcap.read((cv::Mat&)rframe);  // Rキャプチャ
+		
+				//std::cout << test++ << std::endl;
+
+			if(lframe.empty() || rframe.empty()){
+				std::cout << "empty" << std::endl;
+				break;
+			}
+		
+				//std::cout << test++ << std::endl;
+
+		if(startFrame<=count){
+
+			//lframe.save(lss.str());
+			//rframe.save(rss.str());
+		
+				//std::cout << test++ << std::endl;
+
+			lframe.imshow(argv[2]);
+			rframe.imshow(argv[3]);
+		
+				//std::cout << test++ << std::endl;
+
+			if(cv::waitKey(30) >= 0) break;
+
+			//// 様々な処理
+			////// ...
+			//string opt_MarkerLessAR[] = {lss.str(),rss.str()};
+			//string opt_glmain[] = {lss.str(),rss.str()};
+		
+			//	//std::cout << test++ << std::endl;
+
+			//main_MarkerLessAR(3,opt_glmain);
+		
+			//	//std::cout << test++ << std::endl;
+
+			//if(cv::waitKey(30) >= 0) break;
+		
+			//	//std::cout << test++ << std::endl;
+
+			//glmain(4,argv,opt_glmain);
+		
+			//	//std::cout << test++ << std::endl;
+			//
+			//if(cv::waitKey(30) >= 0) break;
+			//
+			//cout << count << endl << endl << endl;
+			//MessageBeep(MB_ICONASTERISK);
+		}
+
+		if(errornum[ecount]==-1||count!=errornum[ecount]){
+			glframe.load("W_"+lss.str());
+			glframe.imshow("gl");
+			//
+			//
+			//	//std::cout << test++ << std::endl;
+			cout << count << endl;
+			cout << errornum[ecount] << endl;
+			writer << glframe;
+		}else{
+			ecount++;
+		}
+
+		if(cv::waitKey(30) >= 0) break;
+
+		count++;
+
+		if(count==endFrame && endFrame!=0)
+			break;
+
+		//cv::destroyAllWindows();
+	}
+}
+
 
 /**
  * 動画書き込み
@@ -215,8 +365,8 @@ int main_videoWriter2(int argc,char *argv[]){
 	cv::VideoWriter writerLeft(argv[2], CV_FOURCC('X','V','I','D'), fps, cap_size);
 	cv::VideoWriter writerRight(argv[3], CV_FOURCC('X','V','I','D'), fps, cap_size);
 
-	//cv::namedWindow("CapLeft", CV_WINDOW_AUTOSIZE|CV_WINDOW_FREERATIO);
-	//cv::namedWindow("CapRight", CV_WINDOW_AUTOSIZE|CV_WINDOW_FREERATIO);
+	cv::namedWindow(argv[2], 0);
+	cv::namedWindow(argv[3], 0);
 
 	cv::Mat frameLeft;   
 	cv::Mat frameRight;   
@@ -481,9 +631,9 @@ void main_imageWriter2(int argc,char *argv[]){
 		capRight.read((cv::Mat&)frameRight);  // キャプチャ
 
 		if(!frameLeft.empty())
-			frameLeft.imshow(argv[2],1);
+			frameLeft.imshow(argv[2],0);
 		if(!frameRight.empty())
-			frameRight.imshow(argv[3],1);
+			frameRight.imshow(argv[3],0);
 
 		int key = cv::waitKey(30);
 
@@ -969,6 +1119,8 @@ void main(int argc,char *argv[]){
 		string option = string(argv[1]);
 		if(option=="-asift"){
 			main_Asift(argc,argv);
+		}else if(option=="-vexe"){
+			main_MarkerLessARVideo(argc,argv);
 		}else if(option=="-vw"){
 			main_videoWriter(argc,argv);
 		}else if(option=="-vw2"){

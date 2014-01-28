@@ -28,6 +28,23 @@ void MarkerLessAR::init(int readini,string ini_name){
 	initAsift();
 }
 
+
+void MarkerLessAR::init(int readini,string imgLeftName,string imgRightName,string ini_name){
+
+	path = pro::Dir();
+	
+	if(readini){
+		readIni(ini_name);
+	}else{
+		defaultParam();
+	}
+
+	this->imgLeftName = imgLeftName;
+	this->imgRightName = imgRightName;
+
+	initAsift();
+}
+
 void MarkerLessAR::defaultParam(){
 	
 	iniAsiftFileName = "Asift.ini";
@@ -103,9 +120,13 @@ void MarkerLessAR::computeKeys(){
 	std::cout << "Computing Left on the image..." << endl;
 	asiftLeft.computeKeyPoints(Asift::IMAGE_ID_INPUT);
 	std::cout << asiftLeft.inputKeys.getNum() <<  " ASIFT keypoints are detected." << endl;
+	cout << "Left keys detected time " << (double)timer.getDiff()/pro::Timer::PER_SEC << " sec." << endl; 
+	timer.lap();
 	std::cout << "Computing Right on the image..." << endl;
 	asiftRight.computeKeyPoints(Asift::IMAGE_ID_INPUT);
 	std::cout << asiftRight.inputKeys.getNum() <<  " ASIFT keypoints are detected." << endl;
+	cout << "Right keys detected time " << (double)timer.getDiff()/pro::Timer::PER_SEC << " sec." << endl; 
+	timer.lap();
 
 }
 
@@ -113,10 +134,16 @@ void MarkerLessAR::computeMatching(){
 	// 左右それぞれのマッチング処理
 	std::cout << "Matching Left on the keypoints..." << endl;
 	asiftLeft.computeMatching(asiftLeft.baseKeys,asiftLeft.inputKeys);
-	asiftLeft.matchings.output(pro::Dir::getStem(imgMarkerName)+"_Lmatching.txt");
+	cout << "Left matchings time " << (double)timer.getDiff()/pro::Timer::PER_SEC << " sec." << endl; 
+	//asiftLeft.matchings.output(pro::Dir::getStem(imgLeftName)+"_Lmatching.txt");
+	timer.lap();
+	//asiftLeft.matchings.output(pro::Dir::getStem(imgMarkerName)+"_Lmatching.txt");
 	std::cout << "Matching Right on the keypoints..." << endl;
 	asiftRight.computeMatching(asiftRight.baseKeys,asiftRight.inputKeys);
-	asiftRight.matchings.output(pro::Dir::getStem(imgMarkerName)+"_Rmatching.txt");
+	cout << "Right matchings time " << (double)timer.getDiff()/pro::Timer::PER_SEC << " sec." << endl; 
+	//asiftRight.matchings.output(pro::Dir::getStem(imgLeftName)+"_Rmatching.txt");
+	timer.lap();
+	//asiftRight.matchings.output(pro::Dir::getStem(imgMarkerName)+"_Rmatching.txt");
 
 	// マッチング点だけにキーポイントを補正
 	std::cout << "only Left Matching Keyspoints..." << endl;
@@ -129,11 +156,16 @@ void MarkerLessAR::computeMatching(){
 	// 左右同士のマッチング
 	matchingsLR.setKeypoints(*asiftLeft.matchings.asiftKeys2,*asiftRight.matchings.asiftKeys2);
 	matchingsLR.matchings=matchingLR(asiftLeft.matchings.matchings,asiftRight.matchings.matchings);
-	matchingsLR.output(pro::Dir::getStem(imgMarkerName)+"_LR.txt");
+	cout << "LR matchings time " << (double)timer.getDiff()/pro::Timer::PER_SEC << " sec." << endl; 
+	matchingsLR.output(pro::Dir::getStem(imgLeftName)+"_LR.txt");
+	//matchingsLR.output(pro::Dir::getStem(imgMarkerName)+"_LR.txt");
 	//asiftLR.createHoriImage(asiftLR.imgInput,matchingsLR,"LRH.png");
-	asiftLR.createHoriImage(asiftLR.imgInput,matchingsLR,pro::Dir::getStem(imgMarkerName)+"_LRH.png");
-	asiftLR.createVertImage(asiftLR.imgInput,matchingsLR,pro::Dir::getStem(imgMarkerName)+"_LRV.png");
+	asiftLR.createHoriImage(asiftLR.imgInput,matchingsLR,pro::Dir::getStem(imgLeftName)+"_LRH.png");
+	asiftLR.createVertImage(asiftLR.imgInput,matchingsLR,pro::Dir::getStem(imgLeftName)+"_LRV.png");
+	//asiftLR.createHoriImage(asiftLR.imgInput,matchingsLR,pro::Dir::getStem(imgMarkerName)+"_LRH.png");
+	//asiftLR.createVertImage(asiftLR.imgInput,matchingsLR,pro::Dir::getStem(imgMarkerName)+"_LRV.png");
 	cout << matchingsLR.getNum() << " matching." << endl;
+	timer.lap();
 
 }
 
@@ -141,8 +173,12 @@ void MarkerLessAR::computeXAxisMatching(){
 	// 左右それぞれのX軸のマッチング処理
 	std::cout << "Matching Left on the xAxis keypoints..." << endl;
 	asiftLeft.computeMatching(asiftLeft.xAxisKeys,asiftLeft.inputKeys);
+	cout << "Left Xmatchings time " << (double)timer.getDiff()/pro::Timer::PER_SEC << " sec." << endl; 
+	timer.lap();
 	std::cout << "Matching Right on the xAxis keypoints..." << endl;
 	asiftRight.computeMatching(asiftRight.xAxisKeys,asiftRight.inputKeys);
+	cout << "Right Xmatchings time " << (double)timer.getDiff()/pro::Timer::PER_SEC << " sec." << endl; 
+	timer.lap();
 	
 	// X軸のマッチング点だけにキーポイントを補正
 	std::cout << "only Left Matching xAxis Keyspoints..." << endl;
@@ -153,10 +189,16 @@ void MarkerLessAR::computeXAxisMatching(){
 	// 左右同士のマッチング xAxis
 	matchingsLR.setKeypoints(*asiftLeft.matchings.asiftKeys2,*asiftRight.matchings.asiftKeys2);
 	matchingsLR.matchings=matchingLR(asiftLeft.matchings.matchings,asiftRight.matchings.matchings);
-	matchingsLR.output(pro::Dir::getStem(imgMarkerName)+"_xAxisLR.txt");
-	asiftLR.createHoriImage(asiftLR.imgInput,matchingsLR,pro::Dir::getStem(imgMarkerName)+"_xAxisLRH.png");
-	asiftLR.createVertImage(asiftLR.imgInput,matchingsLR,pro::Dir::getStem(imgMarkerName)+"_xAxisLRV.png");
+	cout << "LR Xmatchings time " << (double)timer.getDiff()/pro::Timer::PER_SEC << " sec." << endl; 
+	matchingsLR.output(pro::Dir::getStem(imgLeftName)+"_xAxisLR.txt");
+	timer.lap();
+	//matchingsLR.output(pro::Dir::getStem(imgMarkerName)+"_xAxisLR.txt");
+	asiftLR.createHoriImage(asiftLR.imgInput,matchingsLR,pro::Dir::getStem(imgLeftName)+"_xAxisLRH.png");
+	asiftLR.createVertImage(asiftLR.imgInput,matchingsLR,pro::Dir::getStem(imgLeftName)+"_xAxisLRV.png");
+	//asiftLR.createHoriImage(asiftLR.imgInput,matchingsLR,pro::Dir::getStem(imgMarkerName)+"_xAxisLRH.png");
+	//asiftLR.createVertImage(asiftLR.imgInput,matchingsLR,pro::Dir::getStem(imgMarkerName)+"_xAxisLRV.png");
 	cout << matchingsLR.getNum() << " matching." << endl;
+	timer.lap();
 }
 
 void MarkerLessAR::readIni(ptree &pt){
@@ -317,15 +359,18 @@ vector<cv::Point3f> MarkerLessAR::getWorldPoints(AsiftMatchings matchings){
 }
 
 vector<cv::Point3f> MarkerLessAR::inputWorldPoints(){
-	return inputPoint3s(pro::Dir::getStem(imgMarkerName)+"_worldPoints.txt");
+	return inputPoint3s(pro::Dir::getStem(imgLeftName)+"_worldPoints.txt");
+	//return inputPoint3s(pro::Dir::getStem(imgMarkerName)+"_worldPoints.txt");
 }
 
 vector<cv::Point3f> MarkerLessAR::inputXAxisWorldPoints(){
-	return inputPoint3s(pro::Dir::getStem(imgMarkerName)+"_worldPoints_xAxisKeys.txt");
+	return inputPoint3s(pro::Dir::getStem(imgLeftName)+"_worldPoints_xAxisKeys.txt");
+	//return inputPoint3s(pro::Dir::getStem(imgMarkerName)+"_worldPoints_xAxisKeys.txt");
 }
 
 void MarkerLessAR::outputWorldPoints(){
-	outputPoint3s(worldPoints,pro::Dir::getStem(imgMarkerName)+"_worldPoints.txt");
+	outputPoint3s(worldPoints,pro::Dir::getStem(imgLeftName)+"_worldPoints.txt");
+	//outputPoint3s(worldPoints,pro::Dir::getStem(imgMarkerName)+"_worldPoints.txt");
 }
 
 void MarkerLessAR::setZAxis(){
@@ -333,10 +378,12 @@ void MarkerLessAR::setZAxis(){
     int SAMPLES=0;
 	
 	std::ifstream ifs;
-	ifs.open(pro::Dir::getStem(imgMarkerName)+"_worldPoints.txt");
+	ifs.open(pro::Dir::getStem(imgLeftName)+"_worldPoints.txt");
+	//ifs.open(pro::Dir::getStem(imgMarkerName)+"_worldPoints.txt");
 
 	if(!ifs.is_open()){
-		cout << "not open " << pro::Dir::getStem(imgMarkerName)+"_worldPoints.txt" << "..." << endl;
+		cout << "not open " << pro::Dir::getStem(imgLeftName)+"_worldPoints.txt" << "..." << endl;
+		//cout << "not open " << pro::Dir::getStem(imgMarkerName)+"_worldPoints.txt" << "..." << endl;
 		return;
 	}
 
@@ -414,16 +461,18 @@ int MarkerLessAR::setXAxis(){
     int SAMPLES=0;
 	
 	std::ifstream ifs;
-	ifs.open(pro::Dir::getStem(imgMarkerName)+"_worldPoints_xAxisKeys.txt");
+	ifs.open(pro::Dir::getStem(imgLeftName)+"_worldPoints_xAxisKeys.txt");
+	//ifs.open(pro::Dir::getStem(imgMarkerName)+"_worldPoints_xAxisKeys.txt");
 
 	if(!ifs.is_open()){
-		cout << "not open " << pro::Dir::getStem(imgMarkerName)+"_worldPoints_xAxisKeys.txt" << "..." << endl;
+		cout << "not open " << pro::Dir::getStem(imgLeftName)+"_worldPoints_xAxisKeys.txt" << "..." << endl;
+		//cout << "not open " << pro::Dir::getStem(imgMarkerName)+"_worldPoints_xAxisKeys.txt" << "..." << endl;
 		return 0;
 	}
 
 	ifs >> SAMPLES;
 
-	if(SAMPLES<5)
+	if(SAMPLES<2)
 		return 0;
 
     cv::Mat src(SAMPLES,DIM,CV_32FC1);
@@ -485,11 +534,13 @@ void MarkerLessAR::setYAxis(){
 void MarkerLessAR::setCenterAxis(){
 	
 	std::ifstream ifs;
-	ifs.open(pro::Dir::getStem(imgMarkerName)+"_worldPoints.txt");
+	ifs.open(pro::Dir::getStem(imgLeftName)+"_worldPoints.txt");
+	//ifs.open(pro::Dir::getStem(imgMarkerName)+"_worldPoints.txt");
 	int num;
 
 	if(!ifs.is_open()){
-		cout << "not open " << pro::Dir::getStem(imgMarkerName)+"_worldPoints.txt" << "..." << endl;
+		cout << "not open " << pro::Dir::getStem(imgLeftName)+"_worldPoints.txt" << "..." << endl;
+		//cout << "not open " << pro::Dir::getStem(imgMarkerName)+"_worldPoints.txt" << "..." << endl;
 		return;
 	}
 
@@ -516,23 +567,30 @@ void MarkerLessAR::setCenterAxis(){
 
 }
 
-void MarkerLessAR::setAxis(){
+int MarkerLessAR::setAxis(){
+	
 	if(!setXAxis()){
 		std::cout << "marker not found." << std::endl;
+		return 0;
 	}
 	setZAxis();
 	setYAxis();
 	setCenterAxis();
 	outputAxis();
+	cout << "Axis time " << (double)timer.getDiff()/pro::Timer::PER_SEC << " sec." << endl; 
+	timer.lap();
+	return 1;
 }
 
 void MarkerLessAR::outputAxis(){
 
 	ofstream ofs;
-	ofs.open(pro::Dir::getStem(imgMarkerName)+"_Axis.txt");
+	ofs.open(pro::Dir::getStem(imgLeftName)+"_Axis.txt");
+	//ofs.open(pro::Dir::getStem(imgMarkerName)+"_Axis.txt");
 
 	if(!ofs.is_open()){
-		cout << "not open " << pro::Dir::getStem(imgMarkerName) << "_Axis.txt..." << endl; 
+		cout << "not open " << pro::Dir::getStem(imgLeftName) << "_Axis.txt..." << endl; 
+		//cout << "not open " << pro::Dir::getStem(imgMarkerName) << "_Axis.txt..." << endl; 
 		return;
 	}
 
@@ -575,9 +633,9 @@ void MarkerLessAR::setPersMat(double znear,double zfar){
 	//cout << width << endl;
 	//cout << height << endl;
 	
-	//persN = (persAu+persAv)/2.0;
-	persN = znear;
-	persF = zfar;
+	persN = (persAu+persAv)/2.0;
+	//persN = znear;
+	//persF = zfar;
 	//persF = persN+300;
 
 	persR = persN*(persW - persU0)/persAu;
@@ -589,7 +647,7 @@ void MarkerLessAR::setPersMat(double znear,double zfar){
 
 void MarkerLessAR::run(){
 
-	pro::Timer timer;
+	timer.start();
 	
 	/************************************************
 	 * 画像のセット
@@ -606,6 +664,8 @@ void MarkerLessAR::run(){
 	//cout << "L&R image ok !" << endl;
 
 	setImages();
+	cout << "image load time " << (double)timer.getDiff()/pro::Timer::PER_SEC << " sec." << endl; 
+	timer.lap();
 	
 	/************************************************
 	 * マーカーの読み込み
@@ -622,6 +682,8 @@ void MarkerLessAR::run(){
 	//cout << "right xAxis keys " << asiftRight.xAxisKeys.getNum() << "." << endl;
 
 	setKeys();
+	cout << "keys load time " << (double)timer.getDiff()/pro::Timer::PER_SEC << " sec." << endl; 
+	timer.lap();
 
 	/************************************************
 	 * キーポイントの演算
@@ -662,8 +724,12 @@ void MarkerLessAR::run(){
 	computeMatching();
 
 	// ワールド座標へ変換
+	
+	cout << "worldPoints time " << (double)timer.getDiff()/pro::Timer::PER_SEC << " sec." << endl; 
 	worldPoints = getWorldPoints(matchingsLR);
-	outputPoint3s(worldPoints,pro::Dir::getStem(imgMarkerName)+"_worldPoints.txt");
+	outputPoint3s(worldPoints,pro::Dir::getStem(imgLeftName)+"_worldPoints.txt");
+	//outputPoint3s(worldPoints,pro::Dir::getStem(imgMarkerName)+"_worldPoints.txt");
+	timer.lap();
 
 	/************************************************
 	 * X軸マッチング
@@ -692,7 +758,10 @@ void MarkerLessAR::run(){
 
 	// ワールド座標へ変換
 	worldPoints = getWorldPoints(matchingsLR);
-	outputPoint3s(worldPoints,pro::Dir::getStem(imgMarkerName)+"_worldPoints_xAxisKeys.txt");
+	cout << "worldPoints X time " << (double)timer.getDiff()/pro::Timer::PER_SEC << " sec." << endl; 
+	outputPoint3s(worldPoints,pro::Dir::getStem(imgLeftName)+"_worldPoints_xAxisKeys.txt");
+	timer.lap();
+	//outputPoint3s(worldPoints,pro::Dir::getStem(imgMarkerName)+"_worldPoints_xAxisKeys.txt");
 
 	/************************************************
 	 * 結果出力
@@ -703,4 +772,8 @@ void MarkerLessAR::run(){
 	//asiftLR.output(Asift::OUTPUT_ID_HORI,asiftLR.imgInput);
 	//cv::waitKey(0);
 
+}
+
+string MarkerLessAR::getLeftImgName(){
+	return imgLeftName;
 }
