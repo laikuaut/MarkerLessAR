@@ -28,10 +28,6 @@ private:
 	 */
 	// MarkerLessAR ini File Name
 	std::string iniAsiftFileName;
-	// Asift Left side ini File Name
-	//std::string iniAsiftLeftName;
-	// Asift Right side ini File Name
-	//std::string iniAsiftRightName;
 
 	/********************************************
 	 * ステレオカメラ
@@ -110,7 +106,7 @@ public:
 	vector<cv::Point3f> worldPoints;
 
 	/********************************************
-	 * 軸の取得
+	 * 軸の取得 
 	 */
 	cv::Vec3f xAxis;
 	cv::Vec3f yAxis;
@@ -118,7 +114,7 @@ public:
 	cv::Vec3f tAxis;
 
 	/********************************************
-	 * 透視射影行列
+	 * 透視射影行列　論文P51 
 	 */
 	double persAu;
 	double persAv;
@@ -132,6 +128,22 @@ public:
 	double persR;
 	double persT;
 	double persB;
+
+private:
+
+	/********************************************
+	 * 主成分分析によるマーカ位置・姿勢の決定
+	 */
+	// X軸の設定
+	int setXAxis();
+	// Y軸の設定
+	void setYAxis();
+	// Z軸の設定
+	void setZAxis();
+	// 重心の設定
+	void setCenterAxis();
+	// マーカの位置姿勢をファイルに出力
+	void outputAxis();
 
 public:
 
@@ -190,27 +202,30 @@ public:
 	void outputWorldPoints();
 
 	/********************************************
-	 * 主成分分析による軸の決定
+	 * 主成分分析によるマーカ位置・姿勢の決定
+	 * @see setXAxis
+	 * @see setYAxis
+	 * @see setZAxis
+	 * @see setCenterAxis
+	 * @see outputAxis
 	 */
-	int setXAxis();
-	void setYAxis();
-	void setZAxis();
-	void setCenterAxis();
 	int setAxis();
-	void outputAxis();
 
 	/********************************************
-	 * 透視射影行列計算
+	 * 透視射影行列計算 論文P51 
 	 */
-	void setPersMat(double znear,double zfar);
+	void setPersMat();
 
 	/********************************************
 	 * 実行関連
 	 */
 	// 主実行
 	void run();
-
-	// 一時的に
+	
+	/********************************************
+	 * プロパティ関連
+	 */
+	// 左画像の名前取得
 	string getLeftImgName();
 };
 

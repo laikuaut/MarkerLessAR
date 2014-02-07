@@ -1,7 +1,7 @@
 #include"glmain.h"
 
-/*
- *	main.cpp
+/**
+ * OpenGLでの描写main
  */
 
 #include <stdio.h>
@@ -15,7 +15,6 @@
 
 #include "../MarkerLessAR/MarkerLessAR.h"
 #include"../MyLibs/OpenCVLibs/Image.h"
-//#include "my_opencv.h"
 
 using namespace std;
 
@@ -58,8 +57,10 @@ void mouse_function(int, int, int, int);
  * 軸レンダー
  */
 void render_axes(float);
+/*
+ * キューブック(枠線のみ)レンダー
+ */
 void render_cuboid(double length_x,double length_y,double length_z);
-void render_plane(double length);
 
 // カメラ画像
 cv::Mat camera_image;
@@ -494,78 +495,18 @@ void reshape_function(int width, int height)
 	glLoadIdentity();
 
 	// 透視射影行列を設定します
-	// 本番では，カメラ内部パラメータを用いたglFrustum関数へ変更します
-	//gluPerspective(45.0,(double)width / (double)height,1.0,400.0);
-	//glFrustum(glmlar.persL,glmlar.persR,glmlar.persB,glmlar.persT,glmlar.persN,glmlar.persF);
+	// 論文 P51「6.2.6 内部パラメータを考慮した透視射影」
 	glMultMatrixd(getModelMat(
 		2*glmlar.persAu/glmlar.persW, 0, 0, 0,
 		0, 2*glmlar.persAv/glmlar.persH, 0, 0,
 		(glmlar.persW-2*glmlar.persU0)/glmlar.persW, (glmlar.persH-2*glmlar.persV0)/glmlar.persH, -(glmlar.persF+glmlar.persN)/(glmlar.persF-glmlar.persN), -1,
 		0, 0, -(2*glmlar.persF*glmlar.persN)/(glmlar.persF-glmlar.persN), 0
 		));
-	//cout << glmlar.persF << endl;
-	//cout << glmlar.persL << endl;
-	//cout << glmlar.persR << endl;
-	//cout << glmlar.persT << endl;
-	//cout << glmlar.persB << endl;
-	//cout << glmlar.persN << endl;
-	//cout << glmlar.persF << endl;
-	//glFrustum(0 , 2 , 4 , 0 , 1 , 100);
 
 	// モデルビュー行列を初期化します
 	glMatrixMode(GL_MODELVIEW);
-	//glPushMatrix();
-	//glLoadMatrixd(modelMat);
 	glLoadIdentity();
-	//glMultMatrixd(modelMat);
 
-	////z rotate
-	//glMultMatrixd(getModelMat(
-	//	 cos(90.0 * PI/180.0), sin(90.0 * PI/180.0), 0.0,
-	//	-sin(90.0 * PI/180.0), cos(90.0 * PI/180.0), 0.0,
-	//	                  0.0,                  0.0, 1.0,
-	//			     	  0.0,                  0.0, 0.0
-	//));  
-	
-	//y rotate
-	//glMultMatrixd(getModelMat(
-	//	 cos(30.0 * PI/180.0), 0.0,  -1 * sin(30.0 * PI/180.0),
-	//	                  0.0, 1.0,                        0.0,
-	//	 sin(30.0 * PI/180.0), 0.0,       cos(30.0 * PI/180.0),
-	//			       	  0.0, 0.0,                        0.0
-	//)); 
-
-	//x rotate
-	//glMultMatrixd(getModelMat(
-	//	 1.0, 0.0,					0.0,
-	//	 0.0, cos(30.0 * PI/180.0), -1 * sin(30.0 * PI/180.0),
-	//	 0.0, sin(30.0 * PI/180.0), cos(30.0 * PI/180.0),
-	//	 0.0, 0.0, -10.0
-	//)); 
-
-	////scale
-	//glMultMatrixd(getModelMat(
-	//	 1.0, 0.0, 0.0,
-	//	 0.0, 1.0, 0.0,
-	//	 0.0, 0.0, 2.0,
-	//	 0.0, 0.0, 0.0
-	//));  
-	
-	////default
-	//glMultMatrixd(getModelMat(
-	//	 1.0, 0.0, 0.0,
-	//	 0.0, 1.0, 0.0,
-	//	 0.0, 0.0, 1.0,
-	//	 0.0, 10.0, -100.0
-	//));  
-
-	//glMultMatrixd(getModelMat(
-	//	 0.00245, 0.6006,-0.7994,-0.974336,0.178846,0.1313,0.2218,0.75599,0.61585,-11.708,2.953,277.390
-	//));
-
-	//glMultMatrixd(getModelMat(
-	//	 0.00245, 0.6006,-0.7994,-0.974336,0.178846,0.1313,0.2218,0.75599,0.61585,0.0,0.0,-10.0
-	//));  
 
 }
 
@@ -631,23 +572,6 @@ void render_axes(float length){
 		glVertex3f(0.0f,0.0f,-length);
 		glVertex3f(0.0f,0.0f,length);
 	glEnd();
-
-	//glBegin(GL_LINES);
-	//	glVertex3f(0.0f,0.0f,0.0f);
-	//	glVertex3f(length,0.0f,0.0f);
-	//glEnd();
-
-	//glColor3f(0.0f,1.0f,0.0f);
-	//glBegin(GL_LINES);
-	//	glVertex3f(0.0f,0.0f,0.0f);
-	//	glVertex3f(0.0f,length,0.0f);
-	//glEnd();
-
-	//glColor3f(0.0f,0.0f,1.0f);
-	//glBegin(GL_LINES);
-	//	glVertex3f(0.0f,0.0f,0.0f);
-	//	glVertex3f(0.0f,0.0f,length);
-	//glEnd();
 }
 
 
@@ -661,7 +585,6 @@ void render_cuboid(double length_x,double length_y,double length_z){
 		glVertex3f((GLfloat)length_x/2,(GLfloat)length_y/2,(GLfloat)length_z/2);
 	glEnd();
 
-	//glColor3f(0.5f,1.0f,0.5f);
 	glBegin(GL_LINE_LOOP);
 		glVertex3f(-(GLfloat)length_x/2,(GLfloat)length_y/2,(GLfloat)length_z/2);
 		glVertex3f(-(GLfloat)length_x/2,(GLfloat)length_y/2,-(GLfloat)length_z/2);
@@ -669,7 +592,6 @@ void render_cuboid(double length_x,double length_y,double length_z){
 		glVertex3f(-(GLfloat)length_x/2,-(GLfloat)length_y/2,(GLfloat)length_z/2);
 	glEnd();
 
-	//glColor3f(0.5f,0.5f,1.0f);
 	glBegin(GL_LINE_LOOP);
 		glVertex3f((GLfloat)length_x/2,(GLfloat)length_y/2,(GLfloat)length_z/2);
 		glVertex3f((GLfloat)length_x/2,(GLfloat)length_y/2,-(GLfloat)length_z/2);
@@ -677,7 +599,6 @@ void render_cuboid(double length_x,double length_y,double length_z){
 		glVertex3f(-(GLfloat)length_x/2,(GLfloat)length_y/2,(GLfloat)length_z/2);
 	glEnd();
 
-	//glColor3f(0.5f,1.0f,1.0f);
 	glBegin(GL_LINE_LOOP);
 		glVertex3f(-(GLfloat)length_x/2,-(GLfloat)length_y/2,(GLfloat)length_z/2);
 		glVertex3f(-(GLfloat)length_x/2,-(GLfloat)length_y/2,-(GLfloat)length_z/2);
@@ -685,7 +606,6 @@ void render_cuboid(double length_x,double length_y,double length_z){
 		glVertex3f((GLfloat)length_x/2,-(GLfloat)length_y/2,(GLfloat)length_z/2);
 	glEnd();
 
-	//glColor3f(1.0f,1.0f,0.5f);
 	glBegin(GL_LINE_LOOP);
 		glVertex3f(-(GLfloat)length_x/2,(GLfloat)length_y/2,(GLfloat)length_z/2);
 		glVertex3f(-(GLfloat)length_x/2,-(GLfloat)length_y/2,(GLfloat)length_z/2);
@@ -693,33 +613,11 @@ void render_cuboid(double length_x,double length_y,double length_z){
 		glVertex3f((GLfloat)length_x/2,(GLfloat)length_y/2,(GLfloat)length_z/2);
 	glEnd();
 
-	//glColor3f(0.5f,0.5f,0.5f);
 	glBegin(GL_LINE_LOOP);
 		glVertex3f((GLfloat)length_x/2,(GLfloat)length_y/2,-(GLfloat)length_z/2);
 		glVertex3f((GLfloat)length_x/2,-(GLfloat)length_y/2,-(GLfloat)length_z/2);
 		glVertex3f(-(GLfloat)length_x/2,-(GLfloat)length_y/2,-(GLfloat)length_z/2);
 		glVertex3f(-(GLfloat)length_x/2,(GLfloat)length_y/2,-(GLfloat)length_z/2);
 	glEnd();
-
-}
-
-
-void render_plane(double length){
-	glLineWidth(2.0f);
-	glColor3f(0.0f,0.0f,0.0f);
-
-	double length_div = length/5;
-
-	//glColor3f(0.5f,0.5f,0.5f);
-	for(int i=0;i<5;i++){
-		for(int j=0;j<5;j++){
-		glBegin(GL_LINE_LOOP);
-			glVertex3f((GLfloat)length/2+length_div*(i),(GLfloat)length/2+length_div*(j),0);
-			glVertex3f((GLfloat)length/2+length_div*(i),(GLfloat)length/2-length_div*(j+1),0);
-			glVertex3f((GLfloat)length/2-length_div*(i+1),(GLfloat)length/2-length_div*(j+1),0);
-			glVertex3f((GLfloat)length/2-length_div*(i+1),(GLfloat)length/2+length_div*(j),0);
-		glEnd();
-		}
-	}
 
 }
