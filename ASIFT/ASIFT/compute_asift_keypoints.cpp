@@ -47,6 +47,8 @@
 #include <time.h>
 #include "compute_asift_keypoints.h"
 
+#include "../../MyLibs/OpenCVLibs/Image.h"
+
 #ifdef _OPENMP
 #include <omp.h>
 #endif
@@ -449,8 +451,7 @@ int compute_asift_keypoints(vector<float>& image, int width, int height, int num
         // simulate a tilt: subsample the image along the vertical axis by a factor of t.
         vector<float> image_tmp(width_t*height_t);			 
         fproj (image_t, image_tmp, width_r, height_r, &fproj_sx, &fproj_sy, &fproj_bg, &fproj_o, &fproj_p, &fproj_i , fproj_x1 , fproj_y1 , fproj_x2 , fproj_y2 , fproj_x3 , fproj_y3, fproj_x4, fproj_y4); 
-
-        vector<float> image_tmp1 = image_tmp;	 
+		vector<float> image_tmp1 = image_tmp;	
 
         if ( verb )
         {
@@ -467,6 +468,13 @@ int compute_asift_keypoints(vector<float>& image, int width, int height, int num
         keypointslist keypoints_filtered;
         compute_sift_keypoints(image_tmp1_float,keypoints,width_t,height_t,siftparameters);
 		//compute_cv_surf_keypoints(image_tmp1_float,keypoints,width_t,height_t,siftparameters);
+		
+		// •`ŽÊ
+			pro::Image img(width_t,height_t,pro::Image::_8UC1);
+			img.setU8Data(vector<uchar>(image_tmp1_float,image_tmp1_float+width_t*height_t),width_t,height_t,1);
+			//img.save("test");
+			img.imshow("test");
+			cv::waitKey(0);
 
         delete[] image_tmp1_float;		
 
